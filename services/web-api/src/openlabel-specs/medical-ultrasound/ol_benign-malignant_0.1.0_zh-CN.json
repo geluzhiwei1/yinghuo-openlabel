@@ -1,0 +1,51 @@
+{
+    "openlabel": {
+        "meta": {
+            "name": "良恶性分类",
+            "description": "医学数据良恶性分类",
+            "version": "1.0.0",
+            "license": "CCBY-SA 4.0",
+            "copyright": "Copyright © 2024 openlabel.gerwee.com",
+            "authors": [
+                {"name": "Zhang Lizhi", "email": "to2084@qq.com"}
+            ],
+            "contributors": [
+            ]
+        },
+        "ontologies": {
+            "0": "http://openlabel.gerwee.com/taxonomy/"
+        },
+        "classes": [
+            {
+                "name": "根节点",
+                "definition": {
+                },
+                "properties": {
+                    "tags": {
+                        "type": "string",
+                        "title": "标签",
+                        "default": "",
+                        "maxLength": 1024
+                    },
+                    "annotation": {
+                        "type": "string",
+                        "default": "",
+                        "title": "描述",
+                        "maxLength": 1024
+                    }
+                },
+                "children": [
+                    {
+                        "name": "良性"
+                    },
+                    {
+                        "name": "恶性"
+                    },
+                    {
+                        "name": "交界性"
+                    }
+                ]
+            }
+        ]
+    }
+}

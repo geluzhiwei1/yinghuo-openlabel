@@ -1,0 +1,50 @@
+# dev setup
+
+## 启动开发环境
+
+### 1. 启动数据库服务
+
+我们使用 Docker Compose 来管理后端服务，包括 PostgreSQL、FerretDB 和 Redis。
+
+```bash
+docker compose -f docker/docker-compose-dev.yaml up -d
+# create database yinghuo-dev
+docker exec -it yh-dev-postgres psql -U dev -d postgres -c "CREATE DATABASE \"yinghuo-dev\";"
+# 列出表
+docker exec -it yh-dev-postgres psql -U dev -d yinghuo-dev -c "\dt"
+
+```
+
+### 2. 启动 Web API 服务
+
+后端服务是一个 Python 项目，位于 `services/web-api` 目录下。
+
+```bash
+conda create -n yinghuo-dev python=3.10
+conda activate yinghuo-dev
+
+cd services/web-api
+pdm install 
+# python -m yinghuo_app.main
+uvicorn yinghuo_app.app:app --port 8423 --reload
+```
+
+### 3. 启动前端
+
+前端项目位于 `apps/web-app` 目录下。
+
+首先，安装依赖：
+
+```bash
+cd  apps/web-app
+pnpm install
+```
+
+然后，启动开发服务器：
+
+```bash
+cd apps/web-app 
+pnpm run dev
+```
+
+现在，你可以通过浏览器访问[app](http://localhost:9900/guis/v0.3.4/home.html)，使用账号sys@geluzhiwei.com密码yinghuo登录。

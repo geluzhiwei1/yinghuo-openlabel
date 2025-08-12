@@ -1,0 +1,72 @@
+@import './base.css';
+
+/* a,
+.green {
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+  padding: 3px;
+} */
+/* .el-form-item {
+  margin-bottom: 0px;
+} */
+.genFormItem>.el-form-item {
+  margin-bottom: 0px;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.tool-layer {
+  width: 100%;
+  text-align: center;
+  align-items: center;
+}
+
+.oh {
+  overflow: hidden;
+}
+
+.oa {
+  overflow: auto;
+}
+
+.fl {
+  float: left;
+}
+
+.fr {
+  float: right;
+}
+
+.pt16 {
+  padding-top: 16px;
+}
+
+.h100p {
+  height: 100%;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex1 {
+  flex: 1;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+/* element-plus默认样式更改 */
+.el-drawer__header{
+  margin-bottom: 0;
+}

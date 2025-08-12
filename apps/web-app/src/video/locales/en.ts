@@ -1,0 +1,73 @@
+export default {
+  toolbar: {
+    undo: 'Undo',
+    redo: 'Redo',
+    save: 'Save',
+    load: 'Load',
+    delete: 'Delete',
+    deleteAll: 'Delete All in Frame',
+    deleteSeqAll: 'Delete All in Task',
+    common: 'Common',
+    entity: 'Entity',
+    image: 'Image',
+    navigation: 'Navigation',
+    ai: 'AI',
+    add: 'Add',
+    file: 'File',
+    importExport: 'Import/Export',
+    labelStatistics: 'Label Statistics',
+    systemSettings: 'System Settings',
+    view: 'View',
+    attributes: 'Attribute Panel',
+    data: 'Data Panel',
+    help: 'Help',
+    docs: 'Documentation',
+    feedback: 'Feedback/Suggestions',
+    grayscale: 'Grayscale',
+    blackAndWhite: 'Black/White',
+    saturation: 'Saturation',
+    contrast: 'Contrast',
+    brightness: 'Brightness',
+    hue: 'Hue',
+    pixelate: 'Pixelate',
+  },
+  attrpanel: {
+    sequence: 'Sequence',
+    image: 'Image',
+    object: 'Object'
+  },
+  datapanel: {
+    task: 'Task',
+    data: 'Yinghuo',
+    annotation: 'Annotation',
+    semantic: 'Semantic'
+  },
+  buttons: {
+    undo: '<span>Undo</br></br>Shortcut: Ctrl + Z</span>',
+    redo: '<span>Redo</br></br>Shortcut: Ctrl + Y</span>',
+    delete: '<span>Delete Selected</br>Delete selected items</br>Shortcut: X</span>',
+    deleteAll: '<span>Delete All in Frame</br>Clear all annotations in this frame</br>Shortcut: Shift+X</span>',
+    deleteSeqAll: '<span>Delete All in Task</br>Delete all labels in this task</span>',
+    save: '<span>Save Annotations</br>Save all items in the current frame</br>Shortcut: Shift+S</span>',
+    load: '<span>Load Annotations</br>Reload saved labels from the backend</br>Shortcut: Shift+R</span>',
+  },
+  messages: {
+    deleteConfirm: 'Are you sure you want to delete? This will clear all annotated data in the current frame.',
+    deleteSeqAllConfirm: 'This operation will clear all label data for this task and cannot be undone. Are you sure you want to delete?',
+    deleteSuccess: 'Deleted successfully',
+    saveSuccess: 'Frame {frame} saved successfully, {count} items in total',
+    saveSuccessShort: 'Frame {frame}: {statusText}',
+    saveFail: 'Failed to save frame {frame}',
+    cleared: 'Cleared',
+  },
+  misc: {
+    yes: 'Yes',
+    no: 'No',
+    confirm: 'Confirm',
+  },
+  app: {
+    title: 'Yinghuo-Annotation-{mission}-{seq}'
+  },
+  loading: 'Loading {uri}',
+  loadingError: 'Error loading image: {uri}'
+};

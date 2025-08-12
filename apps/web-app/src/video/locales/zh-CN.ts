@@ -1,0 +1,73 @@
+export default {
+  toolbar: {
+    undo: '撤销',
+    redo: '重做',
+    save: '保存',
+    load: '加载',
+    delete: '删除',
+    deleteAll: '删除本帧',
+    deleteSeqAll: '删除任务标签',
+    common: '通用',
+    entity: '实体',
+    image: '图像',
+    navigation: '导航',
+    ai: 'AI',
+    add: '新增',
+    file: '文件',
+    importExport: '导入/导出',
+    labelStatistics: '标签统计',
+    systemSettings: '系统设置',
+    view: '视图',
+    attributes: '属性栏',
+    data: '数据栏',
+    help: '帮助',
+    docs: '使用文档',
+    feedback: '需求/建议',
+    grayscale: '灰度',
+    blackAndWhite: '黑白',
+    saturation: '饱和度',
+    contrast: '对比度',
+    brightness: '亮度',
+    hue: '色相',
+    pixelate: '像素化',
+  },
+  attrpanel: {
+    sequence: '序列',
+    image: '图像',
+    object: '对象'
+  },
+  datapanel: {
+    task: '任务',
+    data: '数据',
+    annotation: '标注',
+    semantic: '语义'
+  },
+  buttons: {
+    undo: '<span>撤销</br></br>快捷键：Ctrl + Z</span>',
+    redo: '<span>重做</br></br>快捷键：Ctrl + Y</span>',
+    delete: '<span>删除选中</br>删除选中件</br>快捷键：X</span>',
+    deleteAll: '<span>删除本帧</br>清除本帧所有标注</br>快捷键：Shift+X</span>',
+    deleteSeqAll: '<span>删除任务标签</br>删除本任务所有标签</span>',
+    save: '<span>保存标注</br>保存当前帧所有件</br>快捷键：Shift+S</span>',
+    load: '<span>加载标注</br>重新从后台加载已经保存的标签</br>快捷键：Shift+R</span>',
+  },
+  messages: {
+    deleteConfirm: '是否删除？本操作将清空本帧所有已标注的数据。',
+    deleteSeqAllConfirm: '本操作将清除本任务所有标签数据，无法恢复。是否删除？',
+    deleteSuccess: '删除成功',
+    saveSuccess: '帧{frame}保存成功，共{count}个',
+    saveSuccessShort: '帧{frame}：{statusText}',
+    saveFail: '帧{frame}保存失败',
+    cleared: '清空',
+  },
+  misc: {
+    yes: '是',
+    no: '否',
+    confirm: '确认',
+  },
+  app: {
+    title: '萤火-标注-{mission}-{seq}'
+  },
+  loading: '加载中 {uri}',
+  loadingError: '加载如下图像时发生错误:{uri}'
+};

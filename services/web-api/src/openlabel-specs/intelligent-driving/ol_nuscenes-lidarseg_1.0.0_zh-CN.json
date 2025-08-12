@@ -1,0 +1,363 @@
+{
+    "openlabel": {
+        "meta": {
+            "name": "点云语义分割标注规范nuScenes-lidarseg",
+            "description": "参见https://github.com/nutonomy/nuscenes-devkit/blob/master/docs/instructions_lidarseg.md",
+            "version": "1.0.0",
+            "license": "CCBY-SA 4.0",
+            "copyright": "Copyright © 2024 ol.geluzhiwei.com",
+            "authors": [
+                {"name": "Zhang Lizhi", "email": "to2084@qq.com"}
+            ],
+            "contributors": [
+            ]
+        },
+        "ontologies": {
+        },
+        "classes": [
+            {
+                "name": "root",
+                "definition": {
+                    "description": "这个节点不显示，仅作为根节点使用。"
+                },
+                "properties": {
+                    "visibility": {
+                        "type": "string",
+                        "title": "可见性",
+                        "description": "目标物体的可见程度",
+                        "enum": [
+                            "<40%",
+                            "<60%",
+                            "<80%",
+                            "<=100%"
+                        ],
+                        "default": "unlabeled",
+                        "ui:widget": "RadioWidget"
+                    },
+                    "tags": {
+                        "type": "string",
+                        "title": "标签",
+                        "default": "",
+                        "maxLength": 10240
+                    },
+                    "desc": {
+                        "type": "string",
+                        "default": "",
+                        "title": "备注",
+                        "maxLength": 10240
+                    }
+                },
+                "children": [
+                    {
+                        "name": "vehicle",
+                        "definition": {
+                            "description": ""
+                        },
+                        "properties": {
+                        },
+                        "children": [
+                            {
+                                "name": "bus.bendy",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            },
+                            {
+                                "name": "bus.rigid",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            },
+                            {
+                                "name": "car",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            },
+                            {
+                                "name": "construction",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            },
+                            {
+                                "name": "emergency.ambulance",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            },
+                            {
+                                "name": "emergency.police",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            },
+                            {
+                                "name": "motorcycle",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            },
+                            {
+                                "name": "trailer",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            },
+                            {
+                                "name": "truck",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            },
+                            {
+                                "name": "ego",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "noise",
+                        "definition": {
+                            "description": "Any lidar return that does not correspond to a physical object, such as dust, vapor, noise, fog, raindrops, smoke and reflections."
+                        },
+                        "properties": {
+                        }
+                    },
+                    {
+                        "name": "animal",
+                        "definition": {
+                            "description": ""
+                        },
+                        "properties": {
+                        }
+                    },
+                    {
+                        "name": "human.pedestrian",
+                        "definition": {
+                            "description": ""
+                        },
+                        "properties": {
+                        },
+                        "children": [
+                            {
+                                "name": "adult",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            },
+                            {
+                                "name": "child",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            },
+                            {
+                                "name": "construction_worker",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            },
+                            {
+                                "name": "personal_mobility",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            },
+                            {
+                                "name": "police_officer",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            },
+                            {
+                                "name": "stroller",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            },
+                            {
+                                "name": "wheelchair",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "movable_object",
+                        "definition": {
+                            "description": ""
+                        },
+                        "properties": {
+                        },
+                        "children": [
+                            {
+                                "name": "barrier",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            },
+                            {
+                                "name": "debris",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            },
+                            {
+                                "name": "pushable_pullable",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            },
+                            {
+                                "name": "trafficcone",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "static_object",
+                        "definition": {
+                            "description": ""
+                        },
+                        "properties": {
+                        },
+                        "children": [
+                            {
+                                "name": "bicycle_rack",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "flat",
+                        "definition": {
+                            "description": ""
+                        },
+                        "properties": {
+                        },
+                        "children": [
+                            {
+                                "name": "driveable_surface",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            },
+                            {
+                                "name": "other",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            },
+                            {
+                                "name": "sidewalk",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            },
+                            {
+                                "name": "terrain",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "static",
+                        "definition": {
+                            "description": ""
+                        },
+                        "properties": {
+                        },
+                        "children": [
+                            {
+                                "name": "manmade",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            },
+                            {
+                                "name": "other",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            },
+                            {
+                                "name": "vegetation",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

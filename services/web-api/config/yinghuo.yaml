@@ -1,0 +1,31 @@
+admin:
+  user: ${ADMIN_USER}
+  password: ${ADMIN_PASSWORD}
+global:
+  mode: 'dev'
+  log:
+    level: debug
+    root_dir: 'logs'
+  datas:
+    YH_USER_DATA_ROOT: ${YH_USER_DATA_ROOT}
+  redis:
+    host: ${REDIS_HOST}
+    port: ${REDIS_PORT}
+    uri: redis://${REDIS_HOST}:${REDIS_PORT}
+  mongodb:
+    uri: ${MONGODB_URI}
+    db: 'qianmo-dev'
+  postgres:
+    host: '${POSTGRES_HOST}'
+    port: ${POSTGRES_PORT}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    database: ${POSTGRES_DB}
+    uri: ${POSTGRES_URI}
+    tortoise_uri: ${TORTOISE_URI}
+  smtp:
+    host: ${SMTP_HOST}
+    port: ${SMTP_PORT}
+    user: ${SMTP_USER}
+    password: ${SMTP_PASSWORD}
+    from_email: ${MAIL_FROM}

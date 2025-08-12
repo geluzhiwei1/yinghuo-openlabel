@@ -1,0 +1,48 @@
+[
+    {
+        "id": "2",
+        "title": "标注任务",
+        "icon": "fluent:clipboard-task-list-24-filled",
+        "index": "/annojob",
+        "role": "annojob",
+        "order": 0,
+        "type": "menu",
+        "desc": ""
+    },
+    {
+        "id": "4",
+        "title": "标注管理",
+        "index": "4",
+        "icon": "icon-park-outline:data-user",
+        "children": [
+            {
+                "id": "41",
+                "parent_id": "4",
+                "index": "/my-job",
+                "role": "my-job",
+                "title": "我的任务",
+                "order": 0,
+                "type": "menu",
+                "desc": ""
+            },
+            {
+                "id": "43",
+                "parent_id": "4",
+                "index": "/anno-specification",
+                "role": "anno-specification",
+                "title": "标注规范",
+                "order": 0,
+                "type": "menu"
+            },
+            {
+                "id": "42",
+                "parent_id": "4",
+                "index": "/my-data",
+                "role": "my-data",
+                "title": "我的数据",
+                "order": 0,
+                "type": "menu"
+            }
+        ]
+    }
+]

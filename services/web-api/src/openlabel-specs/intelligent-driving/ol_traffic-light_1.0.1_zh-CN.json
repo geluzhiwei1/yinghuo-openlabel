@@ -1,0 +1,186 @@
+{
+    "openlabel": {
+        "meta": {
+            "name": "交通灯分类",
+            "description": "日常驾驶中常见的交通灯分类",
+            "version": "1.0.0",
+            "license": "CCBY-SA 4.0",
+            "copyright": "Copyright © 2024 openlabel.gerwee.com",
+            "authors": [
+                {"name": "Zhang Lizhi", "email": "to2084@qq.com"}
+            ],
+            "contributors": [
+            ]
+        },
+        "ontologies": {
+            "0": "http://openlabel.gerwee.com/taxonomy/parking_1.0.0_zh-CN"
+        },
+        "classes": [
+            {
+                "name": "交通信号灯",
+                "definition": {
+                },
+                "properties": {
+                    "color": {
+                        "type": "string",
+                        "title": "颜色",
+                        "description": "信号灯当前颜色",
+                        "enum": [
+                            "绿色",
+                            "红色",
+                            "黄色",
+                            "黑色"
+                        ],
+                        "default": "黑色",
+                        "ui:widget": "RadioWidget"
+                    },
+                    "count": {
+                        "type": "number",
+                        "title": "数字",
+                        "description": "信号灯数字",
+                        "default": -1,
+                        "minimum": -1,
+                        "maximum": 300,
+                        "ui:options": {
+                            "precision": 0
+                        }
+                    },
+                    "blink": {
+                        "type": "string",
+                        "title": "闪烁",
+                        "description": "信号灯是否正在闪烁",
+                        "enum": [
+                            "是",
+                            "否"
+                        ],
+                        "minLength": 1,
+                        "default": "否",
+                        "ui:widget": "RadioWidget"
+                    },
+                    "text": {
+                        "type": "string",
+                        "title": "文字",
+                        "description": "信号灯上的文字",
+                        "default": "",
+                        "maxLength": 16
+                    },
+                    "visibility": {
+                        "type": "string",
+                        "title": "可见性",
+                        "description": "物体可见程度",
+                        "enum": [
+                            "<40%",
+                            "<60%",
+                            "<80%",
+                            "<=100%"
+                        ],
+                        "default": "<=100%",
+                        "ui:widget": "RadioWidget"
+                    },
+                    "tags": {
+                        "type": "string",
+                        "title": "标签",
+                        "default": "",
+                        "maxLength": 1024
+                    },
+                    "annotation": {
+                        "type": "string",
+                        "default": "",
+                        "title": "描述",
+                        "maxLength": 1024
+                    }
+                },
+                "children": [
+                    {
+                        "name": "机动车信号灯",
+                        "definition": {
+                            "ontology_uid": 0,
+                            "ontology_type": "#机动车信号灯",
+                            "color": "#000000"
+                        },
+                        "properties": {}
+                    },
+                    {
+                        "name": "方向指示信号灯",
+                        "definition": {
+                            "ontology_uid": 0,
+                            "ontology_type": "#方向指示信号灯",
+                            "color": "#000000"
+                        },
+                        "properties": {
+                            "direction": {
+                                "type": "string",
+                                "title": "方向",
+                                "enum": [
+                                    "前方",
+                                    "左侧",
+                                    "右侧"
+                                ],
+                                "minLength": 1,
+                                "default": "前方",
+                                "ui:widget": "RadioWidget"
+                            }
+                        },
+                        "children": [
+                        ]
+                    },
+                    {
+                        "name": "人行横道信号灯",
+                        "definition": {
+                            "ontology_uid": 0,
+                            "ontology_type": "#人行横道信号灯",
+                            "color": "#000000"
+                        },
+                        "properties": {}
+                    },
+                    {
+                        "name": "非机动车信号灯",
+                        "definition": {
+                            "ontology_uid": 0,
+                            "ontology_type": "#非机动车信号灯",
+                            "color": "#000000"
+                        },
+                        "properties": {
+                        }
+                    },
+                    {
+                        "name": "掉头信号灯",
+                        "definition": {
+                            "ontology_uid": 0,
+                            "ontology_type": "#掉头信号灯",
+                            "color": "#000000"
+                        },
+                        "properties": {}
+                    },
+                    {
+                        "name": "车道信号灯",
+                        "definition": {
+                            "ontology_uid": 0,
+                            "ontology_type": "#车道信号灯",
+                            "color": "#000000"
+                        },
+                        "properties": {}
+                    },
+                    {
+                        "name": "闪光警告信号灯",
+                        "definition": {
+                            "ontology_uid": 0,
+                            "ontology_type": "#闪光警告信号灯",
+                            "color": "#000000"
+                        },
+                        "properties": {}
+                    },
+                    {
+                        "name": "道口信号灯",
+                        "definition": {
+                            "ontology_uid": 0,
+                            "ontology_type": "#道口信号灯",
+                            "color": "#000000"
+                        },
+                        "properties": {}
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -1,0 +1,213 @@
+{
+    "openlabel": {
+        "meta": {
+            "name": "Road high definition maps ",
+            "description": "https://www.nuscenes.org/nuplan",
+            "url": "https://github.com/motional/nuplan-devkit/blob/d60b4cd2071de9bb041509c43f5226dd22f248c0/nuplan/common/maps/maps_datatypes.py"
+        },
+        "ontologies": {
+        },
+        "classes": [
+            {
+                "name": "root",
+                "definition": {
+                },
+                "properties": {
+                    "tags": {
+                        "type": "string",
+                        "title": "标签",
+                        "default": "",
+                        "maxLength": 10240
+                    },
+                    "desc": {
+                        "type": "string",
+                        "default": "",
+                        "title": "备注",
+                        "maxLength": 10240
+                    }
+                },
+                "children": [
+                    {
+                        "name": "LANE_CONNECTOR",
+                        "properties": {
+                            "LaneConnectorType": {
+                                "type": "string",
+                                "title": "type",
+                                "description": "",
+                                "enum": [
+                                    "STRAIGHT",
+                                    "LEFT",
+                                    "RIGHT",
+                                    "UTURN",
+                                    "UNKNOWN"
+                                ],
+                                "default": "UNKNOWN",
+                                "ui:widget": "RadioWidget"
+                            }
+                        }
+                    },
+                    {
+                        "name": "LANE",
+                        "definition": {
+                        },
+                        "properties": {}
+                    },
+                    {
+                        "name": "INTERSECTION",
+                        "definition": {
+                        },
+                        "properties": {
+                            "IntersectionType": {
+                                "type": "string",
+                                "title": "type",
+                                "description": "",
+                                "enum": [
+                                    "DEFAULT",
+                                    "TRAFFIC_LIGHT",
+                                    "STOP_SIGN",
+                                    "LANE_BRANCH",
+                                    "LANE_MERGE",
+                                    "PASS_THROUGH"
+                                ],
+                                "default": "DEFAULT",
+                                "ui:widget": "RadioWidget"
+                            }
+                        }
+                    },
+                    {
+                        "name": "STOP_LINE",
+                        "definition": {
+                        },
+                        "properties": {
+                            "StopLineType": {
+                                "type": "string",
+                                "title": "type",
+                                "description": "",
+                                "enum": [
+                                    "PED_CROSSING ",
+                                    "STOP_SIGN",
+                                    "TRAFFIC_LIGHT",
+                                    "TURN_STOP",
+                                    "YIELD",
+                                    "UNKNOWN"
+                                ],
+                                "default": "UNKNOWN",
+                                "ui:widget": "RadioWidget"
+                            }
+                        }
+                    },
+                    {
+                        "name": "TURN_STOP",
+                        "definition": {
+                        },
+                        "properties": {}
+                    },
+                    {
+                        "name": "CROSSWALK",
+                        "definition": {
+                        },
+                        "properties": {}
+                    },
+                    {
+                        "name": "DRIVABLE_AREA",
+                        "definition": {
+                        },
+                        "properties": {}
+                    },
+                    {
+                        "name": "YIELD",
+                        "definition": {
+                        },
+                        "properties": {}
+                    },
+                    {
+                        "name": "TRAFFIC_LIGHT",
+                        "definition": {
+                        },
+                        "properties": {}
+                    },
+                    {
+                        "name": "STOP_SIGN",
+                        "definition": {
+                        },
+                        "properties": {}
+                    },
+                    {
+                        "name": "EXTENDED_PUDO",
+                        "definition": {
+                        },
+                        "properties": {}
+                    },
+                    {
+                        "name": "SPEED_BUMP",
+                        "definition": {
+                        },
+                        "properties": {}
+                    },
+                    {
+                        "name": "LANE_CONNECTOR",
+                        "definition": {
+                        },
+                        "properties": {}
+                    },
+                    {
+                        "name": "BASELINE_PATHS",
+                        "definition": {
+                        },
+                        "properties": {}
+                    },
+                    {
+                        "name": "BOUNDARIES",
+                        "definition": {
+                        },
+                        "properties": {}
+                    },
+                    {
+                        "name": "WALKWAYS",
+                        "definition": {
+                        },
+                        "properties": {}
+                    },
+                    {
+                        "name": "CARPARK_AREA",
+                        "definition": {
+                        },
+                        "properties": {}
+                    },
+                    {
+                        "name": "PUDO",
+                        "definition": {
+                        },
+                        "properties": {
+                            "PudoType": {
+                                "type": "string",
+                                "title": "type",
+                                "description": "",
+                                "enum": [
+                                    "PICK_UP_DROP_OFF",
+                                    "PICK_UP_ONLY",
+                                    "DROP_OFF_ONLY",
+                                    "UNKNOWN"
+                                ],
+                                "default": "UNKNOWN",
+                                "ui:widget": "RadioWidget"
+                            }
+                        }
+                    },
+                    {
+                        "name": "ROADBLOCK",
+                        "definition": {
+                        },
+                        "properties": {}
+                    },
+                    {
+                        "name": "ROADBLOCK_CONNECTOR",
+                        "definition": {
+                        },
+                        "properties": {}
+                    }
+                ]
+            }
+        ]
+    }
+}

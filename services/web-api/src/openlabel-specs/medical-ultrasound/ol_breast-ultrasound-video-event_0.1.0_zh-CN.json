@@ -1,0 +1,183 @@
+{
+    "openlabel": {
+        "meta": {
+            "name": "乳腺超声视频事件标注",
+            "description": "乳腺超声视频基础标注",
+            "version": "1.0.0",
+            "license": "CCBY-SA 4.0",
+            "copyright": "Copyright © 2024 geluzhiwei.com",
+            "authors": [
+                {"name": "Zhang Lizhi", "email": "to2084@qq.com"}
+            ],
+            "contributors": [
+            ]
+        },
+        "ontologies": {
+        },
+        "classes": [
+            {
+                "name": "对象根节点",
+                "definition": {
+                    "description": "这个节点不显示，仅作为根节点使用。"
+                },
+                "properties": {
+                    "tags": {
+                        "type": "string",
+                        "title": "标签",
+                        "default": "",
+                        "maxLength": 1024
+                    },
+                    "annotation": {
+                        "type": "string",
+                        "default": "",
+                        "title": "备注",
+                        "maxLength": 1024
+                    }
+                },
+                "children": [
+                    {
+                        "name": "Action",
+                        "properties": {
+                            "检查部位": {
+                                "type": "string",
+                                "title": "检查部位",
+                                "description": "当前超声检查的部位",
+                                "enum": [
+                                    "未知",
+                                    "乳腺-左侧",
+                                    "乳腺-右侧",
+                                    "腋下-左侧",
+                                    "腋下-右侧",
+                                    "无效帧"
+                                ],
+                                "minLength": 1,
+                                "default": "未知",
+                                "ui:widget": "RadioWidget"
+                            },
+                            "检查所见": {
+                                "type": "string",
+                                "title": "检查所见",
+                                "default": "",
+                                "description": ""
+                            },
+                            "检查提示": {
+                                "type": "string",
+                                "title": "检查提示",
+                                "default": "",
+                                "description": ""
+                            },
+                            "肿块": {
+                                "type": "string",
+                                "title": "肿块",
+                                "description": "肿块1/非肿块0",
+                                "enum": [
+                                    "未知",
+                                    "1",
+                                    "0"
+                                ],
+                                "minLength": 1,
+                                "default": "未知",
+                                "ui:widget": "RadioWidget"
+                            },
+                            "长径": {
+                                "type": "number",
+                                "title": "长径",
+                                "default": "0",
+                                "description": "",
+                                "ui:options": {
+                                    "precision": 3
+                                }
+                            },
+                            "前后径": {
+                                "type": "number",
+                                "title": "前后径",
+                                "default": "0",
+                                "description": "",
+                                "ui:options": {
+                                    "precision": 3
+                                }
+                            },
+                            "微钙化": {
+                                "type": "string",
+                                "title": "微钙化",
+                                "default": "",
+                                "description": ""
+                            },
+                            "钼靶钙化": {
+                                "type": "string",
+                                "title": "钼靶钙化",
+                                "default": "",
+                                "description": ""
+                            }
+                        }
+                    },
+                    {
+                        "name": "Event",
+                        "properties": {
+                            "检查部位": {
+                                "type": "string",
+                                "title": "检查部位",
+                                "description": "当前超声检查的部位",
+                                "enum": [
+                                    "未知",
+                                    "左侧乳腺",
+                                    "右侧乳腺",
+                                    "无效帧"
+                                ],
+                                "minLength": 1,
+                                "default": "未知",
+                                "ui:widget": "RadioWidget"
+                            }
+                        }
+                    },
+                    {
+                        "name": "Context"
+                    }
+                ]
+            },
+            {
+                "name": "序列标注",
+                "definition": {
+                    "description": "序列标注的规范定义"
+                },
+                "schema": {
+                    "type": "object",
+                    "required": ["检查所见"],
+                    "ui:order": ["*"],
+                    "properties": {
+                        "检查所见": {
+                            "type": "string",
+                            "title": "检查所见",
+                            "default": "",
+                            "description": "",
+                            "ui:options": {
+                                "rows": 4,
+                                "type": "textarea"
+                            }
+                        },
+                        "检查提示": {
+                            "type": "string",
+                            "title": "检查提示",
+                            "default": "",
+                            "description": "",
+                            "ui:options": {
+                                "rows": 4,
+                                "type": "textarea"
+                            }
+                        },
+                        "病理": {
+                            "type": "string",
+                            "title": "病理",
+                            "default": "",
+                            "description": "",
+                            "ui:options": {
+                                "rows": 4,
+                                "type": "textarea"
+                            }
+                        }
+                    }
+                }
+            }
+        ]
+    }
+}

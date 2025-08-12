@@ -1,0 +1,71 @@
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[project]
+name = "yinghuo"
+dynamic = ["version"]
+readme = "README.md"
+authors = [
+    {name = "Danmo Zhang", email = "to2084@qq.com"},
+]
+
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: AGPL-3.0 License",
+  "Operating System :: OS Independent",
+]
+dependencies = [
+    "pymongo>=4.8.0",
+    "click",
+    "python-dotenv>=1.1.1",
+    "fastapi>=0.114.0",
+    "uvicorn",
+    "pydash>=8.0.3",
+    "json5>=0.9.25",
+    "tortoise-orm>=0.25.1",
+    "pydantic-settings>=2.4.0",
+    "pypcd4>=1.1.0",
+    "passlib[argon2]>=1.7.4",
+    "loguru>=0.7.2",
+    "redis>=5.0.8",
+    "psutil>=6.0.0",
+    "distro>=1.9.0",
+    "shapely>=2.0.6",
+    "opencv-python>=4.10.0.84",
+    "numpy>=2.1.1",
+    "matplotlib>=3.9.2",
+    "scipy>=1.14.1",
+    "pandas>=2.2.2",
+    "pydantic[email]>=2.9.2",
+    "pyarrow>=17.0.0",
+    "pyjwt>=2.9.0",
+    "aiohttp>=3.10.5",
+    "asyncpg>=0.29.0",
+    "jinja2>=3.1.4",
+    "fire>=0.7.0",
+    "httpx>=0.28.1",
+    "pytransform3d",
+    "open3d",
+    "seaborn",
+    "babel>=2.17.0",
+    "motor>=3.7.1",
+    "sqlalchemy>=2.0.41",
+    "async-lru>=2.0.5",
+]
+[project.optional-dependencies]
+lint = ["black[jupyter]", "mypy", "ruff"]
+test = ["pytest", "debugpy", "fastapi", "httpx", "aerich", "pytest-asyncio"]
+
+[tool.setuptools_scm]
+
+[tool.hatch.build.targets.sdist]
+include = ["/src", "/tests"]
+[tool.hatch.build.targets.wheel]
+packages = ["src/yinghuo_app", "src/openlabel", "src/openlabel-specs", "src/yinghuo_utils"]
+
+[tool.pdm]
+version = {source = "scm", write_to = "openlabel/version.py" }
+
