@@ -1,3 +1,8 @@
+
+[README_EN](README_EN.md) | [README中文](README.md)
+
+[github](https://github.com/geluzhiwei/yinghuo-openlabel) | [gitee](https://gitee.com/gerwee/yinghuo) | [官网](https://www.geluzhiwei.com/) 
+
 # Yinghuo-OpenLabel: A Professional Data Annotation Platform
 
 Yinghuo-OpenLabel is a professional, open-source data annotation platform designed for autonomous driving, robotics, and computer vision. It provides a complete toolchain for processing and annotating complex sensor data, including 2D images, videos, and 3D point clouds. The platform supports AI-assisted annotation features to enhance efficiency and strictly adheres to the **OpenLABEL** international standard, ensuring data interoperability and standardization.
@@ -16,6 +21,42 @@ Yinghuo-OpenLabel is a professional, open-source data annotation platform design
     *   Deeply integrates and follows the `OpenLABEL` specification, defining a clear data format and taxonomy.
 *   **System Management**:
     *   Includes complete user, role, and team management functions, supporting multi-tenancy and access control.
+
+## Core Features and Development Roadmap
+Features completed, under development, and planned for the future.
+### 📚 Annotation Tools
+- Visual 2D Annotation
+    * [√] 2D Bounding Box
+    * [√] 2D Rotated Bounding Box
+    * [√] Semantic Segmentation - Polygon
+    * [√] Semantic Segmentation - Mask
+    * [√] Video - Event Annotation
+    * [-] Model Assistance - ONNX Runtime Web
+        * [-] Model Loading
+        * [-] Model Inference
+    * [] Model Assistance - Backend Service
+- Point Cloud 3D Annotation
+    * [ ] 3D Bounding Box
+    * [ ] 3D Rotated Bounding Box
+    * [ ] Semantic Segmentation - Polygon
+    * [ ] Semantic Segmentation - Mask
+- Multi-modal Annotation
+    * [ ] Point Cloud-Image: Project 3D point cloud annotations to 2D images
+    * [ ] Image-Text
+    * [ ] Video-Text
+- 4D Annotation
+
+### 🔧 Management Features
+
+- Data Management
+    * [√] Data Package Import/Export
+    * [ ] Annotation Data Review and Validation
+- User Management
+    * [√] User Login
+    * [ ] User and Team Management
+    * [ ] Permission Control
+- Project Management
+    * [√] Annotation Task Management
 
 ## Tech Stack
 
@@ -95,4 +136,4 @@ We welcome contributions from the community! (Details to be added)
 
 ## License
 
-(License information to be added)
+This project is licensed under the AGPL-3.0 License. See the [LICENSE](LICENSE) file for details.
