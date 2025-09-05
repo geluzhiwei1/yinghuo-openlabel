@@ -1,11 +1,10 @@
 <template>
   <el-row>
     <el-col :span="24">
-      <el-text style="text-align: center"
-        >{{ userAuth.user.email || userAuth.user.mobile_phone_no
-        }}{{ t('home.dashboard.welcome') }}，{{ t('home.dashboard.lastLogin') }}
-        {{ formatUtc(userAuth.user.last_login) }}</el-text
-      >
+      <el-text style="text-align: center">{{ t('home.dashboard.welcome') }}，{{ userAuth.user.email ||
+        userAuth.user.mobile_phone_no
+        }},{{ t('home.dashboard.lastLogin') }}
+        {{ formatUtc(userAuth.user.last_login) }}</el-text>
     </el-col>
   </el-row>
   <el-row>
@@ -13,14 +12,9 @@
       {{ t('home.dashboard.welcome2')
       }}<el-link type="success" href="https://gitee.com/gerwee/yinghuo/issues" target="_blank">{{
         t('home.dashboard.feedback')
-      }}</el-link
-      >，{{ t('home.dashboard.byViewing') }}
-      <el-link
-        type="success"
-        href="https://www.bilibili.com/video/BV1xoTvz2ES5?t=4.4"
-        target="_blank"
-        >{{ t('home.dashboard.videoTutorial') }}</el-link
-      >{{ t('home.dashboard.quickStart') }}
+        }}</el-link>，{{ t('home.dashboard.byViewing') }}
+      <el-link type="success" href="https://www.bilibili.com/video/BV1xoTvz2ES5?t=4.4" target="_blank">{{
+        t('home.dashboard.videoTutorial') }}</el-link>{{ t('home.dashboard.quickStart') }}
     </el-col>
   </el-row>
   <el-row style="height: 300px; align-items: center">

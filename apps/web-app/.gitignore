@@ -18,6 +18,8 @@ coverage
 /cypress/screenshots/
 /webapps/
 __tests__/
+test-results/
+playwright-report/
 
 # Editor directories and files
 .vscode/*

@@ -18,6 +18,7 @@ rest api
 __author__ = "Zhang Lizhi"
 __date__ = "2024-03-27"
 
+import logging
 from fastapi import APIRouter, Request
 from fastapi.responses import ORJSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -46,17 +47,19 @@ async def taxonomy_classes(job_perform: JobPerform, request: Request):
 
 @app.post("/query", summary="schema", tags=["openlabel"])
 async def query(job_perform: dict, request: Request):
+    logging.error(f"job_perform: {job_perform}")
     taxonomy_key = _.get(job_perform, 'taxonomy', "")
     domain_key = _.get(job_perform, 'domain', "")
     
-    if domain_key is None or domain_key == "":
-        # fine all
-        # specs = []
-        # domains = OpenLabel.available_domains()
-        # for d in domains:
-        #     js = OpenLabel.available_taxonomy(d['key'])
-        #     specs += js
-        return wrap_json([])
+    if domain_key == "":
+        specs = []
+        domains = OpenLabel.available_domains()
+        for d in domains:
+            logging.info(f"domain: {d['key']}")
+            js = OpenLabel.available_taxonomy(d['key'])
+            logging.info(f"domain: {d['key']}, taxonomy: {js}")
+            specs += js
+        return wrap_json(specs)
     else:
         # find one
         j = OpenLabel.from_taxonomy_key(taxonomy_key, domain_key)

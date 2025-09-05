@@ -35,7 +35,8 @@ export default {
       description: '说明',
       updatedTime: '更新时间',
       enabled: '是否启用',
-      desc: '描述'
+      desc: '描述',
+      loadSystemSpec: '刷新',
     },
     prioritySelect: {
       placeholder: '请选择优先级',

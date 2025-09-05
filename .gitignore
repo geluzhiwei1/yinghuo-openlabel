@@ -1,5 +1,8 @@
 tmp/
 logs/
+.roo/
+.roomodes
+.marscode/
 
 __pycache__/
 */*.un~

@@ -2,7 +2,7 @@ tmp/
 logs/
 .pdm-build/
 pdm.lock
-
+__pypackages__/
 __pycache__/
 */*.un~
 .*.swp

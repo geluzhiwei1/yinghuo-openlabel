@@ -26,7 +26,8 @@ conda activate yinghuo-dev
 cd services/web-api
 pdm install 
 # python -m yinghuo_app.main
-uvicorn yinghuo_app.app:app --port 8423 --reload
+export PYTHONPATH="${PYTHONPATH}:$(pwd)/src" && python -m uvicorn yinghuo_app.app:app --port 8423 --reload
+
 ```
 
 ### 3. 启动前端
@@ -47,4 +48,4 @@ cd apps/web-app
 pnpm run dev
 ```
 
-现在，你可以通过浏览器访问[app](http://localhost:9900/guis/v0.3.4/home.html)，使用账号sys@geluzhiwei.com密码yinghuo登录。
+现在，你可以通过浏览器访问[app](http://localhost:8400/guis/v0.3.4/home.html)，使用账号prod@geluzhiwei.com密码yinghuo登录。

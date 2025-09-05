@@ -31,7 +31,8 @@ export default {
       description: 'Description',
       updatedTime: 'Updated Time',
       enabled: 'Enabled',
-      desc: 'Description'
+      desc: 'Description',
+      loadSystemSpec: 'Refresh',
     },
     prioritySelect: {
       placeholder: 'Select Priority',

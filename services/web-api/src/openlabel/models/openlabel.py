@@ -289,11 +289,11 @@ class Image(BaseObject, BaseLabel):
     
 class Mask2d(Image):
     class Attributes(BaseAttributes):
-        ltwh: Optional[list[float, float, float, float]] = Field(
+        ltwh: Optional[list[float]] = Field(
             default=...,
             description="The coordinates of the top left corner, width height of the mask."
         )
-        image_shape: list[int, int] = Field(
+        image_shape: list[int] = Field(
             default=...,
             description="The size of the image in pixels."
         )

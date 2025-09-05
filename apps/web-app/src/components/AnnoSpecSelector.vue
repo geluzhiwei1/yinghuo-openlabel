@@ -4,11 +4,7 @@
       valueRef.key + ' (' + valueRef.name + ')'
     }}</el-text>
   </el-row>
-  <el-tooltip
-    placement="bottom-start"
-    raw-content
-    :content="t('components.annoSpecSelector.tooltip')"
-  >
+  <el-tooltip placement="bottom-start" raw-content :content="t('components.annoSpecSelector.tooltip')">
     <el-popover placement="bottom" width="1024" :auto-close="0" trigger="click">
       <template #reference>
         <el-button size="small">
@@ -19,50 +15,26 @@
         <el-row>
           <el-col :span="18">
             <el-button-group>
-              <el-button
-                size="default"
-                @click="currentTab = 'system-spec'"
-                :type="currentTab === 'system-spec' ? 'success' : ''"
-                >{{ t('components.annoSpecSelector.systemSpec') }}</el-button
-              >
-              <el-button
-                size="default"
-                @click="handleUserSpecClick"
-                :type="currentTab === 'my-spec' ? 'success' : ''"
-                >{{ t('components.annoSpecSelector.mySpec') }}</el-button
-              >
-            </el-button-group></el-col
-          >
-          <el-col :span="6"
-            ><router-link to="/anno-specification">{{
-              t('components.annoSpecSelector.newSpec')
-            }}</router-link></el-col
-          >
+              <el-button size="default" @click="currentTab = 'system-spec'"
+                :type="currentTab === 'system-spec' ? 'success' : ''">{{ t('components.annoSpecSelector.systemSpec')
+                }}</el-button>
+              <el-button size="default" @click="handleUserSpecClick"
+                :type="currentTab === 'my-spec' ? 'success' : ''">{{
+                  t('components.annoSpecSelector.mySpec') }}</el-button>
+            </el-button-group><el-button style="margin-left: 20px;" size="small" @click="handleLoadSystemSpecClick">{{
+              t('components.annoSpecSelector.loadSystemSpec') }}</el-button></el-col>
+          <el-col :span="6"><router-link to="/anno-specification">{{
+            t('components.annoSpecSelector.newSpec')
+              }}</router-link></el-col>
         </el-row>
         <div v-show="currentTab === 'system-spec'">
-          <el-table-v2
-            :columns="systemTableColumns"
-            :loading="loading"
-            :data="systemTableDataRef"
-            :width="1000"
-            :height="300"
-            :row-height="30"
-            :row-event-handlers="{ onClick: systemTableRowClick }"
-            ref="tableRef"
-            fixed
-          />
+          <el-table-v2 :columns="systemTableColumns" :loading="loading" :data="systemTableDataRef" :width="1000"
+            :height="300" :row-height="30" :row-event-handlers="{ onClick: systemTableRowClick }" ref="tableRef"
+            fixed />
         </div>
         <div v-show="currentTab === 'my-spec'">
-          <el-table-v2
-            :columns="myTableColumns"
-            :data="myTableDataRef"
-            :width="1024"
-            :height="300"
-            :row-height="30"
-            :row-event-handlers="{ onClick: myTableRowClick }"
-            ref="tableRef"
-            fixed
-          />
+          <el-table-v2 :columns="myTableColumns" :data="myTableDataRef" :width="1024" :height="300" :row-height="30"
+            :row-event-handlers="{ onClick: myTableRowClick }" ref="tableRef" fixed />
         </div>
       </div>
     </el-popover>
@@ -259,6 +231,11 @@ const systemTableRowClick = (row: any) => {
 const myTableRowClick = (row: any) => {
   valueRef.value = { key: row.rowData['_id'], type: 'user', name: row.rowData['name'] }
   // emit('update:modelValue', val)
+}
+
+const handleLoadSystemSpecClick = () => {
+  loadSystemSpec()
+  loadMySpec()
 }
 
 onMounted(() => {
