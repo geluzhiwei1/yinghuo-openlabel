@@ -1,7 +1,7 @@
 
 [README_EN](README_EN.md) | [README中文](README.md)
 
-[github](https://github.com/geluzhiwei/yinghuo-openlabel) | [gitee](https://gitee.com/gerwee/yinghuo) | [官网](https://www.geluzhiwei.com/) 
+[github](https://github.com/geluzhiwei1/yinghuo-openlabel) | [gitee](https://gitee.com/gerwee/yinghuo) | [官网](https://www.geluzhiwei.com/) 
 
 # Yinghuo-OpenLabel: 专业级开源数据标注平台
 
