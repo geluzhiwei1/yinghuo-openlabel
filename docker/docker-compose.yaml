@@ -1,0 +1,36 @@
+services:
+  postgres:
+    container_name: yh-postgres
+    image: ghcr.nju.edu.cn/ferretdb/postgres-documentdb:17-0.105.0-ferretdb-2.4.0
+    restart: on-failure
+    environment:
+      - POSTGRES_USER=dev
+      - POSTGRES_PASSWORD=dev
+      - POSTGRES_DB=postgres
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    ports:
+      - 15432:5432
+
+  ferretdb:
+    container_name: yh-ferretdb
+    image: ghcr.io/ferretdb/ferretdb:2.4.0
+    restart: on-failure
+    ports:
+      - 27017:27017
+    environment:
+      - FERRETDB_POSTGRESQL_URL=postgres://dev:dev@postgres:5432/postgres
+
+  redis:
+    container_name: yh-redis
+    image: redis:latest
+    ports:
+      - 6301:6379
+    restart: always
+    volumes:
+      - ./redis-data:/root/redis
+    environment:
+      - REDIS_PASSWORD=my-password
+networks:
+  default:
+    name: yh-ferretdb

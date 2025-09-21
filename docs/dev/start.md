@@ -20,13 +20,12 @@ docker exec -it yh-dev-postgres psql -U dev -d yinghuo-dev -c "\dt"
 后端服务是一个 Python 项目，位于 `services/web-api` 目录下。
 
 ```bash
-conda create -n yinghuo-dev python=3.10
+conda create -n yinghuo-dev python=3.12
 conda activate yinghuo-dev
 
 cd services/web-api
-pdm install 
-# python -m yinghuo_app.main
-export PYTHONPATH="${PYTHONPATH}:$(pwd)/src" && python -m uvicorn yinghuo_app.app:app --port 8423 --reload
+pip install -e .
+python -m uvicorn yinghuo_app.app:app --port 8423 --reload
 
 ```
 
@@ -39,12 +38,7 @@ export PYTHONPATH="${PYTHONPATH}:$(pwd)/src" && python -m uvicorn yinghuo_app.ap
 ```bash
 cd  apps/web-app
 pnpm install
-```
 
-然后，启动开发服务器：
-
-```bash
-cd apps/web-app 
 pnpm run dev
 ```
 
