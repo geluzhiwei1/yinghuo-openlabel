@@ -1,0 +1,58 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+docs/
+
+# Logs
+logs/
+*.log
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Database data
+postgres-data/
+mongodb-data/
+
+# Docker
+docker/
+docker-compose*.yml
+docker-compose*.yaml
+Dockerfile*
+
+# Node modules (in case they exist in root)
+node_modules/
+
+# Build artifacts
+dist/
+build/
+*.tgz
+*.tar.gz
+
+# Test files
+coverage/
+.nyc_output
+test-results/
+
+# Scripts
+scripts/

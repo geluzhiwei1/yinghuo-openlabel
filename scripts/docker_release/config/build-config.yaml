@@ -1,0 +1,63 @@
+services:
+  frontend:
+    image_name: "yinghuo-frontend"
+    dockerfile: "apps/web-app/Dockerfile"
+    context: "."
+    build_args:
+      NODE_VERSION: "22"
+      PNPM_VERSION: "10.12.1"
+    tags:
+      - "{version}"
+      - "{version}-{environment}"
+      - "latest-{environment}"
+      - "latest"
+    
+  backend:
+    image_name: "yinghuo-backend"
+    dockerfile: "services/web-api/Dockerfile"
+    context: "."
+    build_args:
+      PYTHON_VERSION: "3.12"
+      PDM_VERSION: "2.25"
+    tags:
+      - "{version}"
+      - "{version}-{environment}"
+      - "latest-{environment}"
+      - "latest"
+
+environments:
+  development:
+    build_args:
+      BUILD_ENVIRONMENT: "development"
+      DEBUG: "true"
+    tags:
+      - "{version}-dev"
+      - "latest-dev"
+      
+  staging:
+    build_args:
+      BUILD_ENVIRONMENT: "staging"
+      DEBUG: "false"
+    tags:
+      - "{version}-staging"
+      - "latest-staging"
+      
+  production:
+    build_args:
+      BUILD_ENVIRONMENT: "production"
+      DEBUG: "false"
+    tags:
+      - "{version}"
+      - "latest"
+
+registry:
+  url: "ghcr.io"
+  namespace: "geluzhiwei1"
+
+build_options:
+  platform: "linux/amd64"
+  parallel: true
+
+logging:
+  level: "INFO"
+  file: "logs/docker-release.log"

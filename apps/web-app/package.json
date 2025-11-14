@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --mode development",
-    "prod": "vite --mode prod",
+    "prod": "vite --mode production",
     "devDebug": "vite --mode development --debug",
     "build": "vite build --mode production",
     "preview": "vite preview",

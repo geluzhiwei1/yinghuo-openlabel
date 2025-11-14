@@ -34,7 +34,6 @@ class Loge:
             self.level = "INFO"
 
     def setup(self):
-        os.makedirs('logs', exist_ok=True)
         loguru_logger.remove()
         loguru_logger.add(sink=sys.stdout, level=self.level)
         loguru_logger.add(f"./logs/yinghuo-app.log", level=self.level, rotation="100 MB")  # Output log messages to a file

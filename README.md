@@ -3,11 +3,14 @@
 
 [github](https://github.com/geluzhiwei1/yinghuo-openlabel) | [gitee](https://gitee.com/gerwee/yinghuo) | [官网](https://www.geluzhiwei.com/) 
 
+
 # Yinghuo-OpenLabel: 专业级开源数据标注平台
 
 `Yinghuo-OpenLabel` 是一个专业的、开源的数据标注平台，专为自动驾驶、机器人和计算机视觉领域设计。它提供了一套完整的工具链，用于处理和标注复杂的传感器数据（如 2D 图像、视频和 3D 点云），并深度集成了 AI 辅助标注功能以显著提升标注效率。
 
 本项目参考 **OpenLABEL** 国际标准，确保了数据的互操作性、规范性和可扩展性。
+![alt text](docs/asserts/640.gif)
+![alt text](docs/asserts/641.gif)
 
 ## ✨ 核心功能
 
@@ -85,8 +88,10 @@
 
 启动视频演示：[开发环境启动视频](https://www.bilibili.com/video/BV1thJdzMEN6/?spm_id_from=333.1365.list.card_archive.click&vd_source=4262e24d5d41e600eb592442d23fc63e)
 
-## 🛠️ 快速启动 (生成环境)
-TODO: 一键启动脚本，包括数据库、后端服务、前端应用
+## 🛠️ 快速启动 (生产环境)
+
+请按照以下步骤在本地启动开发环境: [生产环境](docs/quick-start.md)
+
 
 ## 📂 项目结构简介
 
@@ -104,6 +109,13 @@ TODO: 一键启动脚本，包括数据库、后端服务、前端应用
 ## 🤝 贡献指南
 
 我们欢迎任何形式的贡献！请参考 `CONTRIBUTING.md` (待补充) 获取更多信息。
+
+# 微信公众号 格律至微
+
+关注公主号，获取更多技术文章和项目更新。
+
+![关注公众号](docs/asserts/weixingongzhonghao.png)
+
 
 ## License
 

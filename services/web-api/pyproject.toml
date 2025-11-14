@@ -10,7 +10,7 @@ authors = [
     {name = "Danmo Zhang", email = "to2084@qq.com"},
 ]
 
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 license-files = ["LICENSE"]
 classifiers = [
   "Programming Language :: Python :: 3",
@@ -22,7 +22,7 @@ dependencies = [
     "click",
     "python-dotenv>=1.1.1",
     "fastapi>=0.114.0",
-    "uvicorn",
+    "uvicorn>=0.29.0",
     "pydash>=8.0.3",
     "tortoise-orm>=0.25.1",
     "pydantic-settings>=2.4.0",

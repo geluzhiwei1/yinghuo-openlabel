@@ -1,0 +1,31 @@
+admin:
+  user: 'prod@geluzhiwei.com'
+  password: 'yinghuo'
+global:
+  mode: 'prod'
+  log:
+    level: 'info'
+    root_dir: '/app/logs'
+  datas:
+    YH_USER_DATA_ROOT: '/app/yh_user_data'
+  redis:
+    host: 'redis'
+    port: 6379
+    uri: 'redis://redis:6379'
+  mongodb:
+    uri: 'mongodb://produser:prodpass@ferretdb:27017/?authMechanism=PLAIN'
+    db: 'yinghuo-prod'
+  postgres:
+    host: 'postgres'
+    port: 5432
+    username: 'produser'
+    password: 'prodpass'
+    database: 'yinghuo-prod'
+    uri: ''
+    tortoise_uri: "asyncpg://produser:prodpass@postgres:5432/yinghuo-prod"
+  smtp:
+    host: 'smtp.x.com'
+    port: 465
+    user: 'xx'
+    password: 'xx'
+    from_email: 'xx'

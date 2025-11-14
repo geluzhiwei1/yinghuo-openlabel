@@ -2,85 +2,44 @@
   <div>
     <TableSearch :query="query" :options="searchOpt" :search="handleSearch" />
     <div class="container">
-      <TableCustom
-        :columns="columns"
-        :tableData="tableData"
-        :loading="tableLoading"
-        :total="pager.total"
-        :page="pager.page"
-        :viewFunc="handleView"
-        :delFunc="handleDelete"
-        :page-change="changePage"
-        :editFunc="handleEdit"
-        :refresh="getData"
-      >
+      <TableCustom :columns="columns" :tableData="tableData" :loading="tableLoading" :total="pager.total"
+        :page="pager.page" :viewFunc="handleView" :delFunc="handleDelete" :page-change="changePage"
+        :editFunc="handleEdit" :refresh="getData">
         <template #toolbarBtn>
-          <el-button
-            type="primary"
-            :icon="CirclePlusFilled"
-            @click="
-              visible = true
-              rowData = {}
-            "
-            >新增</el-button
-          >
+          <el-button type="primary" :icon="CirclePlusFilled" @click="
+            visible = true;
+          rowData = {}
+            ">新增</el-button>
         </template>
         <template #enabled="{ rows }">
           <el-switch v-model="rows.enabled"></el-switch>
         </template>
       </TableCustom>
     </div>
-    <el-dialog
-      :title="isEdit ? '编辑' : '新增'"
-      v-model="visible"
-      width="700px"
-      destroy-on-close
-      :close-on-click-modal="false"
-      @close="closeDialog"
-    >
+    <el-dialog :title="isEdit ? '编辑' : '新增'" v-model="visible" width="700px" destroy-on-close
+      :close-on-click-modal="false" @close="closeDialog">
       <el-form ref="formRef" :model="rowData" :rules="rules" label-width="120px" status-icon>
         <el-form-item label="唯一编码" prop="onlyCode">
           <el-input v-model="rowData.onlyCode" placeholder="请输入"></el-input>
         </el-form-item>
         <el-form-item label="规划开始时间" prop="ghStartTime">
-          <el-date-picker
-            v-model="rowData.ghStartTime"
-            type="datetime"
-            placeholder="选择规划开始时间"
-          >
+          <el-date-picker v-model="rowData.ghStartTime" type="datetime" placeholder="选择规划开始时间">
           </el-date-picker>
         </el-form-item>
         <el-form-item label="规划结束时间" prop="ghEndTime">
-          <el-date-picker
-            v-model="rowData.ghEndTime"
-            type="datetime"
-            placeholder="选择规划结束时间"
-          >
+          <el-date-picker v-model="rowData.ghEndTime" type="datetime" placeholder="选择规划结束时间">
           </el-date-picker>
         </el-form-item>
         <el-form-item label="实际开始时间" prop="sjStartTime">
-          <el-date-picker
-            v-model="rowData.sjStartTime"
-            type="datetime"
-            placeholder="选择实际开始时间"
-          >
+          <el-date-picker v-model="rowData.sjStartTime" type="datetime" placeholder="选择实际开始时间">
           </el-date-picker>
         </el-form-item>
         <el-form-item label="实际结束时间" prop="sjEndTime">
-          <el-date-picker
-            v-model="rowData.sjEndTime"
-            type="datetime"
-            placeholder="选择实际结束时间"
-          >
+          <el-date-picker v-model="rowData.sjEndTime" type="datetime" placeholder="选择实际结束时间">
           </el-date-picker>
         </el-form-item>
         <el-form-item label="批次说明" prop="pcsm">
-          <el-input
-            v-model="rowData.pcsm"
-            type="textarea"
-            :row="2"
-            placeholder="请输入批次说明"
-          ></el-input>
+          <el-input v-model="rowData.pcsm" type="textarea" :row="2" placeholder="请输入批次说明"></el-input>
         </el-form-item>
       </el-form>
       <template #footer>

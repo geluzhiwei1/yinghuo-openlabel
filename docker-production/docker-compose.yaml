@@ -1,0 +1,70 @@
+services:
+  postgres:
+    container_name: yh-postgres
+    image: ghcr.io/ferretdb/postgres-documentdb:17-0.106.0-ferretdb-2.5.0
+    restart: on-failure
+    environment:
+      - POSTGRES_USER=produser
+      - POSTGRES_PASSWORD=prodpass
+      - POSTGRES_DB=postgres
+      - POSTGRES_PORT=5432
+    volumes:
+      - ${POSTRES_DATA_DIR}:/var/lib/postgresql/data
+    networks:
+      - yinghuo-network
+
+  ferretdb:
+    container_name: yh-ferretdb
+    image: ghcr.io/ferretdb/ferretdb:2.5.0
+    restart: on-failure
+    environment:
+      - FERRETDB_POSTGRESQL_URL=postgres://produser:prodpass@postgres:5432/postgres
+    depends_on:
+      - postgres
+    networks:
+      - yinghuo-network
+
+  redis:
+    container_name: yh-redis
+    image: redis:latest
+    restart: always
+    volumes:
+      - ${REDIS_DATA_DIR}:/root/redis
+    ports:
+      - 6379
+    command: redis-server
+    networks:
+      - yinghuo-network
+  web-api:
+    container_name: yh-web-api
+    image: ghcr.io/geluzhiwei1/yinghuo-backend:latest
+    restart: on-failure
+    ports:
+      - "${WEB_API_PORT}:8423"
+    depends_on:
+      - ferretdb
+      - redis
+    volumes:
+      - ./app-config/yinghuo.yaml:/app/config/yinghuo.yaml
+      - ${YH_USER_DATA_ROOT}:/app/yh_user_data
+      - ${LOG_ROOT}:/app/logs
+      - ./scripts/init-db.sh:/app/init-db.sh
+    command: bash /app/init-db.sh
+    networks:
+      - yinghuo-network
+  web-app:
+    container_name: yh-web-app
+    image: ghcr.io/geluzhiwei1/yinghuo-frontend:latest
+    restart: on-failure
+    ports:
+      - "${WEB_APP_PORT}:80"
+    depends_on:
+      - web-api
+    networks:
+      - yinghuo-network
+    volumes:
+      - ./nginx-conf:/etc/nginx/conf.d
+
+networks:
+  yinghuo-network:
+    driver: bridge

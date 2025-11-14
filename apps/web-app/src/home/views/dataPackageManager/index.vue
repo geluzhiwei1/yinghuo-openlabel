@@ -2,42 +2,22 @@
   <div>
     <TableSearch :query="query" :options="searchOpt" :search="handleSearch" />
     <div class="container">
-      <TableCustom
-        :columns="columns"
-        :tableData="tableData"
-        :loading="tableLoading"
-        :total="pager.total"
-        :page="pager.page"
-        :viewFunc="handleView"
-        :delFunc="handleDelete"
-        :page-change="changePage"
-        :editFunc="handleEdit"
-        :refresh="getData"
-      >
+      <TableCustom :columns="columns" :tableData="tableData" :loading="tableLoading" :total="pager.total"
+        :page="pager.page" :viewFunc="handleView" :delFunc="handleDelete" :page-change="changePage"
+        :editFunc="handleEdit" :refresh="getData">
         <template #toolbarBtn>
-          <el-button
-            type="primary"
-            :icon="CirclePlusFilled"
-            @click="
-              visible = true
-              rowData = {}
-            "
-            >新增</el-button
-          >
+          <el-button type="primary" :icon="CirclePlusFilled" @click="
+            visible = true;
+          rowData = {}
+            ">新增</el-button>
         </template>
         <template #enabled="{ rows }">
           <el-switch v-model="rows.enabled"></el-switch>
         </template>
       </TableCustom>
     </div>
-    <el-dialog
-      :title="isEdit ? '编辑' : '新增'"
-      v-model="visible"
-      width="700px"
-      destroy-on-close
-      :close-on-click-modal="false"
-      @close="closeDialog"
-    >
+    <el-dialog :title="isEdit ? '编辑' : '新增'" v-model="visible" width="700px" destroy-on-close
+      :close-on-click-modal="false" @close="closeDialog">
       <el-form ref="formRef" :model="rowData" :rules="rules" label-width="100px" status-icon>
         <el-form-item label="是否废弃" prop="isFq">
           <el-switch v-model="rowData.isFq" active-value="true" inactive-value="false"></el-switch>
@@ -58,12 +38,7 @@
           <el-input v-model="rowData.sspc" placeholder="请输入"></el-input>
         </el-form-item>
         <el-form-item label="数据包信息" prop="dataInfo">
-          <el-input
-            type="textarea"
-            :rows="2"
-            v-model="rowData.dataInfo"
-            placeholder="请输入"
-          ></el-input>
+          <el-input type="textarea" :rows="2" v-model="rowData.dataInfo" placeholder="请输入"></el-input>
         </el-form-item>
       </el-form>
       <template #footer>
