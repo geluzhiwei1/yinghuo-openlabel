@@ -2,7 +2,7 @@
   <el-row>
     <el-text type="success" v-show="options.inputVisible && valueRef.key">{{
       valueRef.key + ' (' + valueRef.name + ')'
-    }}</el-text>
+      }}</el-text>
   </el-row>
   <el-tooltip placement="bottom-start" raw-content :content="t('components.annoSpecSelector.tooltip')">
     <el-popover placement="bottom" width="1024" :auto-close="0" trigger="click">
@@ -42,7 +42,7 @@
 </template>
 <script setup lang="tsx" name="AnnoBatch">
 /*
-Copyright (C) 2025 undefined
+Copyright (C) 2025 格律至微
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by

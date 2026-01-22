@@ -3,7 +3,7 @@
     <el-col :span="24">
       <el-text style="text-align: center">{{ t('home.dashboard.welcome') }}，{{ userAuth.user.email ||
         userAuth.user.mobile_phone_no
-        }},{{ t('home.dashboard.lastLogin') }}
+      }},{{ t('home.dashboard.lastLogin') }}
         {{ formatUtc(userAuth.user.last_login) }}</el-text>
     </el-col>
   </el-row>
@@ -12,7 +12,7 @@
       {{ t('home.dashboard.welcome2')
       }}<el-link type="success" href="https://gitee.com/gerwee/yinghuo/issues" target="_blank">{{
         t('home.dashboard.feedback')
-        }}</el-link>，{{ t('home.dashboard.byViewing') }}
+      }}</el-link>，{{ t('home.dashboard.byViewing') }}
       <el-link type="success" href="https://www.bilibili.com/video/BV1xoTvz2ES5?t=4.4" target="_blank">{{
         t('home.dashboard.videoTutorial') }}</el-link>{{ t('home.dashboard.quickStart') }}
     </el-col>
@@ -32,7 +32,7 @@
 
 <script setup lang="ts" name="dashboard">
 /*
-Copyright (C) 2025 undefined
+Copyright (C) 2025 格律至微
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by

@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2025 undefined
+Copyright (C) 2025 格律至微
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -51,6 +51,7 @@ export default {
   menu: {
     annojob: '标注任务',
     dashboard: '首页',
+    'system-user': '用户管理',
     'system-dept': '部门管理',
     'system-role': '角色管理',
     'system-data': '系统数据',

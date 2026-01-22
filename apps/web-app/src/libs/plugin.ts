@@ -71,10 +71,13 @@ export const webYoloApisConf = import.meta.env.VITE_APP_WEBYOLO_BASE_URI + '/yh-
 export const webYoloJsLib = import.meta.env.VITE_APP_WEBYOLO_BASE_URI + '/yh-web-yolo/v1.0/YHWebYolo.js'
 
 export const loadYoloV8Wasm = () => {
-  // 如果当前是在开发环境，则加载本地文件
+  // 根据环境加载不同的资源
   if (import.meta.env.PROD) {
-    ; // TODO
+    // 生产环境: 加载CDN上的ONNX Runtime和YOLO模型
+    Promise.all([loadPlugin2("https://s4.zstatic.net/ajax/libs/onnxruntime-web/1.17.3/ort.min.js")])
+    return loadPlugin2(webYoloJsLib)
   } else {
+    // 开发环境: 加载本地或测试服务器资源
     Promise.all([loadPlugin2("https://s4.zstatic.net/ajax/libs/onnxruntime-web/1.17.3/ort.min.js")])
     return loadPlugin2(webYoloJsLib)
   }

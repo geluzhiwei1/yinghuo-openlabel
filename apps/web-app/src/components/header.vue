@@ -34,7 +34,7 @@
 </template>
 <script setup lang="ts">
 /*
-Copyright (C) 2025 undefined
+Copyright (C) 2025 格律至微
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
