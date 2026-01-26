@@ -1,20 +1,8 @@
 <template>
   <div class="tabs-container">
-    <el-tabs
-      v-model="activePath"
-      closable
-      class="tabs"
-      type="card"
-      @tab-click="clickTabls"
-      @tab-remove="closeTabs"
-    >
-      <el-tab-pane
-        v-for="item in tabs.list"
-        :key="item.path"
-        :label="item.title"
-        :name="item.path"
-        @click="setTags(item)"
-      ></el-tab-pane>
+    <el-tabs v-model="activePath" closable class="tabs" type="card" @tab-click="clickTabls" @tab-remove="closeTabs">
+      <el-tab-pane v-for="item in tabs.list" :key="item.path" :label="item.title" :name="item.path"
+        @click="setTags(item)"></el-tab-pane>
     </el-tabs>
     <div class="Tabs-close-box">
       <el-dropdown @command="handleTags">
@@ -30,7 +18,7 @@
             <el-dropdown-item command="other">{{ t('components.tabs.closeOther') }}</el-dropdown-item>
             <el-dropdown-item command="current">{{
               t('components.tabs.closeCurrent')
-            }}</el-dropdown-item>
+              }}</el-dropdown-item>
             <el-dropdown-item command="all">{{ t('components.tabs.closeAll') }}</el-dropdown-item>
           </el-dropdown-menu>
         </template>
@@ -41,7 +29,7 @@
 
 <script setup lang="ts">
 /*
-Copyright (C) 2025 undefined
+Copyright (C) 2025 格律至微
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by

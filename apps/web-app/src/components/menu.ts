@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2025 undefined
+Copyright (C) 2025 格律至微
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -75,15 +75,22 @@ export const menuData: Menus[] = [
     icon: 'bi:database-fill-gear',
     children: [
       {
+        id: '13',
+        pid: '5',
+        index: '/system-user',
+        role: 'system-user',
+        title: 'home.menu.system-user'
+      },
+      {
         id: '10',
-        pid: '1',
+        pid: '5',
         index: '/system-dept',
         role: 'system-dept',
         title: 'home.menu.system-dept'
       },
       {
         id: '12',
-        pid: '1',
+        pid: '5',
         index: '/system-role',
         role: 'system-role',
         title: 'home.menu.system-role'

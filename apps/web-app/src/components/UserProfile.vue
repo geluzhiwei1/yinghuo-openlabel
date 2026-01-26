@@ -30,7 +30,12 @@ import { messages } from '@/states'
 import { isEmpty } from 'radash'
 import { cleanLoginfo } from '@/states/UserState'
 
-const userProfilePanelRef = ref(null)
+interface UserProfilePanelRef {
+  open: () => void
+  close: () => void
+}
+
+const userProfilePanelRef = ref<InstanceType<typeof UserProfilePanel> | null>(null)
 const appVersion = import.meta.env.VITE_APP_VERSION
 
 const modifyPassword = () => {

@@ -1,20 +1,11 @@
 <template>
-  <el-select
-    v-model="valueRef"
-    multiple
-    :placeholder="t('components.rolesSelect.placeholder')"
-  >
-    <el-option
-      v-for="item in roleOptions"
-      :key="item.value"
-      :label="item.label"
-      :value="item.value"
-    />
+  <el-select v-model="valueRef" multiple :placeholder="t('components.rolesSelect.placeholder')">
+    <el-option v-for="item in roleOptions" :key="item.value" :label="item.label" :value="item.value" />
   </el-select>
 </template>
 <script lang="tsx" setup>
 /*
-Copyright (C) 2025 undefined
+Copyright (C) 2025 格律至微
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by

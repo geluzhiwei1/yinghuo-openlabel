@@ -341,6 +341,11 @@ export const systemApi = {
   }
 }
 
+// Fetch user data for system user management
+export const fetchUserData = () => {
+  return reqJson({ uri: `${bizBaseURL}/users/list`, data: {}, method: 'GET' })
+}
+
 export const onnxWebModelApi = {
   getList: () => {
     const baseURL = '/'

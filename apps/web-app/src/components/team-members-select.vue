@@ -1,25 +1,14 @@
 <template>
-  <el-select
-    v-model="valueRef"
-    multiple
-    filterable
-    :placeholder="
-      roleOptions.length === 0
-        ? t('components.teamMembersSelect.noMembers')
-        : t('components.teamMembersSelect.placeholder')
-    "
-  >
-    <el-option
-      v-for="item in roleOptions"
-      :key="item.value"
-      :label="item.label"
-      :value="item.value"
-    />
+  <el-select v-model="valueRef" multiple filterable :placeholder="roleOptions.length === 0
+      ? t('components.teamMembersSelect.noMembers')
+      : t('components.teamMembersSelect.placeholder')
+    ">
+    <el-option v-for="item in roleOptions" :key="item.value" :label="item.label" :value="item.value" />
   </el-select>
 </template>
 <script lang="tsx" setup>
 /*
-Copyright (C) 2025 undefined
+Copyright (C) 2025 格律至微
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
