@@ -8,12 +8,10 @@ import { computed, watch, reactive } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 
 import { BaseBoxBuilder } from './baseboxBuilder'
-import { AnnoWorkEnum } from './common'
+import { AnnoWorkEnum, BaseCanvas } from './common'
 import { globalStates } from '@/states'
 import { OlTypeEnum, type BBox } from '@/openlabel'
 import ColorPickerWidget from '@/components/form/ColorPickerWidget.vue'
-import type { RenderHelper } from '../RenderHelper'
-
 
 const defaultSettingFormData = {
     options: {
@@ -88,7 +86,7 @@ export const toolBarConf = {
 export class BBoxBuilder extends BaseBoxBuilder {
     static name = TOOL_ID
 
-    constructor(baseCanva: RenderHelper) {
+    constructor(baseCanva: BaseCanvas) {
         super(baseCanva, bboxBuilderOptions.settingFormData.options, bboxBuilderOptions.zIndex)
 
         this.hotkeysManager.registerHotkeys({ toolId: TOOL_ID, keys: toolBarConf.shortcut, cb: toolBarConf.shortcutCallback })

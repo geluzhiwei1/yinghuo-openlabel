@@ -6,15 +6,21 @@
  */
 import { ImageCanvas } from './annotaters/imageCanvas'
 import { HelperLineAnnotater } from './annotaters/helperLineAnnotater'
-import { RenderHelper } from './RenderHelper'
+import { BaseCanvas } from './annotaters/common'
 import { globalStates } from '@/states'
 import _ from 'lodash'
 import { AnnoRegistry } from '@/video/annotaters/all-tools'
-import { coreObjects } from './CoreObjects'
 
 
-class Toolsets {
-    public constructor() {
+class AnnotaterManager {
+    private static instance: AnnotaterManager
+    public static getInstance(): AnnotaterManager {
+        if (!AnnotaterManager.instance) {
+            AnnotaterManager.instance = new AnnotaterManager()
+        }
+        return AnnotaterManager.instance;
+    }
+    private constructor() {
     }
 
     private createSubCanvas(divElement: HTMLElement) {
@@ -23,7 +29,7 @@ class Toolsets {
 
     private toolsMap = new Map()
     private exclusiveTools: string[] = new Array()
-    public renderHelper: RenderHelper
+    public baseCanvas: BaseCanvas
     /**
      * 按照顺序创建tool， 并执行activate
      * @param containerId 
@@ -48,18 +54,13 @@ class Toolsets {
         // sub canvas
         this.createSubCanvas(divElement)
         containerEle.appendChild(divElement)
-
-        // 保存全局变量，方便在其他地方使用
-        coreObjects.canvasEle = canvasEle
-        coreObjects.canvasParentEle = divElement
-
-        this.renderHelper = new RenderHelper()
-        this.renderHelper.activate()
+        this.baseCanvas = new BaseCanvas(containerEle, canvasEle)
+        this.baseCanvas.activate()
 
         // 实例化相关工具, set name
         AnnoRegistry.forEach((conf, toolName) => {
             if (toolset.includes(toolName)) {
-                const t = new conf.ToolClass(this.renderHelper)
+                const t = new conf.ToolClass(this.baseCanvas)
                 t.name = toolName
                 t.setConf(toolsSettings[toolName]) // 初始配置
                 this.toolsMap.set(toolName, t)
@@ -69,13 +70,13 @@ class Toolsets {
                 }
             }
         })
-        this.toolsMap.set(ImageCanvas.name, new ImageCanvas(this.renderHelper))
+        this.toolsMap.set(ImageCanvas.name, new ImageCanvas(this.baseCanvas))
         this.toolsMap.get(ImageCanvas.name).name = ImageCanvas.name
-        this.toolsMap.set(HelperLineAnnotater.name, new HelperLineAnnotater(this.renderHelper))
+        this.toolsMap.set(HelperLineAnnotater.name, new HelperLineAnnotater(this.baseCanvas))
         this.toolsMap.get(HelperLineAnnotater.name).name = HelperLineAnnotater.name
 
         this.render = this.render.bind(this)
-        this.renderHelper.on('render:all', () => {
+        this.baseCanvas.on('render:all', () => {
             this.render()
         })
 
@@ -83,77 +84,77 @@ class Toolsets {
         globalStates.subTool = ''
     }
 
-    // /**
-    //  * 仅仅激活一个
-    //  * @param tool 
-    //  */
-    // public activateSingle(tool: string) {
-    //     this.get(tool)?.activate()
-    //     // this.get(tool)?.render()
-    //     this.toolsMap.forEach((toolObj, key) => {
-    //         if (key !== tool) {
-    //             toolObj.deactivate()
-    //         }
-    //     })
-    // }
+    /**
+     * 仅仅激活一个
+     * @param tool 
+     */
+    public activateSingle(tool: string) {
+        this.get(tool)?.activate()
+        // this.get(tool)?.render()
+        this.toolsMap.forEach((toolObj, key) => {
+            if (key !== tool) {
+                toolObj.deactivate()
+            }
+        })
+    }
 
-    // /**
-    //  * 互斥，不可同时启用
-    //  * @param the 
-    //  * @param others 
-    //  */
-    // private selectTheOthers(the: string) {
-    //     this.get(the)?.activate()
-    //     this.exclusiveTools.forEach((tool) => {
-    //         if (tool !== the) {
-    //             this.get(tool)?.deactivate()
-    //         }
-    //     })
-    // }
+    /**
+     * 互斥，不可同时启用
+     * @param the 
+     * @param others 
+     */
+    private selectTheOthers(the: string) {
+        this.get(the)?.activate()
+        this.exclusiveTools.forEach((tool) => {
+            if (tool !== the) {
+                this.get(tool)?.deactivate()
+            }
+        })
+    }
 
-    // /**
-    //  * 切换activate状态
-    //  * @param tool 
-    //  */
-    // public toggle(tool: string) {
-    //     const toolObj = this.get(tool)
-    //     if (toolObj.activated === false) {
-    //         toolObj.activate()
-    //     } else {
-    //         toolObj.deactivate()
-    //     }
-    // }
+    /**
+     * 切换activate状态
+     * @param tool 
+     */
+    public toggle(tool: string) {
+        const toolObj = this.get(tool)
+        if (toolObj.activated === false) {
+            toolObj.activate()
+        } else {
+            toolObj.deactivate()
+        }
+    }
 
     public get(tool: string) {
         return this.toolsMap.get(tool)
     }
 
     public resize(width: number, height: number) {
-        this.renderHelper.resize(width, height)
+        this.baseCanvas.resize(width, height)
         this.toolsMap.forEach((toolObj, key) => {
             toolObj.resize()
         })
-        this.renderHelper.canvasObj.requestRenderAll()
+        this.baseCanvas.canvasObj.requestRenderAll()
     }
 
     public renderAll() {
-        this.renderHelper.canvasObj.renderAll()
+        this.baseCanvas.canvasObj.renderAll()
     }
 
     public render() {
-        this.renderHelper.canvasObj.clear()
+        this.baseCanvas.canvasObj.clear()
         const keys = new Array()
-        this.renderHelper.fabricObjects.forEach((v, k) => {
+        this.baseCanvas.fabricObjects.forEach((v, k) => {
             keys.push(k)
         })
         const sorted = _.sortBy(keys)
         sorted.forEach((o) => {
-            this.renderHelper.canvasObj.add(this.renderHelper.fabricObjects.get(o))
+            this.baseCanvas.canvasObj.add(this.baseCanvas.fabricObjects.get(o))
         })
         this.toolsMap.get('imageCanvas')?.render()
         this.toolsMap.get('bboxBuilder')?.render()
-        this.renderHelper.render()
+        this.baseCanvas.render()
     }
 }
 
-export { Toolsets }
+export { AnnotaterManager }

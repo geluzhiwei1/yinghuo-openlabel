@@ -1,23 +1,23 @@
 <template>
-    <div>
-        <el-row style="width: 100%">
-            <el-col :span="8">No.</el-col>
-            <el-col :span="16" style="text-align:left;"> {{ jobConfig.frame }}
-            </el-col>
-        </el-row>
-        <el-row style="width: 100%">
-            <el-col :span="8">ID.</el-col>
-            <el-col :span="16" style="text-align:left;"> {{ jobConfig.frame }}
-            </el-col>
-        </el-row>
-        <el-row style="width: 100%">
-            <el-col :span="8">分辨率</el-col>
-            <el-col :span="16" style="text-align:left;">{{ imageSize }}
-            </el-col>
-        </el-row>
-        <el-row style="width: 100%">
-            <el-col :span="8">Tags</el-col>
-            <el-col :span="16" style="text-align:left;">
+    <div class="attr-panel">
+        <div class="attr-section">图像 · IMAGE</div>
+        <div class="attr-row">
+            <span class="attr-label">No.</span>
+            <span class="attr-value">{{ jobConfig.frame }}</span>
+        </div>
+        <div class="attr-row">
+            <span class="attr-label">ID.</span>
+            <span class="attr-value">{{ jobConfig.frame }}</span>
+        </div>
+        <div class="attr-row">
+            <span class="attr-label">分辨率</span>
+            <span class="attr-value">{{ imageSize }}</span>
+        </div>
+
+        <div class="attr-section">标签 · TAGS</div>
+        <div class="attr-row attr-row--wrap">
+            <span class="attr-label">Tags</span>
+            <div class="attr-value">
                 <div class="flow gap-2">
                     <el-tag v-for="tag in dynamicTags" :key="tag" closable :disable-transitions="false"
                         @close="handleClose(tag)">
@@ -29,11 +29,11 @@
                         + New Tag
                     </el-button>
                 </div>
-            </el-col>
-        </el-row>
-        <el-row style="width: 100%">
-            <el-input v-model="imageDesc" @blur="saveAnno()" style="width: 100%" :rows="5" type="textarea" placeholder="图像描述" />
-        </el-row>
+            </div>
+        </div>
+
+        <div class="attr-section">描述 · NOTE</div>
+        <el-input v-model="imageDesc" @blur="saveAnno()" style="width: 100%" :rows="5" type="textarea" placeholder="图像描述" />
     </div>
 
 </template>
@@ -127,7 +127,7 @@ watch(dynamicTags, async () => {
 commonChannel.sub(commonChannel.Events.ImageLoaded, async (msg:any) => {
     if (msg.state) {
         await loadAnno()
-        const {width, height} = globalStates.toolsets!.get('imageCanvas').imageSize()
+        const {width, height} = globalStates.toolsManager!.get('imageCanvas').imageSize()
         imageSize.value = `${width} x ${height}`
     }
 })

@@ -1,7 +1,7 @@
 <template>
         <el-row style="width: 100%">
             <el-col :span="24">
-                <el-descriptions title="Job信息" :column="1" :size="size" border>
+                <el-descriptions title="Job信息" :column="1" :size="size" border direction="vertical">
                     <el-descriptions-item label="Job ID">{{ jobConfig.uuid }}</el-descriptions-item>
                     <el-descriptions-item label="数据格式">{{ jobConfig.data_format }}</el-descriptions-item>
                     <el-descriptions-item label="序列">{{ jobConfig.seq }}</el-descriptions-item>
@@ -28,4 +28,7 @@ const size = ref<ComponentSize>('default')
 
 </script>
 <style scoped>
+:deep(.el-descriptions__content) {
+  word-break: break-all;
+}
 </style>

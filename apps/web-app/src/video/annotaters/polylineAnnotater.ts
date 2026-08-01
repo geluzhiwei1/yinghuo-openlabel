@@ -7,7 +7,7 @@
 import { watch, reactive, computed } from 'vue'
 import { fabric } from 'fabric'
 import { Annotater } from './annotater'
-import { AnnoWorkEnum } from './common'
+import { BaseCanvas, AnnoWorkEnum } from './common'
 import { globalStates } from '@/states'
 import { SequenceGenerator } from './sequenceGenerator'
 import colormap from 'colormap'
@@ -196,7 +196,7 @@ const doEditObject = (poly: fabric.Object | undefined) => {
   poly.hasBorders = !poly.edit
 
   // render
-  // globalStates.toolsets!.render()
+  // globalStates.toolsManager!.render()
   return true
 }
 
@@ -231,6 +231,7 @@ export const poly2dAnnotaterStates = reactive({
   selectedFabricObj: defaultObjValue as UserObject,
   defaultObjType: 'default' as string | undefined,
   rebuildByUUID: '',
+  selectedChanged: 0,
 })
 
 const defaultSettingFormData = {
@@ -377,7 +378,7 @@ export const hotBarOptions = reactive({
 const TOOL_ID = 'polylineAnnotater'
 export const toolBarConf = {
   id: TOOL_ID,
-  icon: 'tdesign:user-setting',
+  icon: 'lucide:user-cog',
   name: '设置',
   shortcut: 'Y',
   style: computed(() => ({
@@ -508,7 +509,7 @@ class PolylineAnnotater extends Annotater {
     // this.locking = false
   }
 
-  constructor(baseCanva: RenderHelper) {
+  constructor(baseCanva: BaseCanvas) {
     super(baseCanva)
 
     this.onMouseUp = this.onMouseUp.bind(this)
@@ -671,6 +672,8 @@ class PolylineAnnotater extends Annotater {
       this.selectedIndex = obj.userData.zIndex
 
       // this.baseCanva.canvasObj.setActiveObject(obj)
+
+      poly2dAnnotaterStates.selectedChanged += 1
     } else {
       this.selectedIndex = 0
       defaultObjValue.userData.anno.object_type = poly2dAnnotaterStates.defaultObjType
@@ -1053,7 +1056,7 @@ class PolylineAnnotater extends Annotater {
       }
 
       let object_type = obj.object_type
-      if (isEmpty(object_type)) {
+      if (isEmpty(object_type) || object_type === 'default') {
         // 默认值
         object_type = poly2dAnnotaterStates.defaultObjType
       }
@@ -1171,7 +1174,7 @@ class PolylineAnnotater extends Annotater {
       return
     }
     let object_type = obj.object_type
-    if (isEmpty(object_type)) {
+    if (isEmpty(object_type) || object_type === 'default') {
       // 默认值
       object_type = poly2dAnnotaterStates.defaultObjType
     }

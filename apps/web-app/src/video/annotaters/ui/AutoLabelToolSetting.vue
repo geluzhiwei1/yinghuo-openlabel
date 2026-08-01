@@ -1,6 +1,6 @@
 <template>
   <el-tooltip placement="bottom-start" raw-content :content="formatTooltipContent(currentTool)">
-    <el-button :type="activated ? 'success' : 'primary'"  @click="toolConf.shortcutCallback()" disabled>
+    <el-button type="primary" :class="{ 'is-tool-active': activated }" @click="toolConf.shortcutCallback()">
           <Icon :icon="currentTool.icon" />
     </el-button>
   </el-tooltip>

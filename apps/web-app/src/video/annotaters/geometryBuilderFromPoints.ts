@@ -14,14 +14,13 @@ import { get, toFloat, isEmpty, range, select } from 'radash'
 import { ltrbToXywh } from '@/openlabel/utils'
 import { SequenceGenerator } from './sequenceGenerator'
 import { Annotater } from './annotater'
-import { Vector2, AnnoWorkEnum } from './common'
+import { Vector2, BaseCanvas, AnnoWorkEnum } from './common'
 import { globalStates } from '@/states'
 import { type Point2d, OlTypeEnum, type BBox, type RBBox } from '@/openlabel'
 import ColorPickerWidget from '@/components/form/ColorPickerWidget.vue'
 import { setRectFromBoxObj, angleToTheta, cornersToCxcydxdyangle } from './utils'
 import { loadRustWasm } from '@/libs/plugin'
-import type { RenderHelper } from '../RenderHelper'
-
+import { ElMessage } from 'element-plus'
 
 const { current } = useMagicKeys()
 const currentKeyboard = current
@@ -160,7 +159,7 @@ class GeometryBuilderFromPoints extends Annotater {
         this.curRect?.set({ visible })
     }
 
-    constructor(baseCanva: RenderHelper) {
+    constructor(baseCanva: BaseCanvas) {
         super(baseCanva)
 
         this.curRect = new fabric.Rect({
@@ -501,7 +500,7 @@ class GeometryBuilderFromPoints extends Annotater {
                     break
                 }
                 default:
-                    console.error('不支持的输出类型')
+                    ElMessage.warning('不支持的输出类型')
             }
             globalStates.mainAnnoater.onMessage(obj)
             this.cleanData()

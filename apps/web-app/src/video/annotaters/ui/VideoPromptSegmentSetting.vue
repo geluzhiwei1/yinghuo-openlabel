@@ -1,6 +1,6 @@
 <template>
   <el-tooltip placement="bottom-start" raw-content :content="formatTooltipContent(currentTool)">
-    <el-button :type="activated ? 'success' : 'primary'" @click="toolButtonClick(currentTool.id)" disabled>
+    <el-button type="primary" :class="{ 'is-tool-active': activated }" @click="toolButtonClick(currentTool.id)">
       <Icon :icon="currentTool.icon" />
     </el-button>
   </el-tooltip>
@@ -152,7 +152,7 @@ const activated = computed(() => {
 })
 
 const btnClik = (cmdId: string) => {
-  const toolIns: VideoPromptSegment = globalStates.toolsets!.get(VideoPromptSegment.name)
+  const toolIns: VideoPromptSegment = globalStates.toolsManager!.get(VideoPromptSegment.name)
   switch (cmdId) {
     case 'doRequest':
       toolOptions.doAction += 1

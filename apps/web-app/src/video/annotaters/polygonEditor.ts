@@ -6,7 +6,7 @@
 import { watch, reactive, computed } from 'vue'
 import { fabric } from 'fabric'
 import { Annotater } from './annotater'
-import { AnnoWorkEnum } from "./common"
+import { BaseCanvas, AnnoWorkEnum } from "./common"
 import { globalStates } from '@/states'
 import { type Poly2d, OlTypeEnum } from '@/openlabel'
 import { shortcutCallback } from './utils'
@@ -16,7 +16,6 @@ import { ElMessage } from 'element-plus'
 import { messages } from '@/states'
 import { poly2dAnnotaterStates, type UserObject } from './polylineAnnotater'
 import { freeDrawOptions, FreeDrawingCursor } from '@/libs/free-draw'
-import type { RenderHelper } from '../RenderHelper'
 
 
 const defaultSettingFormData = {
@@ -94,7 +93,7 @@ class PolygonEditor extends Annotater {
 
     private freeDrawingCursor: FreeDrawingCursor
 
-    constructor(baseCanva: RenderHelper) {
+    constructor(baseCanva: BaseCanvas) {
         super(baseCanva)
 
         // 本工具管理的对象

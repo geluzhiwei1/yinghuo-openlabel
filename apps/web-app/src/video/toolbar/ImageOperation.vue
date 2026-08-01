@@ -1,13 +1,14 @@
 <template>
-      <el-popover placement="bottom" width="250" trigger="hover">
+      <el-popover placement="bottom" width="250" trigger="hover" :teleported="true" popper-class="y-toolbar-popper">
       <template #reference>
         <el-button type="primary">
-          {{ $t('video.toolbar.navigation') }}
+          <Icon icon="lucide:navigation" />
+          导航
         </el-button>
       </template>
       <div style="text-align: center">
         <el-button-group>
-          <el-tooltip placement="bottom-start" raw-content :content="'<span>' + $t(item.name) + '</br>' + $t(item.description) + '</br> 快捷键：' + item.shortcut + '</span>'
+          <el-tooltip placement="bottom-start" raw-content :content="'<span>' + item.name + '</br>' + item.description + '</br> 快捷键：' + item.shortcut + '</span>'
             " v-for="(item, index) in naviButtons" :key="index">
             <el-button type="primary" @click="handleImageOp(item.id)">
               <Icon :icon="item.icon" />
@@ -18,28 +19,26 @@
     </el-popover>
   <el-button-group v-if="jobConfig.mission !== Mission.VideoEvents">
     <!-- <el-button type="primary" @click.stop="handleImageOp('rotateLeft')">
-      <Icon size="16" icon="zmdi:rotate-left" />
+      <Icon size="16" icon="lucide:rotate-ccw" />
     </el-button>
     <el-button type="primary" @click.stop="handleImageOp('rotateRight')">
-      <Icon size="16" icon="zmdi:rotate-right" />
+      <Icon size="16" icon="lucide:rotate-cw" />
     </el-button> -->
-    <el-tooltip placement="bottom-start" raw-content :content="'<span>' + $t(item.name) + '</br>' + $t(item.description) + '</br> 快捷键：' + item.shortcut + '</span>'
+    <el-tooltip placement="bottom-start" raw-content :content="'<span>' + item.name + '</br>' + item.description + '</br> 快捷键：' + item.shortcut + '</span>'
       " v-for="(item, index) in imageButtons" :key="index">
       <el-button type="primary" @click="handleImageOp(item.id)">
         <Icon :icon="item.icon" />
       </el-button>
     </el-tooltip>
-    <el-popover placement="bottom" width="550" trigger="hover">
+    <el-popover placement="bottom" width="550" trigger="hover" :teleported="true" popper-class="y-toolbar-popper">
       <template #reference>
         <el-button type="primary">
-          <el-icon class="el-icon--right">
-            <Icon :icon="'mdi:image-edit-outline'" />
-          </el-icon>
+          <Icon icon="mdi:image-edit-outline" />
         </el-button>
       </template>
       <div>
         <el-form :model="imgAttribute">
-          <el-form-item :label="$t('video.toolbar.grayscale')">
+          <el-form-item label="Grayscale">
             <el-row style="width:100%">
               <el-col :span="4">
                 <el-switch v-model="imgAttribute.filterValues.grayscale.enabled" />
@@ -53,10 +52,10 @@
               </el-col>
             </el-row>
           </el-form-item>
-          <el-form-item :label="$t('video.toolbar.blackAndWhite')">
+          <el-form-item label="Black/White">
             <el-switch v-model="imgAttribute.filterValues.blackwhite.enabled" />
           </el-form-item>
-          <el-form-item :label="$t('video.toolbar.saturation')">
+          <el-form-item label="Saturation">
             <el-row style="width:100%">
               <el-col :span="4">
                 <el-switch v-model="imgAttribute.filterValues.saturation.enabled" />
@@ -67,7 +66,7 @@
               </el-col>
             </el-row>
           </el-form-item>
-          <el-form-item :label="$t('video.toolbar.contrast')">
+          <el-form-item label="Contrast">
             <el-row style="width:100%">
               <el-col :span="4">
                 <el-switch v-model="imgAttribute.filterValues.contrast.enabled" />
@@ -78,7 +77,7 @@
               </el-col>
             </el-row>
           </el-form-item>
-          <el-form-item :label="$t('video.toolbar.brightness')">
+          <el-form-item label="Brightness">
             <el-row style="width:100%">
               <el-col :span="4">
                 <el-switch v-model="imgAttribute.filterValues.brightness.enabled" />
@@ -89,7 +88,7 @@
               </el-col>
             </el-row>
           </el-form-item>
-          <el-form-item :label="$t('video.toolbar.hue')">
+          <el-form-item label="Hue">
             <el-row style="width:100%">
               <el-col :span="4">
                 <el-switch v-model="imgAttribute.filterValues.hue.enabled" />
@@ -99,7 +98,7 @@
               </el-col>
             </el-row>
           </el-form-item>
-          <el-form-item :label="$t('video.toolbar.pixelate')">
+          <el-form-item label="Pixelate">
             <el-row style="width:100%">
               <el-col :span="4">
                 <el-switch v-model="imgAttribute.filterValues.pixelate.enabled" />
@@ -118,12 +117,10 @@
 <script lang="tsx" setup>
 import { ref, watch, onMounted } from 'vue'
 import _ from 'lodash'
-import { ArrowDown } from '@element-plus/icons-vue'
 import { Icon } from '@iconify/vue'
 import {
   ElSlider, ElRow, ElCol, ElSwitch, ElRadioGroup, ElRadio,
-  ElIcon,
-  ElPopover,
+    ElPopover,
   ElButton,
   ElButtonGroup,
   ElForm,
@@ -181,7 +178,7 @@ const imgAttribute = ref(_.cloneDeep(default_image_attibute))
 watch(
   imgAttribute,
   () => {
-    globalStates.toolsets!.get("imageCanvas")?.filterImage(imgAttribute.value)
+    globalStates.toolsManager!.get("imageCanvas")?.filterImage(imgAttribute.value)
   },
   { deep: true }
 )
@@ -189,13 +186,13 @@ watch(
 const handleImageOp = (op: string) => {
   switch (op) {
     case 'image-reset':
-      globalStates.toolsets!.get("imageCanvas").reset()
+      globalStates.toolsManager!.get("imageCanvas").reset()
       break
     case 'rotateLeft':
-      globalStates.toolsets!.renderHelper.rotate(-90, globalStates.toolsets!.get("imageCanvas").imageObj.getCenterPoint())
+      globalStates.toolsManager!.baseCanvas.rotate(-90, globalStates.toolsManager!.get("imageCanvas").imageObj.getCenterPoint())
       break
     case 'rotateRight':
-      globalStates.toolsets!.renderHelper.rotate(90, globalStates.toolsets!.get("imageCanvas").imageObj.getCenterPoint())
+      globalStates.toolsManager!.baseCanvas.rotate(90, globalStates.toolsManager!.get("imageCanvas").imageObj.getCenterPoint())
       break
     case 'image-next':
     case 'image-last':

@@ -8,12 +8,12 @@ import { watch, reactive, computed } from 'vue'
 import * as THREE from 'three'
 import { fabric } from 'fabric'
 import { Annotater } from './annotater'
+import { BaseCanvas, AnnoWorkEnum} from "./common"
 import { globalStates } from '@/states'
 import { v4 as uuidv4 } from 'uuid'
 import ColorPickerWidget from '@/components/form/ColorPickerWidget.vue'
 import { type Poly2d, OlTypeEnum } from '@/openlabel'
 import { shortcutCallback } from './utils'
-import type { RenderHelper } from '../RenderHelper'
 
 
 const defaultSettingFormData = {
@@ -97,7 +97,7 @@ class PolylineBuilder extends Annotater {
      *
      * @param baseCanva 基础画布
      */
-    constructor(baseCanva: RenderHelper) {
+    constructor(baseCanva: BaseCanvas) {
         super(baseCanva)
         this.tipsLine = new fabric.Line([0, 0, 0, 0], {
             left: 0,

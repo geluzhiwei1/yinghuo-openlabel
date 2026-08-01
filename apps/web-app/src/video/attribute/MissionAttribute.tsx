@@ -47,7 +47,7 @@ export default defineComponent({
 
     const renderFormItems = () => {
       switch (jobConfig.mission) {
-        case Mission.ObjectDet2d:
+        case Mission.ObjectBBox2d:
         case Mission.TrafficSignal2d:
           return (
             <>

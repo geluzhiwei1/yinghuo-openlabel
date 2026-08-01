@@ -1,6 +1,6 @@
 <template>
     <el-tooltip v-if="toolVisible" placement="bottom-start" raw-content :content="formatTooltipContent(toolConf)">
-        <el-button type="primary" :style="toolConf.style" @click="toolButtonClick(toolConf.id)">
+        <el-button type="primary" :class="{ 'is-tool-active': globalStates.subTool === toolConf.id }" @click="toolButtonClick(toolConf.id)">
             <el-popover placement="bottom" :width="800" :visible="settingVisible" :auto-close="0">
                 <template #reference>
                     <Icon :icon="toolConf.icon" />
@@ -12,12 +12,14 @@
                                 <el-col :span="8">{{ toolConf.name }}</el-col>
                                 <el-col :span="8">快捷键：<el-tag>{{ toolConf.shortcut }}</el-tag></el-col>
                                 <el-col :span="8" style="text-align:right;">
-                                    <el-button circle @click="settingOptionsVisible = !settingOptionsVisible">
+                                    <el-button circle @click="settingOptionsVisible = !settingOptionsVisible"
+                                        :aria-label="settingOptionsVisible ? t('aria.closeSettings') : t('aria.expandSettings')">
                                         <Icon
                                             :icon="settingOptionsVisible ? 'octicon:fold-up-16' : 'octicon:fold-down-16'" />
                                     </el-button>
-                                    <el-button circle @click="settingVisible = !settingVisible">
-                                        <Icon :icon="'fluent:slide-hide-24-regular'" />
+                                    <el-button circle @click="settingVisible = !settingVisible"
+                                        :aria-label="t('aria.closeSettings')">
+                                        <Icon :icon="'lucide:panel-bottom-close'" />
                                     </el-button>
                                 </el-col>
                             </el-row>
@@ -47,6 +49,9 @@ import {
 } from 'element-plus'
 import { Icon } from '@iconify/vue'
 import { globalStates } from '@/states'
+import { i18n } from '@/locales'
+
+const t = (key: string) => i18n.global.t(key)
 
 const toolConf = ref(polylineBuilderConf)
 const settingVisible = ref(false)

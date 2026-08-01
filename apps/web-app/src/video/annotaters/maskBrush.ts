@@ -7,7 +7,7 @@
 import { watch, reactive, computed } from 'vue'
 import { fabric } from 'fabric'
 import { Annotater } from './annotater'
-import { AnnoWorkEnum } from './common'
+import { BaseCanvas, AnnoWorkEnum } from './common'
 import { globalStates } from '@/states'
 import { type Poly2d, type Mask2dBase64, OlTypeEnum } from '@/openlabel'
 import { v4 as uuidv4 } from 'uuid'
@@ -27,7 +27,7 @@ export const toolOptions = reactive({
 const TOOL_ID = 'maskBrush'
 export const toolConf = {
   id: TOOL_ID,
-  icon: 'ph:paint-brush-duotone',
+  icon: 'lucide:brush',
   name: '画刷',
   shortcut: 'G',
   description: '<el-text>按住Ctrl键，再按下鼠标左键的同时移动鼠标</el-text>',
@@ -50,7 +50,7 @@ class MaskBrush extends Annotater {
     toolOptions.zIndex * 10000,
     (toolOptions.zIndex + 1) * 10000
   )
-  constructor(baseCanva: RenderHelper) {
+  constructor(baseCanva: BaseCanvas) {
     super(baseCanva)
 
     if (MaskBrush.instance) throw new Error('MaskBrush is a singleton class')

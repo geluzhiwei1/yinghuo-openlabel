@@ -7,10 +7,9 @@
 
 import { fabric } from 'fabric'
 import { Annotater } from './annotater'
+import { BaseCanvas } from './common'
 import * as _ from 'radash'
 import { globalStates } from '@/states'
-import type { RenderHelper } from '../RenderHelper'
-
 
 class ImageCanvas extends Annotater {
     static name = 'imageCanvas'
@@ -29,7 +28,7 @@ class ImageCanvas extends Annotater {
     })
     private zindex: number = 10
 
-    constructor(baseCanva: RenderHelper) {
+    constructor(baseCanva: BaseCanvas) {
         super(baseCanva)
         fabric.filterBackend = fabric.initFilterBackend()
         fabric.filterBackend = new fabric.WebglFilterBackend()

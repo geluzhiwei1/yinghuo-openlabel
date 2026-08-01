@@ -5,7 +5,7 @@
   top: 0;
   right: 0;
   bottom: 0;
-  background: white;
+  background: var(--y-color-bg-card);
 
   transition: all 0.6s;
   opacity: 0;
@@ -50,7 +50,7 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background-color: #1ABC9C;
+  background-color: var(--y-color-primary);
   opacity: 0.6;
   position: absolute;
   top: 0;

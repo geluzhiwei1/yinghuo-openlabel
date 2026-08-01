@@ -8,9 +8,8 @@ import { watch } from 'vue'
 import { fabric } from 'fabric'
 import _ from 'lodash'
 import { Annotater } from './annotater'
+import { BaseCanvas } from "./common"
 import { globalStates } from '@/states'
-import type { RenderHelper } from '../RenderHelper'
-
 
 class PointAnnotater extends Annotater {
     static name = "pointAnnotater"
@@ -20,7 +19,7 @@ class PointAnnotater extends Annotater {
     private curPoint
     private zindex: number = 40
 
-    constructor(baseCanva: RenderHelper) {
+    constructor(baseCanva: BaseCanvas) {
         super(baseCanva)
         this.curPoint = new fabric.Circle({
             fill: 'rgba(255,0,0,0.5)',

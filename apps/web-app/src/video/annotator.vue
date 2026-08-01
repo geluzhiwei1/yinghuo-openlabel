@@ -15,7 +15,7 @@
 import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { ElRow, ElCol, ElMessage, ElMessageBox } from 'element-plus'
 import { ElLoading } from 'element-plus'
-import { useI18n } from 'vue-i18n'
+import { useDark } from '@vueuse/core'
 import { globalStates } from '@/states'
 import { commonChannel } from '@/video/channel'
 import ImageWaterfallDlg from './panels/datas/ImageWaterfallDlg.vue'
@@ -29,9 +29,26 @@ import _ from 'lodash'
 import { Mission } from '@/constants'
 import VideoPlayer from './video-player.vue'
 import { VideoAnnotator, toolStates as videoAnnotatorStates } from './tools/video-annotator'
-import { Toolsets } from './Toolsets'
+import { AnnotaterManager } from './annotater-manager'
 
-const { t } = useI18n()
+const isDark = useDark()
+
+// Sync theme to canvas background — read --y-color-canvas-surface (theme-aware)
+watch(isDark, () => {
+  nextTick(() => {
+    const surface = getComputedStyle(document.documentElement)
+      .getPropertyValue('--y-color-canvas-surface').trim() || '#ffffff'
+    const canvas = globalStates.toolsManager?.baseCanvas
+    if (canvas) {
+      canvas.setBackgroundColor(surface)
+    }
+    const container = document.getElementById('imageAnnoContainer')
+    if (container) {
+      container.style.backgroundColor = surface
+    }
+  })
+}, { immediate: true })
+
 
 const doVideo = (img_uri: string) => {
   videoAnnotatorStates.player.src = img_uri
@@ -44,12 +61,12 @@ const doImage = (img_uri: string) => {
   const imgNode = new Image()
   const loadingInstance = ElLoading.service({
     lock: true,
-    text: t('video.loading', { uri: img_uri }),
-    background: 'rgba(0, 0, 0, 0.7)',
+    text: `Loading ${img_uri}`,
+    background: 'var(--y-color-bg-overlay)',
   })
   imgNode.addEventListener("load", () => {
-    globalStates.toolsets!.get('imageCanvas').setImage(imgNode)
-    globalStates.toolsets!.render()
+    globalStates.toolsManager!.get('imageCanvas').setImage(imgNode)
+    globalStates.toolsManager!.render()
     loadingInstance.close()
     // statusBar.info = `Width: ${imgNode.width} height: ${imgNode.height}`
     // statusBar.log = `Loaded ${img_uri}`
@@ -60,7 +77,7 @@ const doImage = (img_uri: string) => {
   imgNode.addEventListener("error", () => {
     commonChannel.pub(commonChannel.Events.ImageLoaded, { state: false })
     loadingInstance.close()
-    messages.lastError = t('video.loadingError', { uri: img_uri })
+    messages.lastError = `加载如下图像时发生错误:${img_uri}`
     globalStates.image.imageDataError += 1
   })
 
@@ -129,7 +146,7 @@ onMounted(async () => {
   }
 
   // 初始化工具管理器
-  globalStates.toolsets = new Toolsets()
+  globalStates.toolsManager = AnnotaterManager.getInstance()
 
   watch([() => globalStates.mainTool,
   () => globalStates.subTools,
@@ -138,13 +155,13 @@ onMounted(async () => {
     if (newValue[0] && newValue[1] && newValue[2]) {
 
       // 初始化工具
-      globalStates.toolsets!.init('imageAnnoContainer',
+      globalStates.toolsManager!.init('imageAnnoContainer',
         newValue[0], newValue[1], newValue[2])
 
       // resize
       watch([() => canvaPanel.height_px, () => canvaPanel.width_px],
         () => {
-          globalStates.toolsets!.resize(canvaPanel.width_px, canvaPanel.height_px)
+          globalStates.toolsManager!.resize(canvaPanel.width_px, canvaPanel.height_px)
         },
         { immediate: true }
       )

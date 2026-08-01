@@ -25,8 +25,18 @@ const onResize = () => {
   uiState.appDiv.width_px = width.value
 
   const el = document.getElementById('topbar-container')
-  // uiState.menuBar.height_px = parseInt(useCssVar('--menu-bar-height', el).value)
-  uiState.menuBar.height_px = Math.max(el?.clientHeight, parseInt(useCssVar('--menu-bar-height', el).value))
+  // topbar 的外径要包含 margin+border,clientHeight 不算这两项;
+  // 之前的 +5 硬编码补丁覆盖不了 #topbar-container 的 8px*2 margin + 1px*2 border
+  const fallbackH = parseInt(useCssVar('--menu-bar-height', el).value) || 35
+  let topbarOuter = fallbackH
+  if (el) {
+    const cs = getComputedStyle(el)
+    const rect = el.getBoundingClientRect()
+    const mTop = parseFloat(cs.marginTop) || 0
+    const mBot = parseFloat(cs.marginBottom) || 0
+    if (rect.height > 0) topbarOuter = rect.height + mTop + mBot
+  }
+  uiState.menuBar.height_px = Math.max(topbarOuter, fallbackH)
   uiState.menuBar.width_px = width.value
 
   topBar.height_px = uiState.menuBar.height_px
@@ -35,7 +45,6 @@ const onResize = () => {
   appContainer.height_px = height.value
   appContainer.width_px = width.value
 
-  topBar.height_px += 5
   const panel_height = height.value - topBar.height_px
   attrPanel.value.height_px = panel_height
   mainPanel.height_px = panel_height

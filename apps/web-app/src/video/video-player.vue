@@ -45,7 +45,7 @@ onUnmounted(() => {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
-    color: #2c3e50;
+    color: var(--y-color-text-primary);
     margin-top: 20px;
 }
 
@@ -57,7 +57,7 @@ onUnmounted(() => {
 }
 
 .btn-play {
-    color: white;
+    color: var(--y-color-text-inverse);
     margin-right: 10px;
     cursor: pointer;
 }

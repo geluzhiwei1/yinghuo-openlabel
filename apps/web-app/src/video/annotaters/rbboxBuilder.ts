@@ -8,7 +8,7 @@ import { watch, reactive, computed } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 import { BaseBoxBuilder } from './baseboxBuilder'
 
-import { AnnoWorkEnum } from './common'
+import { BaseCanvas, AnnoWorkEnum } from './common'
 import { OlTypeEnum, type RBBox } from '@/openlabel'
 import { angleToTheta } from './utils'
 import { globalStates } from '@/states'
@@ -53,7 +53,7 @@ class RBBoxBuilder extends BaseBoxBuilder {
 
     private editing = false
 
-    constructor(baseCanva: RenderHelper) {
+    constructor(baseCanva: BaseCanvas) {
         super(baseCanva, rbboxBuilderOptions.options, rbboxBuilderOptions.zIndex)
         this.curRect.set({
             selectable: true

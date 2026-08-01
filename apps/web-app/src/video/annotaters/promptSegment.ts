@@ -14,11 +14,9 @@ import { SequenceGenerator } from './sequenceGenerator'
 import { BBoxTypeEnum, type Point2d, OlTypeEnum, type Poly2d, type RBBox, type BBox } from '@/openlabel'
 import { shortcutCallback, setRectFromBoxObj } from './utils'
 import { ElMessage } from 'element-plus'
-import { Vector2, AnnoWorkEnum } from './common'
+import { Vector2, BaseCanvas, AnnoWorkEnum } from './common'
 import { jobConfig } from '@/states/job-config'
 import { globalStates } from '@/states'
-import type { RenderHelper } from '../RenderHelper'
-
 
 type UserFabricObject = (fabric.Circle | fabric.Rect) & {
     userData: {
@@ -85,7 +83,7 @@ export const toolOptions = reactive({
 const TOOL_ID = 'promptSegment'
 export const pointsPromoteSegmentToolConf = {
     id: TOOL_ID,
-    icon: 'fluent:image-sparkle-16-regular',
+    icon: 'lucide:wand-sparkles',
     name: '鼠标辅助',
     shortcut: 'U',
     description: '设置前景点、背景点或辅助框',
@@ -148,7 +146,7 @@ export class PromptSegment extends Annotater {
         }
     }
 
-    constructor(baseCanva: RenderHelper) {
+    constructor(baseCanva: BaseCanvas) {
         super(baseCanva)
 
         this.curRect = new fabric.Rect({
@@ -320,7 +318,7 @@ export class PromptSegment extends Annotater {
         //     return
         // }
         // call api
-        const imgBlob = globalStates.toolsets!.get('imageCanvas')!.getImageBlob()
+        const imgBlob = globalStates.toolsManager!.get('imageCanvas')!.getImageBlob()
         const data = {
             req: {},
             image: {
@@ -502,6 +500,7 @@ export class PromptSegment extends Annotater {
             // case OlTypeEnum.Point2dGroup: {
             //     break
             // }
+            case OlTypeEnum.Mask2dBase64:
             case OlTypeEnum.Poly2d: {
                 const polys = parsePoly2d(openlabel, undefined)
                 if (polys) {
@@ -514,7 +513,7 @@ export class PromptSegment extends Annotater {
                 break
             }
             default:
-                console.error('不支持的输出类型')
+                ElMessage.warning('不支持的输出类型')
         }
         globalStates.subTool = ''
         this.cleanData()

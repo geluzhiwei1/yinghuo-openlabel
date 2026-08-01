@@ -10,7 +10,7 @@ import colormap from 'colormap'
 import { get, toFloat, isEmpty, range, select } from 'radash'
 import { v4 as uuidv4 } from 'uuid'
 import { Annotater } from './annotater'
-import { AnnoWorkEnum } from "./common"
+import { BaseCanvas, AnnoWorkEnum } from "./common"
 import { globalStates } from '@/states'
 import { type BBox, type RBBox, OlTypeEnum, BBoxTypeEnum } from '@/openlabel'
 import { SequenceGenerator } from './sequenceGenerator'
@@ -24,8 +24,6 @@ import { jobConfig } from '@/states/job-config'
 import { commonChannel } from '@/video/channel'
 import async from 'async'
 import { taxonomyState } from '@/states/TaxonomyState'
-import type { RenderHelper } from '../RenderHelper'
-
 
 const defaultRectValue = {
     userData: {
@@ -166,6 +164,7 @@ const bboxAnnotaterStates = reactive({
     selectedBox: undefined as BBox | RBBox | undefined,
     selectedFabricObj: defaultRectValue as UserFabricObject,
     defaultObjType: 'default' as string,
+    selectedChanged: 0
 })
 
 export const settingUISchema = {
@@ -297,7 +296,7 @@ export const settingUISchema = {
 const TOOL_ID = 'bboxAnnotater'
 export const toolBarConf = {
     id: TOOL_ID,
-    icon: 'tdesign:user-setting',
+    icon: 'lucide:user-cog',
     name: '设置',
     shortcut: 'Y',
     description: '<el-text>主标签窗口设置</el-text>',
@@ -407,7 +406,7 @@ class BBoxAnnotater extends Annotater {
         })
     }
 
-    constructor(baseCanva: RenderHelper) {
+    constructor(baseCanva: BaseCanvas) {
         super(baseCanva)
 
         this.onMouseUp = this.onMouseUp.bind(this)
@@ -706,7 +705,7 @@ class BBoxAnnotater extends Annotater {
             watch(() => bboxAnnotaterStates.selectedFabricObj.userData.anno.object_type, (newVal, oldVal) => {
                 // this.afterEdit(bboxAnnotaterStates.selectedFabricObj, 'objType')
                 
-                bboxAnnotaterStates.defaultObjType = newVal
+                // bboxAnnotaterStates.defaultObjType = newVal
                 // 更新当前对象的样式
                 const selectedFabricObj = bboxAnnotaterStates.selectedFabricObj
                 selectedFabricObj.userData.anno.attributes.opType = 'update'
@@ -918,7 +917,7 @@ class BBoxAnnotater extends Annotater {
                         ]
                     }
                 }
-                if (!box.object_type || box.object_type === '') {
+                if (!box.object_type || box.object_type === '' || box.object_type === 'default') {
                     box.object_type = bboxAnnotaterStates.defaultObjType // 设置类别
                 }
                 box.attributes.opType = opType
@@ -1041,12 +1040,26 @@ class BBoxAnnotater extends Annotater {
             const bbox = this.convertFabricObjectToObj(obj)
             bboxAnnotaterStates.selectedBox = bbox
             bboxAnnotaterStates.selectedFabricObj = obj
-            // bboxAnnotaterStates.selectedFabricObj.userData.anno.val = bbox.val
+            // Sync val back from the freshly computed bbox so the attributes
+            // panel inputs reflect canvas drags/resizes. Mutate in place to
+            // preserve the existing array reference (avoids breaking the deep
+            // watcher on anno.val that handles UI → canvas sync). The watcher
+            // guards on label_uuid change, so re-applying val here is a no-op
+            // for the canvas (fabric already has these values).
+            const annoVal = obj.userData.anno?.val
+            if (Array.isArray(annoVal) && Array.isArray(bbox.val)) {
+                const len = Math.min(annoVal.length, bbox.val.length)
+                for (let i = 0; i < len; i++) {
+                    annoVal[i] = bbox.val[i]
+                }
+            }
             this.setDefaultType(obj.userData.anno.object_type || 'default')
 
             this.selectedIndex = obj.userData.zIndex
             this.canvasObj.setActiveObject(bboxAnnotaterStates.selectedFabricObj)
             this.canvasObj.requestRenderAll()
+
+            bboxAnnotaterStates.selectedChanged += 1
         } else {
             this.selectedIndex = 0
             // 设置为默认值

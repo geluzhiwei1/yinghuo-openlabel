@@ -1,6 +1,6 @@
 <template>
   <el-tooltip v-if="toolVisible" placement="bottom-start" raw-content :content="formatTooltipContent(toolBarConf)">
-    <el-button type="primary" :style="toolBarConf.style" @click="toolButtonClick(toolBarConf.id)">
+    <el-button type="primary" :class="{ 'is-tool-active': globalStates.subTool === toolBarConf.id }" @click="toolButtonClick(toolBarConf.id)">
       <el-popover placement="bottom" :width="600" :visible="settingVisible" :auto-close="0">
         <template #reference>
           <Icon :icon="toolBarConf.icon" />

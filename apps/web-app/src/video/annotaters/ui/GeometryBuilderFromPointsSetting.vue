@@ -1,32 +1,34 @@
 <template>
   <el-tooltip v-if="toolVisible" placement="bottom-start" raw-content
     :content="toolOptions.enabled ? formatTooltipContent(currentTool) : '正在加载WASM组件...'">
-    <el-button type="primary" :style="currentTool.style" @click="toolButtonClick(currentTool.id)"
+    <el-button type="primary" :class="{ 'is-tool-active': activated }" @click="toolButtonClick(currentTool.id)"
       :disabled="!toolOptions.enabled">
       <Icon :icon="currentTool.icon" />
     </el-button>
   </el-tooltip>
-  <Draggable v-slot="{ x, y }" class="fixed" :initial-value="{ x: canvaPanel.left_px, y: topBar.height_px + 5 }"
-    :storage-key="'yh-vd-tool-pos-' + toolConf.id" storage-type="session"
-    v-show="activated && !commonAnnotaterSetting.settingFormData.settings.hideToolSettings" :resizeable="true"
-    :style="[topDivStyle]" :handle="dragHandle">
-    <div ref="dragHandle" class="cursor-move">
-      {{ toolConf.name }} {{ toolConf.shortcut }}
-    </div>
-      <el-card>
-        <el-text>在目标左、上、右、下方最外侧点击，敲击<el-tag>Space</el-tag>完成</el-text>
-        <el-form label-width="auto" class="myclass">
-          <el-form-item label="点数限制">
-            <el-slider range show-stops v-model="toolOptions.seting.pointCount"
-              :max="toolOptions.seting.pointCountMax"></el-slider>
-          </el-form-item>
-        </el-form>
-        <VueForm label-width="auto" class="myclass"
-          v-model="toolOptions.settingFormData" :schema="ui.schema"
-          :formProps="{ labelPosition: 'right', layoutColumn: 1 }" :formFooter="{ show: false }"
-          @change="handleProptertyFormChange" />
-      </el-card>
-  </Draggable>
+  <Teleport to="#_Draggable_teleport">
+    <Draggable v-slot="{ x, y }" class="fixed" :initial-value="{ x: canvaPanel.left_px, y: topBar.height_px + 5 }"
+      :storage-key="'yh-vd-tool-pos-' + toolConf.id" storage-type="session"
+      v-show="activated && !commonAnnotaterSetting.settingFormData.settings.hideToolSettings" :resizeable="true"
+      :style="[topDivStyle]" :handle="dragHandle">
+      <div ref="dragHandle" class="cursor-move">
+        {{ toolConf.name }} {{ toolConf.shortcut }}
+      </div>
+        <el-card>
+          <el-text>在目标左、上、右、下方最外侧点击，敲击<el-tag>Space</el-tag>完成</el-text>
+          <el-form label-width="auto" class="myclass">
+            <el-form-item label="点数限制">
+              <el-slider range show-stops v-model="toolOptions.seting.pointCount"
+                :max="toolOptions.seting.pointCountMax"></el-slider>
+            </el-form-item>
+          </el-form>
+          <VueForm label-width="auto" class="myclass"
+            v-model="toolOptions.settingFormData" :schema="ui.schema"
+            :formProps="{ labelPosition: 'right', layoutColumn: 1 }" :formFooter="{ show: false }"
+            @change="handleProptertyFormChange" />
+        </el-card>
+    </Draggable>
+  </Teleport>
 </template>
 <script lang="tsx" setup>
 import { computed, ref, watch } from 'vue'

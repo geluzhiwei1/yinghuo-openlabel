@@ -137,7 +137,7 @@ export default {
     padding-bottom: 28px;
     font-family: PingFangSC-Medium;
     font-size: 36px;
-    color: #000000;
+    color: var(--y-color-text-primary);
     letter-spacing: 1px;
     text-align: justify;
   }
@@ -145,9 +145,9 @@ export default {
   .cell-item {
     width: 100%;
     // margin-bottom: 18px;
-    background: #ffffff;
-    border: 2px solid #f0f0f0;
-    border-radius: 12px 12px 12px 12px;
+    background: var(--y-color-bg-card);
+    border: 2px solid var(--y-color-border-light);
+    border-radius: var(--y-radius-xl);
     overflow: hidden;
     box-sizing: border-box;
     margin-bottom: 10px;
@@ -165,7 +165,7 @@ export default {
 
       .item-desc {
         font-size: 15px;
-        color: #333333;
+        color: var(--y-color-text-regular);
         line-height: 15px;
         font-weight: bold;
       }
@@ -188,7 +188,7 @@ export default {
           max-width: 150px;
           margin-left: 10px;
           font-size: 14px;
-          color: #999999;
+          color: var(--y-color-text-secondary);
         }
 
         .like {
@@ -201,7 +201,7 @@ export default {
             i {}
 
             .like-total {
-              color: #ff4479;
+              color: var(--y-color-danger);
             }
           }
 
@@ -213,7 +213,7 @@ export default {
           .like-total {
             margin-left: 10px;
             font-size: 12px;
-            color: #999999;
+            color: var(--y-color-text-secondary);
           }
         }
       }

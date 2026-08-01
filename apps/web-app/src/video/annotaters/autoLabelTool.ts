@@ -5,7 +5,7 @@
  * @date 甲辰 [龙] 年 三月十四
  */
 import { computed, watch, reactive } from 'vue'
-import { AnnoWorkEnum } from './common'
+import { BaseCanvas, AnnoWorkEnum } from './common'
 import { globalStates } from '@/states'
 import { Annotater } from './annotater'
 import { dnnModelApi } from '@/api'
@@ -14,8 +14,7 @@ import { OlTypeEnum, type RBBox } from '@/openlabel'
 import { parseBBoxes, parseMask2dBase64, parsePoly2d } from '@/openlabel/utils'
 import { fabric } from 'fabric'
 import { v4 as uuidv4 } from 'uuid'
-import { ElLoading } from 'element-plus'
-import type { RenderHelper } from '../RenderHelper'
+import { ElLoading, ElMessage } from 'element-plus'
 
 export const funcsApiState = reactive({
     apiList: null,
@@ -84,7 +83,7 @@ export const autoLabelToolOptions = reactive({
 const TOOL_ID = 'autoLabelTool'
 export const autoLabelToolConf = {
     id: TOOL_ID,
-    icon: 'material-symbols:robot-2-rounded',
+    icon: 'lucide:bot',
     name: '自动标注',
     shortcut: 'M',
     description: '当前应用模型：' + funcsApiState.selectedApi.api_id,
@@ -93,7 +92,7 @@ export const autoLabelToolConf = {
 class AutoLabelTool extends Annotater {
     static name = TOOL_ID
 
-    constructor(baseCanva: RenderHelper) {
+    constructor(baseCanva: BaseCanvas) {
         super(baseCanva)
 
         watch(() => globalStates.subTool, (newValue, oldValue) => {
@@ -153,7 +152,7 @@ class AutoLabelTool extends Annotater {
                     text: '模型推理...',
                     background: 'rgba(0, 0, 0, 0.7)',
                 })
-                funcsApiState.selectedApi.infer.inference({ imageEle: globalStates.toolsets!.get('imageCanvas').getImageEle() }).then(
+                funcsApiState.selectedApi.infer.inference({ imageEle: globalStates.toolsManager!.get('imageCanvas').getImageEle() }).then(
                     (openlabel) => {
                         // olObjs.forEach((obj: any) => {
                         //     globalStates.mainAnnoater?.onMessage(obj)
@@ -174,7 +173,7 @@ class AutoLabelTool extends Annotater {
                     background: 'rgba(0, 0, 0, 0.7)',
                 })
 
-                const imgBlob = globalStates.toolsets!.get('imageCanvas')!.getImageBlob()
+                const imgBlob = globalStates.toolsManager!.get('imageCanvas')!.getImageBlob()
                 const data = {
                     req: {},
                     image: {
@@ -282,7 +281,7 @@ class AutoLabelTool extends Annotater {
                 break
             }
             default:
-                console.error('不支持的输出类型')
+                ElMessage.warning('不支持的输出类型')
         }
         globalStates.subTool = ''
         this.cleanData()

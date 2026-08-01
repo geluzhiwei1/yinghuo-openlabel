@@ -1,33 +1,33 @@
 <template>
-  <div>
-    <el-row> 序列：{{ jobConfig.seq }} - {{ jobConfig.stream }} </el-row>
-    <el-row style="width: 100%">
-      <el-col :span="8">序列总帧数：</el-col>
-      <el-col :span="16" style="text-align: left">{{ dataSeqState.tsToFrame.size }} </el-col>
-    </el-row>
-    <el-row style="width: 100%" v-if="taxonomyState.seqAnnoSchema">
-      <VueForm
-        label-width="auto"
-        v-model="seqAnnoForm"
-        :schema="taxonomyState.seqAnnoSchema.schema"
-        :formProps="{ labelPosition: 'top', layoutColumn: 1 }"
-        :formFooter="{ show: false }"
-        size="small"
-      />
-    </el-row>
-    <!-- <el-row style="width: 100%">
-      <VueForm
-        label-width="auto"
-        v-model="annoFormData"
-        :schema="annoUISchema.schema"
-        :formProps="{ labelPosition: 'top', layoutColumn: 1 }"
-        :formFooter="{ show: false }"
-        size="small"
-      />
-    </el-row> -->
-    <el-row style="width: 100%">
-      <el-col :span="8">Tag</el-col>
-      <el-col :span="16" style="text-align: left">
+  <div class="attr-panel">
+    <div class="attr-section">序列 · SEQ</div>
+    <div class="attr-row">
+      <span class="attr-label">序列</span>
+      <span class="attr-value">{{ jobConfig.seq }} · {{ jobConfig.stream }}</span>
+    </div>
+    <div class="attr-row">
+      <span class="attr-label">总帧数</span>
+      <span class="attr-value">{{ dataSeqState.tsToFrame.size }}</span>
+    </div>
+
+    <template v-if="taxonomyState.seqAnnoSchema">
+      <div class="attr-section">扩展属性 · ATTRS</div>
+      <el-row style="width: 100%">
+        <VueForm
+          label-width="auto"
+          v-model="seqAnnoForm"
+          :schema="taxonomyState.seqAnnoSchema.schema"
+          :formProps="{ labelPosition: 'top', layoutColumn: 1 }"
+          :formFooter="{ show: false }"
+          size="small"
+        />
+      </el-row>
+    </template>
+
+    <div class="attr-section">标签 · TAGS</div>
+    <div class="attr-row attr-row--wrap">
+      <span class="attr-label">Tag</span>
+      <div class="attr-value">
         <div class="flow gap-2">
           <el-tag
             v-for="tag in dynamicTags"
@@ -51,23 +51,23 @@
             + New Tag
           </el-button>
         </div>
-      </el-col>
-    </el-row>
-    <el-row style="width: 100%">
-      备注:
-      <el-input
-        v-model="seqDesc"
-        style="width: 100%"
-        :rows="5"
-        type="textarea"
-        placeholder="备注"
-      />
-    </el-row>
-    <el-row style="width: 100%">
-        <el-button :loading="loading" type="primary" @click="submitForm()">
-            保存
-        </el-button>
-    </el-row>
+      </div>
+    </div>
+
+    <div class="attr-section">备注 · NOTE</div>
+    <el-input
+      v-model="seqDesc"
+      style="width: 100%"
+      :rows="5"
+      type="textarea"
+      placeholder="备注"
+    />
+
+    <div style="margin-top: 12px;">
+      <el-button :loading="loading" type="primary" @click="submitForm()" style="width: 100%;">
+        保存 · SAVE
+      </el-button>
+    </div>
   </div>
 </template>
 <script lang="tsx" setup>
@@ -182,7 +182,7 @@ const resetFields = () => {
 }
 
 const loadAnno = async () => {
-  
+
   resetFields()
 
   const params = {

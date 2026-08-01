@@ -13,6 +13,9 @@ import { Icon } from '@iconify/vue'
 import { globalStates } from '@/states'
 import { jobConfig } from '@/states/job-config'
 import { Mission } from '@/constants'
+import { i18n } from '@/locales'
+
+const t = (key: string) => i18n.global.t(key)
 
 const tableDataRef = ref([] as any[])
 const loading = ref(false)
@@ -76,7 +79,7 @@ const tableColumns: Column<any>[] = [
     {
         title: '',
         key: 'operations',
-        width: 120,
+        width: 110,
         align: 'center',
         cellRenderer: ({ rowData }) => {
             const onDeleteRow = () => {
@@ -101,16 +104,16 @@ const tableColumns: Column<any>[] = [
                 }
             }
             return (
-                <div>
-                    <el-button size="small" onClick={onFocusRow} circle>
-                        <Icon icon="material-symbols-light:center-focus-strong-outline"></Icon>
-                    </el-button>
-                    <el-button size="small" onClick={onToggleVisible} circle >
-                        <Icon icon={rowData.visible ? 'mdi:show-outline' : 'mdi:hide-outline'}></Icon>
-                    </el-button>
-                    <el-button size="small" onClick={onDeleteRow} circle>
-                        <Icon icon='material-symbols-light:delete-outline'></Icon>
-                    </el-button>
+                <div class="obj-actions">
+                    <button class="obj-action" onClick={onFocusRow} aria-label={t('aria.focusObject')} title={t('aria.focusObject')}>
+                        <Icon icon="material-symbols-light:center-focus-strong-outline" />
+                    </button>
+                    <button class="obj-action" onClick={onToggleVisible} aria-label={t('aria.toggleVisibility')} title={t('aria.toggleVisibility')}>
+                        <Icon icon={rowData.visible ? 'mdi:show-outline' : 'mdi:hide-outline'} />
+                    </button>
+                    <button class="obj-action obj-action--danger" onClick={onDeleteRow} aria-label={t('action.delete')} title={t('action.delete')}>
+                        <Icon icon='material-symbols-light:delete-outline' />
+                    </button>
                 </div>
             )
         },

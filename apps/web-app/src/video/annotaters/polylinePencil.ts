@@ -9,13 +9,12 @@ import { useMagicKeys, whenever } from '@vueuse/core'
 import * as THREE from 'three'
 import { fabric } from 'fabric'
 import { Annotater } from './annotater'
-import { AnnoWorkEnum} from "./common"
+import { BaseCanvas, AnnoWorkEnum} from "./common"
 import { globalStates } from '@/states'
 import { OlTypeEnum, type Poly2d } from '@/openlabel'
 import { v4 as uuidv4 } from 'uuid'
 import ColorPickerWidget from '@/components/form/ColorPickerWidget.vue'
 import { shortcutCallback } from './utils'
-import type { RenderHelper } from '../RenderHelper'
 
 
 const { current } = useMagicKeys()
@@ -97,7 +96,7 @@ export const toolSettingUi = {
 const TOOL_ID = "polylinePencil"
 export const toolConf = {
     id: TOOL_ID,
-    icon: 'carbon:paint-brush-alt',
+    icon: 'lucide:brush',
     name: '多边形-画笔',
     shortcut: 'J',
     description: '<el-text>按住Ctrl键，同时移动鼠标</el-text>',
@@ -118,7 +117,7 @@ class PolylinePencil extends Annotater {
     private ketDownShift = false
     private ketDownAlt = false
 
-    constructor(baseCanva: RenderHelper) {
+    constructor(baseCanva: BaseCanvas) {
         super(baseCanva)
         this.tipsLine = new fabric.Line([0,0,0,0], {
             left:0,

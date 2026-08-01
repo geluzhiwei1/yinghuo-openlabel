@@ -28,6 +28,8 @@
 <script lang="tsx" setup>
 import { ref, watch, reactive } from 'vue'
 import { ElTableV2, ElDialog, ElColorPicker } from 'element-plus'
+import { i18n } from '@/locales'
+const t = (key: string) => i18n.global.t(key)
 import type { Column, RowEventHandlerParams } from 'element-plus'
 import { dataPanel } from '@/states/UiState'
 import { Icon } from '@iconify/vue'
@@ -134,16 +136,16 @@ const tableColumns: Column<any>[] = [
                 rowData.style.options.visible = !rowData.style.options.visible
             }
             return (
-                <div>
-                    <el-button size="small" onClick={onSetting} circle>
-                        <Icon icon='material-symbols-light:tv-options-input-settings-outline'></Icon>
-                    </el-button>
-                    <el-button size="small" onClick={onToggleVisible} circle>
-                        <Icon icon={rowData.style.options.visible ? 'mdi:show-outline' : 'mdi:hide-outline'}></Icon>
-                    </el-button>
-                    <el-button size="small" onClick={onDeleteRow} circle>
-                        <Icon icon='material-symbols-light:delete-outline' ></Icon>
-                    </el-button>
+                <div class="obj-actions">
+                    <button class="obj-action" onClick={onSetting} aria-label={t('aria.editObject')} title={t('aria.editObject')}>
+                        <Icon icon='material-symbols-light:tv-options-input-settings-outline' />
+                    </button>
+                    <button class="obj-action" onClick={onToggleVisible} aria-label={t('aria.toggleVisibility')} title={t('aria.toggleVisibility')}>
+                        <Icon icon={rowData.style.options.visible ? 'mdi:show-outline' : 'mdi:hide-outline'} />
+                    </button>
+                    <button class="obj-action obj-action--danger" onClick={onDeleteRow} aria-label={t('action.delete')} title={t('action.delete')}>
+                        <Icon icon='material-symbols-light:delete-outline' />
+                    </button>
                 </div>
             )
         },

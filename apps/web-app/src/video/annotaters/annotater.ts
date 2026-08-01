@@ -6,7 +6,7 @@
  */
 import { computed, watch, reactive } from 'vue'
 import { useActiveElement, useMagicKeys, whenever } from '@vueuse/core'
-import { RenderHelper } from '../RenderHelper'
+import { BaseCanvas } from './common'
 import { globalStates } from '@/states'
 import { HotkeysManager } from '@/libs/hotkeys-manager'
 
@@ -19,7 +19,7 @@ const notUsingInput = computed(() =>
 export abstract class Annotater {
     protected name = ""
     public canvasObj
-    public baseCanva: RenderHelper
+    public baseCanva: BaseCanvas
     public activated = false
 
     protected initconf: any
@@ -118,7 +118,7 @@ export abstract class Annotater {
         }, { immediate: true })
     }
 
-    constructor(baseCanva: RenderHelper) {
+    constructor(baseCanva: BaseCanvas) {
         this.baseCanva = baseCanva
         this.canvasObj = baseCanva.canvasObj
         watch(() => this.statesCore.listenHotkeys, (newVal, oldVal) => {

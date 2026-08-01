@@ -6,7 +6,7 @@
   </el-tooltip> -->
   <el-popover placement="bottom" :width="400" trigger="hover">
       <template #reference>
-        <el-button :type="activated ? 'success' : 'primary'">
+        <el-button type="primary" :class="{ 'is-tool-active': activated }">
           <Icon :icon="toolConf.icon" />
         </el-button>
       </template>

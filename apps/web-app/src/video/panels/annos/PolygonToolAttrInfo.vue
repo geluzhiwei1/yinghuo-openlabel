@@ -8,9 +8,7 @@
           <el-popover placement="bottom" width="550" trigger="click">
             <template #reference>
               <el-button>
-                <el-icon class="el-icon--right">
-                  <ArrowDown />
-                </el-icon>
+                <Icon icon="lucide:arrow-down" class="el-icon--right" />
               </el-button>
             </template>
             <div>
@@ -32,9 +30,9 @@
 </template>
 
 <script lang="tsx" setup>
+import { Icon } from "@iconify/vue"
 import { ref, watch, reactive, computed } from 'vue'
-import { ElForm, ElRow, ElCol, ElInput, ElButton, ElPopover, ElIcon, ElFormItem, ElInputNumber } from 'element-plus'
-import { ArrowDown } from '@element-plus/icons-vue'
+import { ElForm, ElRow, ElCol, ElInput, ElButton, ElPopover, ElFormItem, ElInputNumber } from 'element-plus'
 import TaxonomyTreeSelecter from '@/components/Taxonomy/TaxonomyTreeSelecter.vue'
 import VueForm from '@lljj/vue3-form-element'
 import { entityChannel, commonChannel } from '@/video/channel'
@@ -96,14 +94,6 @@ const defaultSchema = {
   required: [],
   'ui:order': ['*'],
   properties: {
-    tags: {
-      type: 'string',
-      title: 'tags'
-    },
-    annotation: {
-      type: 'string',
-      title: 'annotation'
-    }
   }
 }
 const selectedObjTypeAttrSchema = ref({})
@@ -183,7 +173,11 @@ watch(() => taxonomyState.ontologyClassNames, (newVal, oldVal) => {
 watch([() => poly2dAnnotaterStates.defaultObjType], (newVal, oldVal) => {
   changeSchema()
 })
-
+watch(() => poly2dAnnotaterStates.selectedChanged, (newVal, oldVal) => {
+  if (newVal) {
+    changeSchema()
+  }
+})
 
 // sub = entityChannel.sub(entityChannel.Events.SelectedBoxChanged, (msg) => {
 //   if (msg.data) {

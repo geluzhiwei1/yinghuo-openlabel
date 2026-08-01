@@ -9,7 +9,7 @@ export const semanticButtons = {
   },
   "segmentByRectTool":{
     id: 'segmentByRectTool',
-    icon: 'iconoir:3d-rect-three-pts',
+    icon: 'lucide:box',
     name: '拉框分割',
     shortcut: '左击 + 左击',
     description: '<el-text>单击鼠标左键开始</el-text>',

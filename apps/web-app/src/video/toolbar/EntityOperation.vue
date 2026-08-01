@@ -2,10 +2,11 @@
   <el-button-group v-if="jobConfig.mission === Mission.ObjectBBox2d">
     <BBoxBuilderToolSetting />
     <GeometryBuilderFromPointsSetting />
-    <el-popover placement="bottom" width="250" trigger="hover">
+    <el-popover placement="bottom" width="250" trigger="hover" :teleported="true" popper-class="y-toolbar-popper">
       <template #reference>
-        <el-button type="primary" disabled>
-          {{ $t('video.toolbar.ai') }}
+        <el-button type="primary">
+          <Icon icon="lucide:sparkles" />
+          AI
         </el-button>
       </template>
       <div style="text-align: center">
@@ -22,10 +23,11 @@
   <el-button-group v-else-if="jobConfig.mission === Mission.ObjectRBBox2d">
     <RBBoxBuilderToolSetting />
     <GeometryBuilderFromPointsSetting />
-    <el-popover placement="bottom" width="250" trigger="hover">
+    <el-popover placement="bottom" width="250" trigger="hover" :teleported="true" popper-class="y-toolbar-popper">
       <template #reference>
         <el-button type="primary">
-          {{ $t('video.toolbar.ai') }}
+          <Icon icon="lucide:sparkles" />
+          AI
         </el-button>
       </template>
       <div style="text-align: center">
@@ -45,10 +47,11 @@
     <PolylinePencilSetting />
     <MaskBrushSetting />
     <PolygonEditorSetting />
-    <el-popover placement="bottom" width="250" trigger="hover">
+    <el-popover placement="bottom" width="250" trigger="hover" :teleported="true" popper-class="y-toolbar-popper">
       <template #reference>
         <el-button type="primary">
-          {{ $t('video.toolbar.ai') }}
+          <Icon icon="lucide:sparkles" />
+          AI
         </el-button>
       </template>
       <div style="text-align: center">
@@ -64,9 +67,9 @@
   </el-button-group>
   <el-button-group v-else-if="jobConfig.mission === Mission.VideoEvents">
     <VideoEventToolUi></VideoEventToolUi>
-    <el-button type="primary" :style="{ color: globalStates.mainTool === VideoEventTool.Name ? 'blue' : '' }"
+    <el-button type="primary" :class="{ 'is-tool-active': globalStates.mainTool === VideoEventTool.Name }"
       @click="globalStates.mainTool = (globalStates.mainTool === VideoEventTool.Name) ? undefined : VideoEventTool.Name">
-      {{ $t('video.toolbar.add') }}(N)
+      新增(N)
     </el-button>
   </el-button-group>
 </template>
@@ -74,6 +77,7 @@
 import { globalStates } from '@/states'
 import { jobConfig } from '@/states/job-config'
 import { Mission } from '@/constants'
+import { Icon } from '@iconify/vue'
 import BBoxBuilderToolSetting from '../annotaters/ui/BBoxBuilderTool.vue'
 import RBBoxBuilderToolSetting from '../annotaters/ui/RBBoxBuilderTool.vue'
 import TextPromptBBoxToolSetting from '../annotaters/ui/TextPromptBBoxTool.vue'

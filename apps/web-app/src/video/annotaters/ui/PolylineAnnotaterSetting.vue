@@ -1,7 +1,7 @@
 <template>
   <el-popover placement="bottom" width="450" trigger="hover">
     <template #reference>
-    <el-button :type="activated ? 'success' : 'primary'" :style="toolBarConf.style"
+    <el-button type="primary" :class="{ 'is-tool-active': activated }"
       @click="toolButtonClick(toolBarConf.id)">
       <Icon :icon="toolBarConf.icon" />
     </el-button>

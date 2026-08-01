@@ -9,9 +9,7 @@
           <el-popover placement="bottom" width="550" trigger="click">
             <template #reference>
               <el-button>
-                <el-icon class="el-icon--right">
-                  <ArrowDown />
-                </el-icon>
+                <Icon icon="lucide:arrow-down" class="el-icon--right" />
               </el-button>
             </template>
             <div>
@@ -40,9 +38,9 @@
 </template>
 
 <script lang="tsx" setup>
+import { Icon } from "@iconify/vue"
 import { ref, watch, reactive, computed } from 'vue'
-import { ElForm, ElRow, ElCol, ElInput, ElButton, ElPopover, ElIcon, ElFormItem } from 'element-plus'
-import { ArrowDown } from '@element-plus/icons-vue'
+import { ElForm, ElRow, ElCol, ElInput, ElButton, ElPopover, ElFormItem } from 'element-plus'
 import TaxonomyTreeSelecter from '@/components/Taxonomy/TaxonomyTreeSelecter.vue'
 import VueForm from '@lljj/vue3-form-element'
 import { taxonomyState } from '@/states/TaxonomyState'

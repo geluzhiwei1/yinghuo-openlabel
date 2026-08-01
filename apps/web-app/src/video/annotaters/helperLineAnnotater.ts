@@ -7,12 +7,9 @@
 import { watch, reactive } from 'vue'
 import { fabric } from 'fabric'
 import { Annotater } from './annotater'
-import { Vector2, AnnoWorkEnum } from "./common"
+import { BaseCanvas, Vector2, AnnoWorkEnum } from "./common"
 import { commonAnnotaterSetting } from './common-annotater-settings'
 import { globalStates } from '@/states'
-import type { RenderHelper } from '../RenderHelper'
-
-
 /**
  * 辅助线
  */
@@ -24,7 +21,7 @@ class HelperLineAnnotater extends Annotater {
 
     private zindex: number = 20
 
-    constructor(baseCanva: RenderHelper) {
+    constructor(baseCanva: BaseCanvas) {
         super(baseCanva)
         // draw line
         this.lineVertical = new fabric.Line([0, 0, 0, this.canvasObj.getWidth()], {

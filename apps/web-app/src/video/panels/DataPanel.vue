@@ -2,23 +2,23 @@
   <div id="dataPanelContainer" ref="el">
     <el-row id="panelBar">
       <el-col :span="20">
-        <el-button-group v-if="uiState.ui === 'anno'">
+        <el-button-group v-if="uiState.ui === 'anno'" class="panel-tabs">
           <el-button size="default" @click="dataPanel.tabs.active = 'task'"
-            :type="dataPanel.tabs.active === 'task' ? 'success' : ''">{{ $t('video.datapanel.task') }}</el-button>
+            :type="dataPanel.tabs.active === 'task' ? 'primary' : ''">任务</el-button>
           <el-button size="default" @click="dataPanel.tabs.active = 'images'"
-            :type="dataPanel.tabs.active === 'images' ? 'success' : ''">{{ $t('video.datapanel.data') }}</el-button>
+            :type="dataPanel.tabs.active === 'images' ? 'primary' : ''">数据</el-button>
           <el-button size="default" @click="dataPanel.tabs.active = 'objets'"
-            :type="dataPanel.tabs.active === 'objets' ? 'success' : ''">{{ $t('video.datapanel.annotation') }}</el-button>
+            :type="dataPanel.tabs.active === 'objets' ? 'primary' : ''">标注</el-button>
         </el-button-group>
-        <el-button-group v-else-if="uiState.ui === 'seman'">
+        <el-button-group v-else-if="uiState.ui === 'seman'" class="panel-tabs">
           <el-button size="default" @click="dataPanel.tabs.active = 'task'"
-            :type="dataPanel.tabs.active === 'task' ? 'success' : ''">{{ $t('video.datapanel.task') }}</el-button>
+            :type="dataPanel.tabs.active === 'task' ? 'primary' : ''">任务</el-button>
           <el-button size="default" @click="dataPanel.tabs.active = 'images'"
-            :type="dataPanel.tabs.active === 'images' ? 'success' : ''">{{ $t('video.datapanel.data') }}</el-button>
+            :type="dataPanel.tabs.active === 'images' ? 'primary' : ''">数据</el-button>
           <el-button size="default" @click="dataPanel.tabs.active = 'objets'"
-            :type="dataPanel.tabs.active === 'objets' ? 'success' : ''">{{ $t('video.datapanel.annotation') }}</el-button>
+            :type="dataPanel.tabs.active === 'objets' ? 'primary' : ''">标注</el-button>
           <el-button size="default" @click="dataPanel.tabs.active = 'pcSemantic'"
-            :type="dataPanel.tabs.active === 'pcSemantic' ? 'success' : ''">{{ $t('video.datapanel.semantic') }}</el-button>
+            :type="dataPanel.tabs.active === 'pcSemantic' ? 'primary' : ''">语义</el-button>
         </el-button-group>
       </el-col>
       <el-col :span="4" style="text-align: right;font-size:18pt;">

@@ -14,11 +14,11 @@
         <el-button @click="toolOptions.funcSetting.func = 'brush';PolygonEditor.instance.onCommand('brush', {})" round size="small"
             :type="toolOptions.funcSetting.func === 'brush' ? 'success' : ''"
             >
-            描边(1)<Icon :icon="'tabler:brush'" />
+            描边(1)<Icon :icon="'lucide:brush'" />
           </el-button>
           <el-button round size="small" :type="toolOptions.funcSetting.func === 'erase' ? 'success' : ''"
             @click="toolOptions.funcSetting.func = 'erase';PolygonEditor.instance.onCommand('erase', {})">
-            擦边(2)<Icon :icon="'tabler:brush-off'" />
+            擦边(2)<Icon :icon="'lucide:brush'" />
           </el-button>
       </el-button-group> -->
       <el-button-group>
@@ -72,7 +72,7 @@
         </el-button>
         <el-button @click="toolOptions.funcSetting.func = 'densify'" round size="small"
           :type="toolOptions.funcSetting.func === 'densify' ? 'success' : ''">
-          <Icon :icon="'iconoir:curve-array'" />Densify
+          <Icon :icon="'lucide:spline'" />Densify
         </el-button>
         <el-button @click="toolOptions.funcSetting.func = 'simplify'" round size="small"
           :type="toolOptions.funcSetting.func === 'simplify' ? 'success' : ''">

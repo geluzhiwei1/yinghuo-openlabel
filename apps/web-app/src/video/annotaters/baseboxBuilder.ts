@@ -7,10 +7,9 @@
 import { watch } from 'vue'
 import { fabric } from 'fabric'
 import { useMagicKeys, whenever } from '@vueuse/core'
-import { Vector2, AnnoWorkEnum } from './common'
+import { Vector2, BaseCanvas, AnnoWorkEnum } from './common'
 import { globalStates } from '@/states'
 import { Annotater } from './annotater'
-import type { RenderHelper } from '../RenderHelper'
 
 const { current } = useMagicKeys()
 const currentKeyboard = current
@@ -20,7 +19,7 @@ abstract class BaseBoxBuilder extends Annotater {
     protected drawing = false
     protected curRect: fabric.Rect
 
-    constructor(baseCanva: RenderHelper, defaultOptions: any, zIndex: number) {
+    constructor(baseCanva: BaseCanvas, defaultOptions: any, zIndex: number) {
         super(baseCanva)
 
         this.curRect = new fabric.Rect({

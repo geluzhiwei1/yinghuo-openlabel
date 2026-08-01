@@ -13,13 +13,11 @@ import { parseBBoxes, parsePoly2d } from '@/openlabel/utils'
 import { SequenceGenerator } from './sequenceGenerator'
 import { shortcutCallback, setRectFromBoxObj } from './utils'
 import { ElMessage } from 'element-plus'
-import { Vector2 } from './common'
+import { Vector2, BaseCanvas, AnnoWorkEnum } from './common'
 import { globalStates } from '@/states'
 import { jobConfig } from '../../states/job-config'
 import { dataSeqState } from '@/states/DataSeqState'
 import { get } from 'radash'
-import type { RenderHelper } from '../RenderHelper'
-
 
 type UserFabricObject = (fabric.Circle | fabric.Rect) & {
     userData: {
@@ -144,7 +142,7 @@ export const toolOptions = reactive({
 const TOOL_ID = 'videoPromptSegment'
 export const pointsPromoteSegmentToolConf = {
     id: TOOL_ID,
-    icon: 'fluent:video-clip-wand-24-regular',
+    icon: 'lucide:wand-sparkles',
     name: '视频标注',
     shortcut: 'V',
     description: '设置前景点、背景点或辅助框，辅助标注',
@@ -208,7 +206,7 @@ export class VideoPromptSegment extends Annotater {
         }
     }
 
-    constructor(baseCanva: RenderHelper) {
+    constructor(baseCanva: BaseCanvas) {
         super(baseCanva)
 
         this.curRect = new fabric.Rect({
@@ -583,7 +581,7 @@ export class VideoPromptSegment extends Annotater {
                 break
             }
             default:
-                console.error('不支持的输出类型')
+                ElMessage.warning('不支持的输出类型')
         }
     }
 

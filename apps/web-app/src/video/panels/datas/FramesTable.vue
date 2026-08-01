@@ -17,15 +17,17 @@
     </el-button-group>
     <el-button-group v-if="jobConfig.data_source === 'imageURLs'">
       <el-button @click="handleClick('editUrls')" size="small"  round :type="'success'">
-        <el-icon><Plus /></el-icon>
+        <Icon icon="lucide:plus" />
       </el-button>
     </el-button-group>
   </el-row>
   <!-- <el-scrollbar
     :max-height="dataPanel.panelTableHeight + 'px'"
     :max-width="dataPanel.value.panelWidth + 'px'"> -->
-    <el-table-v2 :columns="tableColumns" :data="tableDataRef" :row-height="40" :height="dataPanel.panelTableHeight - 5"
-      :width="dataPanel.panelWidth" ref="tableRef" fixed :row-class="rowClass" :row-event-handlers="{onClick: handleRowClick}"/>
+    <el-table-v2 :columns="tableColumns" :data="tableDataRef" :row-height="40"
+      :height="dataPanel.panelTableHeight - 5"
+      :width="dataPanel.panelWidth"
+      ref="tableRef" fixed :row-class="rowClass" :row-event-handlers="{onClick: handleRowClick}"/>
   <!-- </el-scrollbar>  -->
    <SeqImageUrlsEditor ref="urieditor"></SeqImageUrlsEditor>
 </template>
@@ -36,7 +38,6 @@ import { Icon } from '@iconify/vue'
 import { jobConfig } from '@/states/job-config'
 import * as _ from 'radash'
 import type { Column, RowClassNameGetter } from 'element-plus'
-import { Plus } from '@element-plus/icons-vue'
 import { dataSeqState } from '@/states/DataSeqState'
 import { commonChannel } from '../../channel'
 import { dataPanel } from '@/states/UiState'
@@ -60,51 +61,59 @@ const viewType = ref('table')
 const tableDataRef = ref([])
 const urieditor = ref()
 
-const tableColumns: Column<any>[] = [
+// 创建动态列宽的 columns
+const createColumns = (widths: { id: number; objectCount: number; name: number; uri: number; timestamp: number }): Column<any>[] => [
   {
     title: 'No.',
     key: 'id',
     dataKey: 'id',
-    width: 50
+    width: widths.id
   },
   {
     title: 'Count',
     key: 'objectCount',
     dataKey: 'objectCount',
-    width: 50
+    width: widths.objectCount
   },
-  // {
-  //   title: 'Operation',
-  //   key: 'operations',
-  //   cellRenderer: ({ rowIndex }) => (
-  //     <div>
-  //       <el-button size="small" value={rowIndex} onClick={handleChangeFrame}>
-  //         加载
-  //       </el-button>
-  //     </div>
-  //   ),
-  //   width: 100,
-  //   align: 'center'
-  // },
   {
     title: '',
     key: 'name',
     dataKey: 'name',
-    width: 150
+    width: widths.name
   },
   {
     title: 'URI',
     key: 'uri',
     dataKey: 'uri',
-    width: 150
+    width: widths.uri
   },
   {
     title: '时间戳',
     key: 'timestamp',
     dataKey: 'timestamp',
-    width: 150
+    width: widths.timestamp
   },
 ]
+
+const baseWidths = { id: 50, objectCount: 60, name: 100, uri: 120, timestamp: 100 }
+const tableColumns = ref<Column<any>[]>(createColumns(baseWidths))
+
+const updateColWidth = () => {
+  const panelW = dataPanel.value.panelWidth || 300
+  const total = Object.values(baseWidths).reduce((a, b) => a + b, 0)
+  const ratio = Math.max(1, panelW / total)
+  const widths = {
+    id: Math.max(50, Math.floor(baseWidths.id * ratio)),
+    objectCount: Math.max(50, Math.floor(baseWidths.objectCount * ratio)),
+    name: Math.max(80, Math.floor(baseWidths.name * ratio)),
+    uri: Math.max(80, Math.floor(baseWidths.uri * ratio)),
+    timestamp: Math.max(80, Math.floor(baseWidths.timestamp * ratio)),
+  }
+  tableColumns.value = createColumns(widths)
+}
+
+// 监听面板宽度变化
+watch(() => dataPanel.value.panelWidth, updateColWidth, { immediate: true })
 
 const handleChangeFrame = (e) => {
   tryJumpFrame(_.toInt(e.currentTarget.value))

@@ -1,6 +1,6 @@
 <template>
     <el-tooltip placement="bottom-start" raw-content :content="formatTooltipContent(toolConf)">
-        <el-button :type="activated ? 'success' : 'primary'" @click="toolButtonClick(toolConf.id)">
+        <el-button type="primary" :class="{ 'is-tool-active': activated }" @click="toolButtonClick(toolConf.id)">
             <Icon :icon="toolConf.icon" />
         </el-button>
     </el-tooltip>

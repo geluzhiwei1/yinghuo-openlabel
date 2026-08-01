@@ -6,7 +6,7 @@
  */
 import { computed, watch, reactive } from 'vue'
 import { Annotater } from './annotater'
-import { AnnoWorkEnum } from './common'
+import { BaseCanvas, AnnoWorkEnum } from './common'
 import { dnnModelApi } from '@/api'
 import { globalStates } from '@/states'
 import { parseBBoxes } from '@/openlabel/utils'
@@ -25,7 +25,7 @@ export const textPromptBBoxOptions = reactive({
 const TOOL_ID = 'textPromptBBoxTool'
 export const textPromoteBBoxToolConf = {
     id: TOOL_ID,
-    icon: 'fluent:text-whole-word-20-filled',
+    icon: 'lucide:type',
     name: '提示词标注',
     shortcut: 'T',
     description: '选中一个框后，按键盘T，自动框选同类别',
@@ -45,7 +45,7 @@ export const textPromoteBBoxToolConf = {
 class TextPromptBBoxTool extends Annotater {
     static name = TOOL_ID
 
-    constructor(baseCanva: RenderHelper) {
+    constructor(baseCanva: BaseCanvas) {
         super(baseCanva)
 
         watch(() => globalStates.subTool, (newValue, oldValue) => {
@@ -93,7 +93,7 @@ class TextPromptBBoxTool extends Annotater {
             text: '模型推理...',
             background: 'rgba(0, 0, 0, 0.7)',
         })
-        const imgBlob = globalStates.toolsets!.get('imageCanvas')!.getImageBlob()
+        const imgBlob = globalStates.toolsManager!.get('imageCanvas')!.getImageBlob()
         const data = {
           req: {},
           image: {

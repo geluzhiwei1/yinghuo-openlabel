@@ -1,17 +1,31 @@
 <template>
   <el-button-group>
-    <el-tooltip placement="bottom-start" raw-content :content="$t('video.buttons.undo')">
+    <el-tooltip placement="bottom-start" raw-content :content="'<span>Undo' +
+      '</br>' +
+      '</br>快捷键：Ctrl + Z' +
+      '</span>'
+      ">
       <el-button type="primary" @click="unDoConf.handle()" :disabled="unDoConf.disabled.value">
         <Icon :icon="unDoConf.icon" />
-      </el-button>
+        </el-button>
     </el-tooltip>
-    <el-tooltip placement="bottom-start" raw-content :content="$t('video.buttons.redo')">
+    <el-tooltip placement="bottom-start" raw-content :content="'<span>Redo' +
+        '</br>' +
+        '</br>快捷键：Ctrl + Y' +
+        '</span>'
+        ">
       <el-button type="primary" @click="reDoConf.handle()" :disabled="reDoConf.disabled.value">
         <Icon :icon="reDoConf.icon" />
       </el-button>
     </el-tooltip>
-    <el-tooltip placement="bottom-start" raw-content :content="t('video.buttons.' + item.id.replace('-','.'))"
-      v-for="(item, index) in commonButtons" :key="index">
+    <el-tooltip placement="bottom-start" raw-content :content="'<span>' +
+      item.name +
+      '</br>' +
+      item.description +
+      '</br>快捷键：' +
+      item.shortcut +
+      '</span>'
+      " v-for="(item, index) in commonButtons" :key="index">
       <el-button type="primary" @click="item.handle()" :loading="item.loading">
         <Icon :icon="item.icon" v-show="!item.loading" />
       </el-button>
@@ -19,17 +33,23 @@
     <el-popover placement="bottom" width="250" trigger="hover">
       <template #reference>
         <el-button type="primary">
-          {{ $t('video.toolbar.delete') }}
+          删
         </el-button>
       </template>
       <div>
         <el-button-group>
-          <el-tooltip placement="bottom-start" raw-content :content="t('video.buttons.' + item.id.replace('-','.'))"
-            v-for="(item, index) in delButtons" :key="index">
-            <el-button type="primary" @click="item.handle()" :loading="item.loading">
-              <Icon :icon="item.icon" v-show="!item.loading" />
-            </el-button>
-          </el-tooltip>
+          <el-tooltip placement="bottom-start" raw-content :content="'<span>' +
+      item.name +
+      '</br>' +
+      item.description +
+      '</br>快捷键：' +
+      item.shortcut +
+      '</span>'
+      " v-for="(item, index) in delButtons" :key="index">
+      <el-button type="primary" @click="item.handle()" :loading="item.loading">
+        <Icon :icon="item.icon" v-show="!item.loading" />
+      </el-button>
+    </el-tooltip>
         </el-button-group>
       </div>
     </el-popover>
@@ -43,23 +63,23 @@ import _ from 'lodash'
 import { Icon } from '@iconify/vue'
 import { commonChannel } from '../channel'
 import { jobConfig } from '@/states/job-config'
-import { labelApi } from '@/api'
+import { labelApi, labelsApi } from '@/api'
 import type { Action } from 'element-plus'
 import { globalStates } from '@/states'
 import { hotkeysManager } from '../hotkeysManager'
 import { messages } from '@/states'
 import { listify } from 'radash'
 import { userSettings } from '@/states/UserState'
-import { useI18n } from 'vue-i18n'
+import { useUnit } from '../composables/useUnit'
 
-const { t } = useI18n()
+const { unit: currentUnit } = useUnit()
 
 const unDoConf = {
   id: 'common-undo',
   icon: 'mynaui:undo',
-  name: t('video.toolbar.undo'),
+  name: '取消上次',
   shortcut: 'Shift+Z',
-  description: t('video.buttons.undo'),
+  description: '<el-text>取消上次的编辑</el-text>',
   showButton: true,
   disabled: computed(() => {
     if (globalStates.mainAnnoater.undoRedo?.states.canUndo) {
@@ -70,15 +90,16 @@ const unDoConf = {
   }),
   handle: () => {
     globalStates.mainAnnoater.undoLastOp?.()
+    // commonChannel.pub(commonChannel.Events.ButtonClicked, { data: 'common-undo' })
   }
 }
 
 const reDoConf = {
   id: 'common-redo',
   icon: 'mynaui:redo',
-  name: t('video.toolbar.redo'),
+  name: '重做上次',
   shortcut: 'Shift+D',
-  description: t('video.buttons.redo'),
+  description: '<el-text>重做上次的编辑</el-text>',
   showButton: true,
   disabled: computed(() => {
     if (globalStates.mainAnnoater.undoRedo?.states.canRedo) {
@@ -89,15 +110,16 @@ const reDoConf = {
   }),
   handle: () => {
     globalStates.mainAnnoater.redoLastOp?.()
+    // commonChannel.pub(commonChannel.Events.ButtonClicked, { data: 'common-undo' })
   }
 }
 
 const saveButtonConf = reactive({
   id: 'save-annotation',
-  icon: 'mingcute:upload-3-line',
-  name: t('video.toolbar.save'),
+  icon: 'lucide:upload',
+  name: '保存标注',
   shortcut: 'Shift+S',
-  description: t('video.buttons.save'),
+  description: '<el-text>保存当前帧所有件</el-text>',
   showButton: true,
   loading: false,
   handle: () => {
@@ -107,9 +129,9 @@ const saveButtonConf = reactive({
 const loadButtonConf = {
   id: 'load-annotation',
   icon: 'uis:refresh',
-  name: t('video.toolbar.load'),
+  name: '加载标注',
   shortcut: 'Shift+R',
-  description: t('video.buttons.load'),
+  description: '<el-text>重新从后台加载已经保存的标签</el-text>',
   showButton: true,
   loading: false,
   handle: () => {
@@ -127,9 +149,9 @@ const delButtons = [
   {
     id: 'delete',
     icon: 'ep:delete',
-    name: t('video.toolbar.delete'),
+    name: '删除选中',
     shortcut: 'X',
-    description: t('video.buttons.delete'),
+    description: '<el-text>删除选中件</el-text>',
     showButton: true,
     loading: false,
     handle: () => {
@@ -139,9 +161,9 @@ const delButtons = [
   {
     id: 'delete-all',
     icon: 'ep:delete-filled',
-    name: t('video.toolbar.deleteAll'),
+    name: '删除本帧',
     shortcut: 'Shift+X',
-    description: t('video.buttons.deleteAll'),
+    description: '<el-text>清除本帧所有标注</el-text>',
     showButton: true,
     loading: false,
     handle: () => {
@@ -152,9 +174,9 @@ const delButtons = [
   {
     id: 'delete-seq-all',
     icon: 'mdi:database-remove',
-    name: t('video.toolbar.deleteSeqAll'),
+    name: '删除任务标签',
     shortcut: '',
-    description: t('video.buttons.deleteSeqAll'),
+    description: '<el-text>删除本任务所有标签</el-text>',
     showButton: true,
     loading: false,
     handle: () => {
@@ -178,6 +200,39 @@ const saveLabel = () => {
     return
   }
 
+  // Stage 9.5: 若当前 jobConfig 对应一个 Stage 7 spawn 出来的 unit,
+  // 走新 label v2 端点(乐观锁 + 版本 + 关联 workflow instance)
+  if (currentUnit.value) {
+    const unitId = currentUnit.value.id
+    const expectedVersion = (currentUnit.value as any).data_version ?? 0
+    labelsApi
+      .save(unitId, {
+        expected_version: expectedVersion,
+        objects: frame_labels,
+        attrs: {
+          current_tool: globalStates.mainTool,
+          current_mission: jobConfig.mission,
+        },
+      })
+      .then((rec: any) => {
+        ElMessage.success(`帧${jobConfig.frame}:已保存 v${rec.version}`)
+        // 同步本地 data_version,下次保存基于该版本
+        if (currentUnit.value) {
+          ;(currentUnit.value as any).data_version = rec.version
+        }
+        globalStates.mainAnnoater.deletedObjs?.clear()
+        loadAnnos()
+      })
+      .catch(() => {
+        // req.ts 已提示
+      })
+      .finally(() => {
+        saveButtonConf.loading = false
+      })
+    return
+  }
+
+  // 兼容路径:老 AnnoJob 任务无 unit 绑定,走原 frame_save / save
   labelApi.save({
       frame_labels,
       jobConfig: jobConfig,
@@ -185,12 +240,13 @@ const saveLabel = () => {
       current_tool: globalStates.mainTool
     })
     .then((res) => {
-      ElMessage.success(t('video.messages.saveSuccessShort', { frame: jobConfig.frame, statusText: res.statusText }))
+      // messages.lastSuccess = `帧${jobConfig.frame}保存成功，共${frame_labels.length}个`
+      ElMessage.success(`帧${jobConfig.frame}：` + res.statusText)
       globalStates.mainAnnoater.deletedObjs?.clear()
       loadAnnos()
     })
     .catch(() => {
-      ElMessage.error(t('video.messages.saveFail', { frame: jobConfig.frame }))
+      ElMessage.error(`帧${jobConfig.frame}保存失败`)
     })
     .finally(() => {
       saveButtonConf.loading = false
@@ -247,14 +303,14 @@ commonChannel.sub(commonChannel.Events.ButtonClicked, (msg: any) => {
       globalStates.mainAnnoater.removeSelected()
       break
     case 'delete-all':
-      ElMessageBox.confirm(t('video.messages.deleteConfirm'), t('video.misc.confirm'), {
+      ElMessageBox.confirm('是否删除？本操作将清空本帧所有已标注的数据。', 'Confirm', {
         distinguishCancelAndClose: true,
-        confirmButtonText: t('video.misc.yes'),
-        cancelButtonText: t('video.misc.no')
+        confirmButtonText: '是',
+        cancelButtonText: '否'
       })
         .then(() => {
           globalStates.mainAnnoater.cleanData()
-          messages.lastInfo = t('video.messages.cleared')
+          messages.lastInfo = '清空'
         })
         .catch((action: Action) => {
           if (action === 'cancel') {
@@ -263,10 +319,10 @@ commonChannel.sub(commonChannel.Events.ButtonClicked, (msg: any) => {
         })
       break
     case 'delete-seq-all':
-      ElMessageBox.confirm(t('video.messages.deleteSeqAllConfirm'), t('video.misc.confirm'), {
+      ElMessageBox.confirm('本操作将清除本任务所有标签数据，无法恢复。是否删除？', 'Confirm', {
         distinguishCancelAndClose: true,
-        confirmButtonText: t('video.misc.yes'),
-        cancelButtonText: t('video.misc.no')
+        confirmButtonText: '是',
+        cancelButtonText: '否'
       })
         .then(() => {
           globalStates.mainAnnoater.cleanData()
@@ -275,7 +331,7 @@ commonChannel.sub(commonChannel.Events.ButtonClicked, (msg: any) => {
               current_mission: jobConfig.mission,
           }).then(() => {
             commonChannel.pub(commonChannel.Events.UpdateObjectCounts, {})
-            ElMessage.success(t('video.messages.deleteSuccess'))
+            ElMessage.success('删除成功')
           })
         })
         .catch((action: Action) => {

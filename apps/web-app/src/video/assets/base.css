@@ -112,7 +112,16 @@ body {
     sans-serif;
 }
 #app {
-  min-height: var(--body-height);
+  height: 100%;
+}
+
+/* 全屏不可滚动兜底:即便 JS 侧的高度计算有残差,溢出也会被裁掉,
+   不会再触发浏览器竖直滚动条。*/
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
 }
 
 /* #imageAnnoContainer {

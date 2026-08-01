@@ -1,10 +1,11 @@
 <template>
     <el-tooltip v-if="toolVisible" placement="bottom-start" raw-content :content="tooltipText">
-        <el-button type="primary" :style="{ color: globalStates.subTool === 'bboxBuilder' ? 'blue' : '' }"
+        <el-button type="primary" :class="{ 'is-tool-active': activated }"
             @click="toolConf.shortcutCallback()">
             <Icon :icon="toolConf.icon" />
         </el-button>
     </el-tooltip>
+    <Teleport to="#_Draggable_teleport">
     <Draggable v-slot="{ x, y }" class="fixed" :initial-value="{ x: canvaPanel.left_px, y: topBar.height_px + 5 }"
         :storage-key="'yh-vd-tool-pos-' + toolConf.id" storage-type="session"
         v-show="activated && !commonAnnotaterSetting.settingFormData.settings.hideToolSettings" :resizeable="true"
@@ -18,12 +19,13 @@
                 <li>移动鼠标到目标左上点，单击开始拉框</li>
                 <li>再移动鼠标到目标右下点，单击完成</li>
             </ol></el-text>
-            <VueForm label-width="auto" 
+            <VueForm label-width="auto"
                 v-model="toolOptions.settingFormData" :schema="settingUI.schema"
                 :formProps="{ labelPosition: 'right', layoutColumn: 1 }" :formFooter="{ show: false }"
                 @change="handleProptertyFormChange" />
         </el-card>
     </Draggable>
+</Teleport>
 </template>
 <script lang="tsx" setup>
 import { computed, ref, watch } from 'vue'

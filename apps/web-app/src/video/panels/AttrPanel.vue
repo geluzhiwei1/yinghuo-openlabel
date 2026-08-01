@@ -1,16 +1,16 @@
 <template>
   <div id="attrPanelContainer">
     <el-row :style="{height: dataPanel.panelBarHeight + 'px'}">
-      <el-button-group>
-        <el-button size="default" @click="tabRef = 'view:seq'" :type="tabRef === 'view:seq'?'success':''">{{ $t('video.attrpanel.sequence') }}</el-button>
-        <el-button size="default" @click="tabRef = 'view:image'" :type="tabRef === 'view:image'?'success':''" :disabled="jobConfig.mission === Mission.VideoEvents">{{ $t('video.attrpanel.image') }}</el-button>
-        <el-button size="default" @click="tabRef = 'view:objet'" :type="tabRef === 'view:objet'?'success':''">{{ $t('video.attrpanel.object') }}</el-button>
+      <el-button-group class="panel-tabs">
+        <el-button size="default" @click="tabRef = 'view:seq'" :type="tabRef === 'view:seq'?'primary':''">序列</el-button>
+        <el-button size="default" @click="tabRef = 'view:image'" :type="tabRef === 'view:image'?'primary':''" :disabled="jobConfig.mission === Mission.VideoEvents">图像</el-button>
+        <el-button size="default" @click="tabRef = 'view:objet'" :type="tabRef === 'view:objet'?'primary':''">对象</el-button>
       </el-button-group>
     </el-row>
     <el-row>
       <el-col :span="24">
         <el-scrollbar>
-          <div style="padding-left: 5px; padding-right: 5px;" :style="{height: (dataPanel.panelHeight - dataPanel.panelBarHeight) + 'px'}">
+          <div style="padding-left: 4px; padding-right: 4px;" :style="{height: (dataPanel.panelHeight - dataPanel.panelBarHeight) + 'px'}">
             <!-- <AnnoToolAttr :toolName="globalStates.mainTool" :subToolName="globalStates.subTool" v-if="tabRef === 'view:objet'"></AnnoToolAttr> -->
              <div v-if="tabRef === 'view:objet'">
               <PolygonToolAttr v-if="currentGeometryType === OlTypeEnum.Poly2d || currentGeometryType === OlTypeEnum.Mask2dBase64"/>
