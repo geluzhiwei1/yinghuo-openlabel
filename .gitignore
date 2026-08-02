@@ -25,3 +25,14 @@ tmp.*
 build
 dist
 .env
+
+# EE/SaaS 私有仓库挂载点(scripts/setup-edition.sh 克隆进来)。
+# 这些目录由独立 git 仓库提供,主仓库不应跟踪。
+# 详见 services/web-api/src/yinghuo_app/edition.py 顶部文档。
+# 注:不带尾斜杠,以同时匹配目录、symlink、目录内文件。
+services/web-api/src/yinghuo_app/ee
+services/web-api/src/yinghuo_app/saas
+apps/web-app/ee
+apps/web-app/src/ee
+apps/web-app/saas
+apps/web-app/src/saas

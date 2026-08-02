@@ -24,6 +24,7 @@ dependencies = [
     "fastapi>=0.114.0",
     "uvicorn>=0.29.0",
     "pydash>=8.0.3",
+    "json5>=0.9.25",
     "tortoise-orm>=0.25.1",
     "pydantic-settings>=2.4.0",
     "pypcd4>=1.1.0",
@@ -52,14 +53,35 @@ dependencies = [
     "babel>=2.17.0",
     "motor>=3.7.1",
     "sqlalchemy>=2.0.41",
+    "aiosqlite>=0.20.0",
     "async-lru>=2.0.5",
+    # 邮件:用 PyPI 上的 emails 包(替换原 libs/python-emails 源码依赖)。
+    # extras:html → HTML 邮件解析/转换(cssutils/lxml/premailer 等);
+    #         jinja2 → emails.template.JinjaTemplate 模板渲染。
+    "emails[html,jinja2]>=1.1.2",
+    # 监控:Prometheus 指标暴露(EE 加载,YH_EDITION>=ee)。CE 不依赖此包也能装配,
+    # 因为 metrics.py 仅在 HAS_EE 分支里 import。
+    "prometheus-fastapi-instrumentator>=7.0.0",
+    # SSO LDAP 凭据验证(EE 加载)。OIDC 用主代码已有的 httpx 直接 HTTP,无需 authlib。
+    # ldap3 同步 API,在 async 视图里通过 asyncio.to_thread 跑。
+    "ldap3>=2.9.1",
+    # 计费 Stripe webhook(SaaS 加载,YH_EDITION==saas)。
+    "stripe>=10.0.0",
+    # passlib 仍依赖 pkg_resources,setuptools 81+ 已移除,这里显式 pin
+    "setuptools<81",
 ]
 
 [tool.setuptools.packages.find]
-where = ["src"]  # 告诉 setuptools 在 src 目录下找包
-include = ["*"]  # 包含所有包
+where = ["src"]
+include = ["*"]
 
 [project.optional-dependencies]
 lint = ["black[jupyter]", "mypy", "ruff"]
 test = ["pytest", "debugpy", "fastapi", "httpx", "aerich", "pytest-asyncio"]
 
+# 注:阶段 2 换上源端代码后,把下面的 tortoise_orm 路径改为 yinghuo_app.config.settings.TORTOISE_ORM
+# (源端 config 在 yinghuo_app/config.py,目标端在 yinghuo_conf/loader.py)
+[tool.tortoise]
+tortoise_orm = "yinghuo_app.config.settings.TORTOISE_ORM"
+location = "./migrations"
+src_folder = "./."

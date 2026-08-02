@@ -1,31 +1,84 @@
 admin:
-  user: ${ADMIN_USER}
-  password: ${ADMIN_PASSWORD}
+  user: 'prod@geluzhiwei.com'
+  password: 'yinghuo'
 global:
   mode: 'dev'
   log:
     level: debug
     root_dir: 'logs'
+  weights:
+    root_dir: 'weights'
+    http_server: 'http://localhost:8401/qm-weight/'
   datas:
-    YH_USER_DATA_ROOT: ${YH_USER_DATA_ROOT}
+    root_dir: '/tmp/funcs-tmp'
+    http_server: 'http://localhost:7020'
+    YH_USER_DATA_ROOT: '/home/work/yh_user_datas/'
   redis:
-    host: ${REDIS_HOST}
-    port: ${REDIS_PORT}
-    uri: redis://${REDIS_HOST}:${REDIS_PORT}
+    host: '127.0.0.1'
+    port: 6301
+    uri: 'redis://127.0.0.1:6301'
   mongodb:
-    uri: ${MONGODB_URI}
+    uri: 'mongodb://dev:dev@127.0.0.1:27017/'
     db: 'qianmo-dev'
   postgres:
-    host: '${POSTGRES_HOST}'
-    port: ${POSTGRES_PORT}
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
-    database: ${POSTGRES_DB}
-    uri: ${POSTGRES_URI}
-    tortoise_uri: ${TORTOISE_URI}
+    host: '127.0.0.1'
+    port: 15432
+    username: 'dev'
+    password: 'dev'
+    database: 'yinghuo-dev'
+    uri: 'postgresql+asyncpg://dev:dev@127.0.0.1:15432/yinghuo-dev'
+    tortoise_uri: 'asyncpg://dev:dev@127.0.0.1:15432/yinghuo-dev'
+  sms:
+    # 阿里云短信服务。真实 AccessKey 不要写进 git,推荐两种注入方式:
+    #   1. 环境变量(优先级最高):ALIYUN_SMS_ACCESS_KEY_ID / ALIYUN_SMS_ACCESS_KEY_SECRET
+    #   2. 部署时替换下面占位符
+    access_key_id: 'REPLACE_WITH_YOUR_ACCESS_KEY_ID'
+    access_key_secret: 'REPLACE_WITH_YOUR_ACCESS_KEY_SECRET'
+    sign_name: '格律至微'
+    template_code: 'SMS_320186056'
+    endpoint: 'dysmsapi.aliyuncs.com'
   smtp:
-    host: ${SMTP_HOST}
-    port: ${SMTP_PORT}
-    user: ${SMTP_USER}
-    password: ${SMTP_PASSWORD}
-    from_email: ${MAIL_FROM}
+    # 验证邮件 SMTP 配置。授权码类敏感字段不要写进 git,推荐两种注入方式:
+    #   1. 环境变量(优先级最高):YH_SMTP_USER / YH_SMTP_PASSWORD
+    #   2. 部署时替换下面占位符
+    host: 'smtp.qq.com'
+    port: 465
+    ssl: true
+    user: 'REPLACE_WITH_YOUR_SMTP_USER'
+    password: 'REPLACE_WITH_YOUR_SMTP_PASSWORD'
+    mail_from: 'REPLACE_WITH_YOUR_SMTP_USER'
+  sso:
+    # 企业版 SSO 配置(EE 加载,YH_EDITION>=ee)。CE 不加载此段。
+    # 敏感字段(secret / bind_password)推荐环境变量注入:
+    #   YH_OIDC_CLIENT_SECRET  YH_LDAP_BIND_PASSWORD
+    oidc:
+      enabled: false
+      client_id: 'REPLACE_WITH_OIDC_CLIENT_ID'
+      client_secret: 'REPLACE_WITH_OIDC_CLIENT_SECRET'
+      server_url: 'https://auth.example.com'
+      redirect_uri: 'https://yinghuo.example.com/api/v1/p/auth/oidc/callback'
+      frontend_redirect: '/'
+    ldap:
+      enabled: false
+      server_url: 'ldap://dc.example.com:389'
+      bind_dn_prefix: 'uid='
+      bind_dn_suffix: ',OU=Users,DC=example,DC=com'
+      search_base: 'OU=Users,DC=example,DC=com'
+      search_filter: '(uid={username})'
+      bind_password: 'REPLACE_WITH_LDAP_PASSWORD'
+  saas:
+    # SaaS 增量配置(YH_EDITION==saas 加载)。
+    # 配额默认值:新租户的默认 quota(可在 PlatformTenant.quota JSONField 覆盖)。
+    default_quota:
+      api_requests_per_day: 10000
+    billing:
+      stripe:
+        enabled: false
+        # Stripe dashboard → Developers → Webhooks → 选 endpoint → Signing secret
+        webhook_secret: 'REPLACE_WITH_STRIPE_WEBHOOK_SECRET'  # 或 YH_STRIPE_WEBHOOK_SECRET
+        # Stripe API key(sk_live_xxx 或 sk_test_xxx)
+        api_key: 'REPLACE_WITH_STRIPE_API_KEY'                # 或 YH_STRIPE_API_KEY
+  backup:
+    # EE 备份目标目录(pg_dump / mongodump 产物落地处)。
+    # systemd timer / cron 应挂载此路径,清理由外部 rotate 策略管。
+    target_dir: '/var/backups/yinghuo'

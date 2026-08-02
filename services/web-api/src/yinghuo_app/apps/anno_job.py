@@ -1,17 +1,3 @@
-# Copyright (C) 2025 geluzhiwei.com
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 anno job perform rest api
 """
@@ -26,14 +12,17 @@ from typing import Optional, Dict, List, Any
 from bson import ObjectId
 from datetime import datetime, timezone
 from fastapi import Depends
+from redis import asyncio as aioredis
 import pymongo
 import os
 
-from yinghuo_conf import Conf, settings
+from ..config import Conf, gConf, settings
 from yinghuo_conf.api_util.utils import wrap_json, mongo_json_encoder
-from yinghuo_conf import Conf
+from ..config import Conf, gConf
 from ..dto.data_seq import SimpleDataSeq
-from .ctx import CTX_USER_ID, CTX_USER_FRESHNESS
+from .ctx import CTX_USER_ID, CTX_USER_FRESHNESS, get_current_tenant_id
+from ..redis_conf import init_redis_pool
+from ..biz.notification import publisher
 from ..dto.response import SuccessJson, SuccessPage, FailJson
 from ..biz.db.collection import JobStatus, Pager, CollectionBase, UserProfile
 from ..log import logger
@@ -42,8 +31,9 @@ from ..biz.services.team import team_service
 from ..biz.services.job import job_service
 from ..biz.services.anno_job import annoJobService
 from ..biz.services.user_profile import user_profile_service
+from .dependency import permission_required
 
-app = APIRouter()
+app = APIRouter(dependencies=[permission_required("business:anno-job:write")])
 PATH = "/perform"
 
 @app.post("/perform", summary="创建", tags=["annoJobPerform"])
@@ -52,7 +42,7 @@ async def create(anno_job_perform: AnnoJob):
     user_id = CTX_USER_ID.get("user_id")
     query1 = {"authority.owners": user_id}
     collection = Conf.MG_ANNO_JOB_PERFORM
-    total_count = await collection.count_documents(query1)
+    total_count = collection.count_documents(query1)
     
     max_job_count = 15
     profile:UserProfile = await user_profile_service.get_by_user_id(user_id)
@@ -71,7 +61,7 @@ async def create(anno_job_perform: AnnoJob):
 async def delete_list(request: Request):
     req_json = await request.json()
     if ObjectId.is_valid(req_json["uuid"]):
-        result = await Conf.MG_ANNO_JOB_PERFORM.delete_one(
+        result = Conf.MG_ANNO_JOB_PERFORM.delete_one(
             {
                 "_id": ObjectId(req_json["uuid"]),
                 "authority.owners": CTX_USER_ID.get("user_id"),
@@ -79,8 +69,8 @@ async def delete_list(request: Request):
         )
         if result.deleted_count == 1:
             # 删除附属数据
-            await Conf.MG_DATA_SEQ_META.delete_one({"job.uuid": req_json["uuid"], "authority.owners": CTX_USER_ID.get("user_id")})
-            await Conf.MG_DATA_STREAM_META.delete_many({"job.uuid": req_json["uuid"], "authority.owners": CTX_USER_ID.get("user_id")})
+            Conf.MG_DATA_SEQ_META.delete_one({"job.uuid": req_json["uuid"], "authority.owners": CTX_USER_ID.get("user_id")})
+            Conf.MG_DATA_STREAM_META.delete_many({"job.uuid": req_json["uuid"], "authority.owners": CTX_USER_ID.get("user_id")})
             return wrap_json([])
         else:
             return wrap_json([], status=1, statusText="delete failed")
@@ -110,9 +100,9 @@ async def update(anno_job_perform: dict):
             update["$set"][field] = anno_job_perform[field]
 
         update["$set"]["updated_time"] = datetime.now(timezone.utc)
-        result = await Conf.MG_ANNO_JOB_PERFORM.update_one(query, update)
+        result = Conf.MG_ANNO_JOB_PERFORM.update_one(query, update)
         if result.modified_count == 1:
-            rows = await Conf.MG_ANNO_JOB_PERFORM.find(query).to_list(length=None)
+            rows = Conf.MG_ANNO_JOB_PERFORM.find(query)
             return wrap_json(mongo_json_encoder(list(rows)))
 
     return wrap_json([], status=1, statusText="update failed")
@@ -130,7 +120,7 @@ async def update_status(anno_job_perform: dict):
         return wrap_json([], status=1, statusText="参数错误")
 
     user_id = CTX_USER_ID.get("user_id")
-    doc = await job_service.can_user_see_job(user_id, uuid, CTX_USER_FRESHNESS.get())
+    doc = job_service.can_user_see_job(user_id, uuid, CTX_USER_FRESHNESS.get())
     if doc is None:
         return wrap_json([], status=1, statusText="没有权限")
 
@@ -156,7 +146,7 @@ async def query_info(uuid: str = Query(None)):
     if not ObjectId.is_valid(uuid):
         return wrap_json([], status=1, statusText="uuid is invalid")
     user_id = CTX_USER_ID.get("user_id")
-    doc = await job_service.can_user_see_job(user_id, uuid, CTX_USER_FRESHNESS.get())
+    doc = job_service.can_user_see_job(user_id, uuid, CTX_USER_FRESHNESS.get())
     if doc is None:
         return wrap_json([], status=1, statusText="没有权限")
     docs = [doc]
@@ -181,7 +171,7 @@ async def paged_search(search: Search, request: Request):
     query1 = {"authority.owners": user_id}
     query2 = {"authority.collaborators": user_id}
     
-    my_depts = await team_service.find_my_dept_ids(user_id)
+    my_depts = team_service.find_my_dept_ids(user_id)
     query3 = {"authority.dept": {"$in": my_depts}} # 并且角色是管理员
     query = {"$or": [query1, query2, query3]}
     if search.query.data_seq and search.query.data_seq != "":
@@ -192,7 +182,7 @@ async def paged_search(search: Search, request: Request):
         query["current_status.status"] = search.query.job_status
 
     collection = Conf.MG_ANNO_JOB_PERFORM
-    total_count = await collection.count_documents(query)
+    total_count = collection.count_documents(query)
 
     rows = []
     if total_count > 0:
@@ -203,7 +193,7 @@ async def paged_search(search: Search, request: Request):
             .skip(skip)
             .limit(search.pager.page_size)
         )
-        rows = await collection_rows.to_list(length=search.pager.page_size)
+        rows = list(collection_rows)
     return SuccessPage(
         data=mongo_json_encoder(rows),
         total=total_count,
@@ -220,7 +210,7 @@ async def paged_search2(search: Search, request: Request):
     query1 = {"authority.owners": user_id}
     query2 = {"authority.collaborators": user_id}
     
-    my_depts = await team_service.find_my_dept_ids(user_id)
+    my_depts = team_service.find_my_dept_ids(user_id)
     query3 = {"authority.dept": {"$in": my_depts}}
     query = {"$or": [query1, query2, query3]}
     if search.query.data_seq and search.query.data_seq != "":
@@ -231,7 +221,7 @@ async def paged_search2(search: Search, request: Request):
         query["current_status.status"] = search.query.job_status
         
     collection = Conf.MG_ANNO_JOB_PERFORM
-    total_count = await collection.count_documents(query)
+    total_count = collection.count_documents(query)
 
     rows = []
     if total_count > 0:
@@ -242,7 +232,7 @@ async def paged_search2(search: Search, request: Request):
             .skip(skip)
             .limit(search.pager.page_size)
         )
-        rows = await collection_rows.to_list(length=search.pager.page_size)
+        rows = list(collection_rows)
     return SuccessPage(
         data=mongo_json_encoder(rows),
         total=total_count,
@@ -250,3 +240,107 @@ async def paged_search2(search: Search, request: Request):
         page=search.pager.page,
     )
     
+class JobCollaborator(BaseModel):
+    job_id: str
+    dept_id: str = None
+    collaborators: Optional[List[int]] = None
+
+
+
+def update_collaborator_one(dto, user_id):
+    collection = Conf.MG_ANNO_JOB_PERFORM
+    query = {
+            "_id": ObjectId(dto.job_id),
+            "authority.owners": user_id,
+        }
+    update = {"$set": {}}
+    update["$set"]["updated_time"] = datetime.now(timezone.utc)
+        
+    if dto.dept_id:
+            # 可以是""
+        update["$set"]["authority.dept"] = dto.dept_id
+    if dto.collaborators:
+            # 可以是[]
+        update["$set"]["authority.collaborators"] = dto.collaborators
+
+    result = collection.update_one(query, update)
+    return result
+
+@app.post("/update_collaborator", summary="更新collaborator", tags=["annoJobPerform"])
+async def update_collaborator(
+    dto: JobCollaborator,
+    redis: aioredis.Redis = Depends(init_redis_pool),
+):
+    # 验证参数
+    if not ObjectId.is_valid(dto.job_id) \
+        or (dto.dept_id is None and dto.collaborators is None):
+        return wrap_json([], status=1, statusText="参数错误")
+    user_id = CTX_USER_ID.get("user_id")
+
+    # Stage 12.2:读旧 collaborator 集合,做 diff 只通知新加的(避免重复打扰)
+    old_doc = Conf.MG_ANNO_JOB_PERFORM.find_one(
+        {"_id": ObjectId(dto.job_id)}, {"authority.collaborators": 1}
+    )
+    old_set = set((old_doc or {}).get("authority", {}).get("collaborators") or [])
+
+    result = update_collaborator_one(dto, user_id)
+    if not result.acknowledged:
+        return wrap_json([], status=1, statusText="更新失败")
+
+    new_ids = [c for c in (dto.collaborators or []) if c not in old_set and c != user_id]
+    tenant_id = get_current_tenant_id() or "_default"
+    for cid in new_ids:
+        try:
+            await publisher.publish_assignment(
+                redis, tenant_id=tenant_id, user_id=cid,
+                job_id=dto.job_id, by_user_id=user_id,
+            )
+        except Exception as e:
+            logger.warning(f"notif assignment publish failed (user={cid}, job={dto.job_id}): {e}")
+
+    return wrap_json([], status=0, statusText="更新成功")
+
+
+@app.post("/update_collaborators", summary="批量更新collaborator", tags=["annoJobPerform"])
+async def update_collaborators(
+    dtos: List[JobCollaborator] = None,
+    redis: aioredis.Redis = Depends(init_redis_pool),
+):
+    # 验证参数
+    if dtos is None or len(dtos) == 0:
+        return wrap_json([], status=1, statusText="参数错误")
+
+    user_id = CTX_USER_ID.get("user_id")
+    tenant_id = get_current_tenant_id() or "_default"
+
+    failed = []
+    for dto in dtos:
+        if not ObjectId.is_valid(dto.job_id) \
+            or (dto.dept_id is None and dto.collaborators is None):
+            return wrap_json([], status=1, statusText="参数错误")
+
+        # Stage 12.2:diff 旧 collaborator,只通知新加的
+        old_doc = Conf.MG_ANNO_JOB_PERFORM.find_one(
+            {"_id": ObjectId(dto.job_id)}, {"authority.collaborators": 1}
+        )
+        old_set = set((old_doc or {}).get("authority", {}).get("collaborators") or [])
+
+        result = update_collaborator_one(dto, user_id)
+        if not result.acknowledged:
+            failed.append(dto.job_id)
+            continue
+
+        new_ids = [c for c in (dto.collaborators or []) if c not in old_set and c != user_id]
+        for cid in new_ids:
+            try:
+                await publisher.publish_assignment(
+                    redis, tenant_id=tenant_id, user_id=cid,
+                    job_id=dto.job_id, by_user_id=user_id,
+                )
+            except Exception as e:
+                logger.warning(f"notif assignment publish failed (user={cid}, job={dto.job_id}): {e}")
+
+    if len(failed) > 0:
+        return wrap_json(failed, status=1, statusText="部分更新失败:%s" % ", ".join(failed))
+
+    return wrap_json([], status=0, statusText="更新成功")

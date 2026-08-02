@@ -1,17 +1,3 @@
-# Copyright (C) 2025 geluzhiwei.com
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 rest api for dnn model inference
 """
@@ -20,22 +6,23 @@ __date__ = "2023-11-22"
 
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi import FastAPI, Request, APIRouter
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, Response
 from starlette.background import BackgroundTask
 import httpx
 from pydash import _
 import os
+import json
 
 
-from yinghuo_conf import Conf, settings
-from yinghuo_conf.loader import app_settings
+from ..config import Conf, gConf, settings
 from .ctx import CTX_USER_ID
 from yinghuo_conf.api_util.api_discovery import ApiDiscovery
 from yinghuo_conf.api_util.utils import wrap_json
 from ..log import logger
+from .dependency import permission_required
 
 # app = FastAPI()
-app = APIRouter()
+app = APIRouter(dependencies=[permission_required("admin:flow:write")])
 HTTP_Clients = {}
 
 def get_client(api_name: str):
@@ -53,6 +40,11 @@ def get_client(api_name: str):
 
     return HTTP_Clients[api_name]
 
+HOP_HEADERS = frozenset({'host'})
+
+def _filter_headers(headers: dict) -> dict:
+    return {k: v for k, v in headers.items() if k.lower() not in HOP_HEADERS}
+
 @app.post("/serv/{service_group}/{api_id}", tags=["dnn"])
 async def serv(service_group:str, api_id: str, request: Request):
     serv_url_str = Conf.get_serv_uri(service_group, api_id)
@@ -60,8 +52,9 @@ async def serv(service_group:str, api_id: str, request: Request):
         return wrap_json(1, "api_id not found")
     serv_url = httpx.URL(serv_url_str)
     client = get_client(api_id)
+    body = await request.body()
     req = client.build_request(
-        request.method, serv_url, headers=request.headers.raw, content=request.stream()
+        request.method, serv_url, headers=_filter_headers(dict(request.headers)), content=body
     )
     logger.info(f"{request.method} to {serv_url_str}")
     r = await client.send(req, stream=True)
@@ -89,8 +82,8 @@ async def service(service_group: str, request: Request):
 async def get_service(request: Request):
     # TODO 结合API管理，过滤能看到的api
     apiWater = ApiDiscovery(
-        redis_host=app_settings.global_config.redis.host,
-        redis_port=app_settings.global_config.redis.port,
+        redis_host=gConf['global']['redis']['host'], 
+        redis_port=gConf['global']['redis']['port'],
         prefix_key='yh-func-api')
     data = apiWater.list_nodes()
     return wrap_json(data)
@@ -102,8 +95,8 @@ async def serv_func_api(api_group:str, api_id:str, request: Request):
     # TODO 结合API管理，检查是否具有权限
     
     apiWater = ApiDiscovery(
-        redis_host=app_settings.global_config.redis.host,
-        redis_port=app_settings.global_config.redis.port,
+        redis_host=gConf['global']['redis']['host'], 
+        redis_port=gConf['global']['redis']['port'],
         prefix_key='yh-func-api')
     nodes = apiWater.get_nodes(api_group, api_id)
     if nodes is None or len(nodes) == 0:
@@ -119,14 +112,23 @@ async def serv_func_api(api_group:str, api_id:str, request: Request):
     
     user_id = CTX_USER_ID.get("user_id")
     root_dir = os.path.join(settings.YH_USER_DATA_ROOT)
-    headers = {'data_root':root_dir, 'user_id': str(user_id)}
-    for k, v in request.headers.items():
-        headers[k] = v
+    headers = _filter_headers(dict(request.headers))
+    headers['data_root'] = root_dir
+    headers['user_id'] = str(user_id)
+    body = await request.body()
     req = client.build_request(
-        request.method, serv_url, headers=headers, content=request.stream()
+        request.method, serv_url, headers=headers, content=body
     )
-    logger.info(f"{request.method} to {serv_uri}")
+    logger.info(f"{request.method} to {serv_uri}, headers={headers}, body_len={len(body)}")
     r = await client.send(req, stream=True)
+    if r.status_code >= 400:
+        error_body = await r.aread()
+        logger.error(f"upstream {serv_uri} returned {r.status_code}: {error_body[:500]}")
+        try:
+            detail = json.loads(error_body)
+        except Exception:
+            detail = error_body.decode(errors='replace')
+        return wrap_json(status=r.status_code, statusText=f'模型推理服务异常 ({serv_uri}): {detail}')
     return StreamingResponse(
         r.aiter_raw(),
         status_code=r.status_code,

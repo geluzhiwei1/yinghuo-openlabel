@@ -1,17 +1,3 @@
-# Copyright (C) 2025 geluzhiwei.com
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
  # @author Zhang Lizhi
  # @email erlingba@qq.com
  # @date 2024-08-22
@@ -27,12 +13,13 @@ from fastapi.responses import FileResponse, Response
 from yinghuo_app.biz.services.user import user_service
 from yinghuo_app.dto.users import *
 from .ctx import CTX_USER_ID, CTX_USER_FRESHNESS
-from yinghuo_conf import Conf, settings
+from ..config import Conf, gConf, settings
 from ..dto.response import SuccessJson, FailJson
 from ..biz.services.job import job_service
+from .dependency import permission_required
 logger = logging.getLogger(__name__)
 
-app = APIRouter()
+app = APIRouter(dependencies=[permission_required("business:dataset:read")])
 
 @app.route("/{stream_file:path}")
 async def get_file(request: Request):

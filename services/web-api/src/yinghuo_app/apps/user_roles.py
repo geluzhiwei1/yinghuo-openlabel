@@ -1,17 +1,3 @@
-# Copyright (C) 2025 geluzhiwei.com
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 rest api
 """
@@ -27,16 +13,17 @@ import pymongo
 from datetime import datetime, timezone
 import json
 
-from ..api_util import wrap_json, mongo_json_encoder
-from yinghuo_conf import Conf
+from yinghuo_conf.api_util.utils import wrap_json, mongo_json_encoder
+from ..config import Conf, gConf
 from ..dto.data_seq import SimpleDataSeq
 from .ctx import CTX_USER_ID
 from ..dto.response import SuccessJson, SuccessPage, FailJson
 from ..biz.db.collection import Pager, CollectionBase, UserRoles
 from openlabel import OpenLabel
 from ..biz.services.role import role_service
+from .dependency import permission_required
 
-app = APIRouter()
+app = APIRouter(dependencies=[permission_required("admin:role:write")])
 
 @app.post("/create", summary="创建", tags=["user_roles"])
 async def create(dto: UserRoles, request: Request):
@@ -54,7 +41,7 @@ async def create(dto: UserRoles, request: Request):
         "owners": [CTX_USER_ID.get("user_id")],
     }
     collection = Conf.MG_USER_ROLES
-    result = await collection.insert_one(dto)
+    result = collection.insert_one(dto)
     if result.acknowledged:
         return wrap_json([])
     else:
@@ -67,7 +54,7 @@ async def delete_list(request: Request):
     collection = Conf.MG_USER_ROLES
     
     if "_id" in req_json:
-        result = await collection.delete_one(
+        result = collection.delete_one(
             {
                 "_id": ObjectId(req_json["_id"]),
                 "authority.owners": CTX_USER_ID.get("user_id"),
@@ -76,7 +63,7 @@ async def delete_list(request: Request):
         return wrap_json([])
     elif "_ids" in req_json and len(req_json["_ids"]) > 0:
         ids_to_delete = [ObjectId(id) for id in req_json["_ids"]]
-        result = await collection.delete_many(
+        result = collection.delete_many(
             {
                 "_id": {"$in": ids_to_delete},
                 "authority.owners": CTX_USER_ID.get("user_id"),
@@ -114,10 +101,10 @@ async def update(dto: dict, request: Request):
         for field in fields:
             update["$set"][field] = dto[field]
 
-        result = await collection.update_one(query, update)
+        result = collection.update_one(query, update)
         if result.modified_count == 1:
-            rows = await collection.find(query).to_list(length=None)
-            return wrap_json(mongo_json_encoder(rows))
+            rows = collection.find(query)
+            return wrap_json(mongo_json_encoder(list(rows)))
 
     return wrap_json([], status=1, statusText="update failed")
 
@@ -130,14 +117,16 @@ async def query(request: Request, _id: str = Query(None)):
         query = {"authority.owners": CTX_USER_ID.get("user_id")}
         
     collection = Conf.MG_USER_ROLES
-    rows = await collection.find(query).sort("updated_time", pymongo.DESCENDING).to_list(length=None)
+    rows = collection.find(query).sort("updated_time", pymongo.DESCENDING)
+    rows = list(rows)
     return wrap_json(mongo_json_encoder(rows))
 
 @app.get("/query_list", summary="查询列表", tags=["user_roles"])
 async def query_list():
     query = {"authority.owners": CTX_USER_ID.get("user_id")}
     collection = Conf.MG_USER_ROLES
-    rows = await collection.find(query).sort("updated_time", pymongo.DESCENDING).to_list(length=None)
+    rows = collection.find(query).sort("updated_time", pymongo.DESCENDING)
+    rows = list(rows)
     
     rtn_rows = []
     for row in rows:
@@ -167,11 +156,11 @@ async def paged_search(search: Search):
         query["is_system"] = search.query.is_system
 
     collection = Conf.MG_USER_ROLES
-    total_count = await collection.count_documents(query)
+    total_count = collection.count_documents(query)
     if total_count == 0:
         # new user, no roles
-        await role_service.init_system_role(user_id)
-        total_count = await collection.count_documents(query)
+        role_service.init_system_role(user_id)
+        total_count = collection.count_documents(query)
 
     rows = []
     if search.pager.page_size > 0:
@@ -184,13 +173,13 @@ async def paged_search(search: Search):
                 .skip(skip)
                 .limit(search.pager.page_size)
             )
-            rows = await collection_rows.to_list(length=None)
+            rows = list(collection_rows)
     else:
         # 查询所有
         collection_rows = (
             collection.find(query).sort("updated_time", pymongo.DESCENDING)
         )
-        rows = await collection_rows.to_list(length=None)
+        rows = list(collection_rows)
     return SuccessPage(
         data=mongo_json_encoder(rows),
         total=total_count,

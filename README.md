@@ -28,7 +28,47 @@
     *   包含完整的用户、角色和团队管理功能，支持多租户和精细化的权限控制。
 
 ##  核心特性和发展路线图
+
 已经完成的功能，正在开发的功能，以及未来的功能规划。
+
+## 📦 三版分发(CE / EE / SaaS)
+
+本项目采用 GitLab 式三版分层:`CE ⊂ EE ⊂ SaaS`,单代码库通过目录挂载切换版本。
+
+| 版本 | 用途 | 仓库 | License | 公开 |
+|---|---|---|---|---|
+| **CE**(社区版) | 个人/小团队自部署 | 本仓库(`yinghuo-openlabel`) | AGPL-3.0 | 是 |
+| **EE**(企业版) | 企业自部署,补 SSO/审计/监控 | `yinghuo-openlabel-ee`(独立私有仓库) | 商业 | 否 |
+| **SaaS** | 多租户云服务,补计费/配额/自助注册 | `yinghuo-openlabel-saas`(独立私有仓库) | 商业 | 否 |
+
+### 工作原理
+
+- 主仓库(本仓库)即 CE,含 ~95% 代码
+- EE/SaaS 各自独立 git 仓库,通过 `scripts/setup-edition.sh` 在开发/构建期挂载为子目录(symlink)
+- `services/web-api/src/yinghuo_app/edition.py` 检测目录存在性 + `YH_EDITION` 环境变量,启动期 fail-fast 防止"声明了 EE 但 ee/ 未挂载"等不一致
+- 打包时 `scripts/build-{ce,ee,saas}.sh` 探测挂载点,自动产出对应版本产物
+
+### 开发某版本
+
+```bash
+# CE(默认):啥也不需要挂
+scripts/setup-edition.sh ce
+
+# EE:挂载 yinghuo-openlabel-ee
+YH_EDITION_EE_REPO=git@github.com:your-org/yinghuo-openlabel-ee.git \
+  scripts/setup-edition.sh ee
+
+# SaaS:同时挂 EE + SaaS(SaaS 跨包依赖 EE)
+YH_EDITION_EE_REPO=...   \
+YH_EDITION_SAAS_REPO=... \
+  scripts/setup-edition.sh saas
+```
+
+挂上后,正常的 `YH_EDITION=ee python ...` / `YH_EDITION=ee pnpm build` 即可。
+
+### 商业授权
+
+EE/SaaS 仓库不对外开放。商业授权请联系维护者。本仓库(CE)严格遵守 AGPL-3.0。
 ### 📚 标注工具
 - 视觉2D标注
     * [√] 2D边界框

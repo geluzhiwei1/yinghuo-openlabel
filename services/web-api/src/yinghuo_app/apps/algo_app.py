@@ -1,17 +1,3 @@
-# Copyright (C) 2025 geluzhiwei.com
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 algo api
 """
@@ -31,9 +17,29 @@ import json
 import numpy as np
 
 from ..algos import ALGOS
-from yinghuo_conf import Conf
+from ..config import Conf
+from .dependency import permission_required
 
-app = APIRouter()
+app = APIRouter(dependencies=[permission_required("admin:flow:write")])
+
+
+# class RoundingFloat(float):
+#     __repr__ = staticmethod(lambda x: format(x, '.3f'))
+
+# json.encoder.c_make_encoder = None
+# json.encoder.float = RoundingFloat
+
+# class JEncoder(json.JSONEncoder):
+#     def default(self, obj):
+#         if isinstance(obj, (np.int_, np.intc, np.intp, np.int8,
+#                             np.int16, np.int32, np.int64, np.uint8,
+#                             np.uint16, np.uint32, np.uint64)):
+#             return int(obj)
+#         elif isinstance(obj, (np.float16, np.float32, np.float64)):
+#             return float(obj)
+#         elif isinstance(obj, (np.ndarray,)):
+#             return obj.tolist()
+#         return json.JSONEncoder.default(self, obj)
 
 
 @app.post("/{algo_id}")

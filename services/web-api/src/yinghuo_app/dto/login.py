@@ -1,17 +1,3 @@
-# Copyright (C) 2025 geluzhiwei.com
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, Field
@@ -21,17 +7,34 @@ class CredentialsSchema(BaseModel):
     username: Optional[str] = Field(None, description="用户名", example="admin")
     email: str = Field(None, description="邮箱", example="admin@admin.com", max_length=100)
     password: str = Field(None, description="密码", example="123456", max_length=32)
-    captchaId: Optional[str]
-    captchaText: Optional[str]
-    mobile_phone_no: Optional[str]
-    accountType: Optional[str]
+    captchaId: Optional[str] = None
+    captchaText: Optional[str] = None
+    mobile_phone_no: Optional[str] = None
+    accountType: Optional[str] = None
     useMobileMsgCode: Optional[bool] = False
 
-class JWTOut(BaseModel):
-    access_token: str
-    user_name: str
 
 class JWTPayload(BaseModel):
     user_id: int
     is_superuser: bool
     exp: datetime
+    iat: datetime | None = None
+    jti: str | None = None
+    ver: int = 1
+    token_type: str = "access"  # access / refresh
+
+
+class JWTOut(BaseModel):
+    access_token: str
+    refresh_token: str
+    user_name: str
+    expires_in: int  # access token 有效期(秒)
+
+
+class RefreshIn(BaseModel):
+    refresh_token: str = Field(..., description="refresh token")
+
+
+class LogoutIn(BaseModel):
+    """可选传入 refresh_token,登出时一并吊销"""
+    refresh_token: Optional[str] = None

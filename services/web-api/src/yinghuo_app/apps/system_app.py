@@ -1,17 +1,3 @@
-# Copyright (C) 2025 geluzhiwei.com
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 rest api
 """
@@ -29,7 +15,7 @@ import json
 
 from yinghuo_app.dto.users import UpdateAccount
 from yinghuo_conf.api_util.utils import wrap_json, mongo_json_encoder
-from yinghuo_conf import Conf
+from ..config import Conf, gConf
 from ..dto.data_seq import SimpleDataSeq
 from .ctx import CTX_USER_ID
 from ..dto.response import SuccessJson, SuccessPage, FailJson
@@ -53,7 +39,9 @@ async def get_user():
     # TODO 获取用户的角色、权限等信息
     query = {"authority.owners": user_id}
     collection = Conf.MG_USER_ROLES
-    rows = await collection.find(query).sort("updated_time", pymongo.DESCENDING).to_list(length=None)
+    rows = collection.find(query).sort("updated_time", pymongo.DESCENDING)
+    # roles = mongo_json_encoder(rows)
+    rows = list(rows)
     labels = [r['label'] for r in rows]
     
     data = {

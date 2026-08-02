@@ -1,17 +1,3 @@
-# Copyright (C) 2025 geluzhiwei.com
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import json
 import sys
 from typing import List
@@ -27,7 +13,7 @@ else:
 import os
 from pydash import _
 import openlabel.models.utils as ol_utils
-from yinghuo_conf import Conf, settings
+from ...config import Conf, settings
 from ...exceptions import BizException
 from .job import job_service
 from yinghuo_conf.api_util.utils import wrap_json, mongo_json_encoder
@@ -87,15 +73,15 @@ class AnnoService(object):
             # "authority.owner": user_id,
         }
         if clear:
-            result = await collection.delete_many(query)
+            result = collection.delete_many(query)
             if not result.acknowledged:
                 raise BizException(statusText="clear frame anno failed", status=500)
         
         # 如果collection中没有这个frame的数据，则创建一个新的
         frame_anno_id = None
-        frame_anno_doc = await collection.find_one(query)
+        frame_anno_doc = collection.find_one(query)
         if frame_anno_doc is None:
-            res = await collection.insert_one({
+            res = collection.insert_one({
                 "jobConfig": {
                     "seq": seq,
                     "stream": stream,
@@ -109,7 +95,7 @@ class AnnoService(object):
             if not res.acknowledged:
                 raise BizException(statusText="save frame anno failed", status=500)
             # frame_anno_id = res.inserted_id
-            frame_anno_doc = await collection.find_one(query)
+            frame_anno_doc = collection.find_one(query)
             
         frame_anno_id = frame_anno_doc['_id']
         
@@ -142,7 +128,7 @@ class AnnoService(object):
                 }]
             updates[f'frame_labels.{label_uuid}'] = o    
             
-        result = await collection.update_one(update_query, {
+        result = collection.update_one(update_query, {
             "$set": updates
         })
         
@@ -340,7 +326,7 @@ class AnnoService(object):
         query1["_id"] = ObjectId(job_uuid)
 
         collection = Conf.MG_ANNO_JOB_PERFORM
-        _rows = await collection.find(query1)
+        _rows = collection.find(query1)
         jobs = list(_rows)
         if len(jobs) == 0:
             return None
@@ -375,6 +361,199 @@ class AnnoService(object):
             }
             
         return await self.export_collection_to_coco(job, seq_meta, stream_labels)
+
+    def _load_job(self, job_uuid: str):
+        if not ObjectId.is_valid(job_uuid):
+            raise BizException(statusText="job uuid 错误")
+        job = Conf.MG_ANNO_JOB_PERFORM.find_one({"_id": ObjectId(job_uuid)})
+        if job is None:
+            raise BizException(statusText="任务不存在")
+        return mongo_json_encoder(job)
+
+    def _resolve_categories(self, job: dict):
+        """从 job.label_spec.taxonomy 解析出 categories 列表与 class_name_id_map"""
+        taxonomy = _.get(job, "label_spec.taxonomy", {})
+        spec_key = taxonomy.get("key")
+        if not spec_key:
+            return [], {}
+        if taxonomy.get("type") == "user":
+            rows = list(Conf.MG_DATA_ANNO_SPEC.find({"_id": ObjectId(spec_key)}))
+            if not rows:
+                return [], {}
+            j = OpenLabel.from_json(json.loads(rows[0]["spec"]))
+        else:
+            spec_domain = taxonomy.get("domain")
+            j = OpenLabel.from_taxonomy_key(spec_key, spec_domain)
+        categories_tree, class_name_id_map = j.get_class_tree()
+        class_id_map = {v: k for k, v in class_name_id_map.items()}
+        categories = [
+            {
+                "id": p["id"],
+                "name": p["name"],
+                "supercategory": class_id_map.get(p["parent"]) if p.get("parent") is not None else None,
+            }
+            for p in categories_tree
+        ]
+        return categories, class_name_id_map
+
+    def _collect_anno_rows(self, job_uuid: str, mission: str, scope: str,
+                           seq: str = "", stream: str = "", frame=None):
+        if mission not in Conf.MG_COLLECTION:
+            raise BizException(statusText="不支持的任务类型")
+        collection = Conf.MG_COLLECTION[mission]
+        query = {"jobConfig.uuid": job_uuid}
+        if scope == "currentFrame":
+            if not seq or not stream or frame is None:
+                raise BizException(statusText="参数错误")
+            query["jobConfig.seq"] = seq
+            query["jobConfig.stream"] = stream
+            query["jobConfig.frame"] = frame
+        else:  # currentTask
+            if seq:
+                query["jobConfig.seq"] = seq
+            if stream:
+                query["jobConfig.stream"] = stream
+        rows = list(collection.find(query))
+        return mongo_json_encoder(rows)
+
+    def _row_image_size(self, row: dict):
+        """从 anno doc 里尝试拿到 (width, height)"""
+        fp = row.get("frame_properties", {}) or {}
+        w = fp.get("width")
+        h = fp.get("height")
+        if w and h:
+            return int(w), int(h)
+        for v in (row.get("frame_labels", {}) or {}).values():
+            shape = _.get(v, "attributes.image_shape")
+            if isinstance(shape, list) and len(shape) == 2 and shape[0] and shape[1]:
+                return int(shape[0]), int(shape[1])
+        return None, None
+
+    def export_to_coco_v2(self, job_uuid: str, mission: str, scope: str,
+                          seq: str = "", stream: str = "", frame=None):
+        """按 scope 导出 COCO 字典"""
+        job = self._load_job(job_uuid)
+        rows = self._collect_anno_rows(job_uuid, mission, scope, seq, stream, frame)
+        categories, class_name_id_map = self._resolve_categories(job)
+
+        images, image_id_set = [], set()
+        annotations = []
+        anno_id = 1
+        for row in rows:
+            frame_id = _.get(row, "jobConfig.frame")
+            try:
+                frame_id_int = int(frame_id)
+            except (TypeError, ValueError):
+                frame_id_int = frame_id
+            w, h = self._row_image_size(row)
+            image_info = row.get("frame_properties", {}) or {}
+            image = {
+                "id": frame_id_int,
+                "file_name": os.path.basename(image_info.get("uri") or "") or f"{frame_id}.jpg",
+                "width": w if w else -1,
+                "height": h if h else -1,
+            }
+            if frame_id_int not in image_id_set:
+                images.append(image)
+                image_id_set.add(frame_id_int)
+
+            for _, ol_anno in (row.get("frame_labels", {}) or {}).items():
+                if ol_anno is None or ol_anno.get("is_removed"):
+                    continue
+                if ol_anno.get("val_ref") is not None and "val" not in ol_anno:
+                    val_ref = ol_anno["val_ref"]
+                    job_owner_id = job["authority"]["owners"][0]
+                    job_seq = job["label_spec"]["data"]["seq"]
+                    ol_anno = dict(ol_anno)
+                    ol_anno["val"] = self.load_val(job_owner_id, job_seq, val_ref)
+                anno = {
+                    "id": anno_id,
+                    "image_id": frame_id_int,
+                    "category_id": class_name_id_map.get(ol_anno.get("object_type", ""), -1),
+                    "segmentation": [],
+                    "bbox": [],
+                    "iscrowd": 0,
+                    "attributes": {},
+                }
+                self.coco_build_anno(anno, ol_anno)
+                annotations.append(anno)
+                anno_id += 1
+
+        return {
+            "info": self.coco_build_info(),
+            "licenses": [],
+            "categories": categories,
+            "images": images,
+            "annotations": annotations,
+        }
+
+    def export_to_yolo(self, job_uuid: str, mission: str, scope: str,
+                       seq: str = "", stream: str = "", frame=None):
+        """按 scope 导出 YOLO zip 字节流。
+
+        Returns:
+            (zip_bytes, file_name)
+        """
+        import zipfile
+        from io import BytesIO
+
+        job = self._load_job(job_uuid)
+        rows = self._collect_anno_rows(job_uuid, mission, scope, seq, stream, frame)
+        categories, class_name_id_map = self._resolve_categories(job)
+        id_name_map = {cid: name for name, cid in class_name_id_map.items()}
+
+        buf = BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+            yaml_lines = [
+                f"path: ./{scope}",
+                "train: images",
+                "val: images",
+                f"nc: {len(class_name_id_map)}",
+                "names:",
+            ]
+            for cid in sorted(id_name_map.keys()):
+                yaml_lines.append(f"  {cid}: {id_name_map[cid]}")
+            zf.writestr("data.yaml", "\n".join(yaml_lines) + "\n")
+
+            seen_frames = set()
+            for row in rows:
+                frame_id = _.get(row, "jobConfig.frame")
+                try:
+                    frame_id_int = int(frame_id)
+                except (TypeError, ValueError):
+                    continue
+                w, h = self._row_image_size(row)
+                if not w or not h:
+                    continue
+                lines = []
+                for _, ol_anno in (row.get("frame_labels", {}) or {}).items():
+                    if ol_anno is None or ol_anno.get("is_removed"):
+                        continue
+                    if ol_anno.get("ol_type_") != "BBox":
+                        continue
+                    val = ol_anno.get("val") or []
+                    if len(val) != 4:
+                        continue
+                    cx, cy, bw, bh = val
+                    cid = class_name_id_map.get(ol_anno.get("object_type", ""))
+                    if cid is None:
+                        continue
+                    lines.append(
+                        f"{cid} {cx / w:.6f} {cy / h:.6f} {bw / w:.6f} {bh / h:.6f}"
+                    )
+                fname = f"labels/{frame_id_int}.txt"
+                if fname in seen_frames:
+                    continue
+                seen_frames.add(fname)
+                zf.writestr(fname, "\n".join(lines) + ("\n" if lines else ""))
+
+        tail = f"{job_uuid}"
+        if scope == "currentFrame":
+            try:
+                tail = f"{int(frame)}"
+            except (TypeError, ValueError):
+                pass
+        return buf.getvalue(), f"yolo_{scope}_{tail}.zip"
 
 
 anno_service = AnnoService()

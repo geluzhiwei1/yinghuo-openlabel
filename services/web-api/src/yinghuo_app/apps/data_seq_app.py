@@ -1,17 +1,4 @@
-# Copyright (C) 2025 geluzhiwei.com
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#!/usr/bin/env python
 """
 data sequence api
 """
@@ -32,15 +19,18 @@ from bson import ObjectId
 import pathlib
 from fastapi import APIRouter
 from yinghuo_conf.api_util.utils import wrap_json, json_encoder, mongo_json_encoder
-from yinghuo_conf import Conf, settings
+from ..config import Conf, gConf, settings
+from yinghuo_app.dto.seq_data import SeqData
 from ..biz.db.collection import JobPerform
 from ..biz.services import job_meta
 from fastapi import Depends
 from .ctx import CTX_USER_ID
+from .dependency import permission_required
 
 
 # app = FastAPI()
-app = APIRouter()
+app = APIRouter(dependencies=[permission_required("business:dataset:read")])
+
 
 
 def get_dir_structure(prefix, base_dir, ignore_hidden=True):
@@ -97,6 +87,7 @@ def list_dataSeq():
     return wrap_json(json_encoder(dir_tree))
 
 
+
 def get_non_empty_subdirs(base_dir):
     """
     """
@@ -132,7 +123,7 @@ async def stream_meta2(job_perform: JobPerform, request: Request):
     user_id = CTX_USER_ID.get("user_id")
     if job_perform.data_format == "openlabel" or \
             job_perform.data_format == "simple-directory":
-        d = await job_meta.find_stream_meta(job_perform.uuid, job_perform.stream, job_perform.data_source, seq=job_perform.seq)
+        d = job_meta.find_stream_meta(job_perform.uuid, job_perform.stream, job_perform.data_source, seq=job_perform.seq)
         return wrap_json(d)
     else:
         return wrap_json(
@@ -155,7 +146,7 @@ async def update_stream_meta_uris(uuid:str= Body(..., embed=True), uris:list[str
         )
     
     if jobConfig.data_source == "imageURLs":
-        result = await job_meta.update_stream_urls(uuid, uris)
+        result = job_meta.update_stream_urls(uuid, uris)
         if result.modified_count == 1:
             return wrap_json({})
         else:
@@ -172,7 +163,7 @@ async def seq_meta2(job_perform: JobPerform):
     user_id = CTX_USER_ID.get("user_id")
     if job_perform.data_format == "simple-directory" or \
             job_perform.data_format == "openlabel":
-        d = await job_meta.find_seq_meta(job_perform.uuid)
+        d = job_meta.find_seq_meta(job_perform.uuid)
         return wrap_json(d)
     else:
         raise wrap_json(

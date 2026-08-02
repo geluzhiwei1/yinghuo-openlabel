@@ -1,17 +1,3 @@
-# Copyright (C) 2025 geluzhiwei.com
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 rest api
 """
@@ -27,8 +13,8 @@ import pymongo
 from datetime import datetime, timezone
 import json
 
-from ..api_util import wrap_json, mongo_json_encoder
-from yinghuo_conf import Conf
+from yinghuo_conf.api_util.utils import wrap_json, mongo_json_encoder
+from ..config import Conf, gConf
 from ..dto.data_seq import SimpleDataSeq
 from .ctx import CTX_USER_ID
 from ..dto.response import SuccessJson, SuccessPage, FailJson
@@ -36,12 +22,13 @@ from ..biz.db.collection import Pager, CollectionBase
 from ..exceptions import BizException
 from openlabel import OpenLabel
 import pydash
+from .dependency import permission_required
 
-app = APIRouter()
+app = APIRouter(dependencies=[permission_required("admin:team:write")])
 
 class UserDepts(CollectionBase):
     label: Annotated[str, Field(max_length=100, min_length=1, description="部门名称", example="标注小组1")]
-    desc: Optional[Annotated[str, Field(max_length=1000, description="备注", example="红绿灯标注")]]
+    desc: Optional[Annotated[str, Field(max_length=1000, description="备注", example="红绿灯标注")]] = None
     parent_id: Optional[str] = ''
     order: Optional[int] = 0
     # class Config:
@@ -59,7 +46,7 @@ class UserDepts(CollectionBase):
 #         "authority.owners": CTX_USER_ID.get("user_id")
 #     }
 #     collection = Conf.MG_USER_DEPTS
-#     rows = await collection.find(query)
+#     rows = collection.find(query)
 #     if len(rows) != 1:
 #         raise BizException(status=503, statusText="没有找到对应的数据")
 #     return rows[0]
@@ -79,7 +66,7 @@ async def create(dto: UserDepts, request: Request):
         "owners": [CTX_USER_ID.get("user_id")],
     }
     collection = Conf.MG_USER_DEPTS
-    result = await collection.insert_one(dto)
+    result = collection.insert_one(dto)
     if result.acknowledged:
         return wrap_json([])
     else:
@@ -95,17 +82,19 @@ async def delete_list(request: Request):
     
     collection = Conf.MG_USER_DEPTS
     query = {"_id": ObjectId(_id), "authority.owners": CTX_USER_ID.get("user_id")}
-    rows = await collection.find(query).to_list(length=None)
+    rows = collection.find(query)
+    rows = list(rows)
     if len(rows) == 0:
         return wrap_json([], status=1, statusText="没有权限")
     
     # children 节点有子元素，不允许删除
     query = {"parent_id": _id, "authority.owners": CTX_USER_ID.get("user_id")}
-    rows = await collection.find(query).to_list(length=None)
+    rows = collection.find(query)
+    rows = list(rows)
     if len(rows) != 0:
         return wrap_json([], status=1, statusText="该节点有子部门，不可以删除")
     
-    result = await collection.delete_one({
+    result = collection.delete_one({
             "_id": ObjectId(_id),
             "authority.owners": CTX_USER_ID.get("user_id"),
     })
@@ -142,10 +131,10 @@ async def update(dto_dict: dict):
         for field in fields:
             update["$set"][field] = dto_dict[field]
 
-        result = await collection.update_one(query, update)
+        result = collection.update_one(query, update)
         if result.modified_count == 1:
-            rows = await collection.find(query).to_list(length=None)
-            return wrap_json(mongo_json_encoder(rows))
+            rows = collection.find(query)
+            return wrap_json(mongo_json_encoder(list(rows)))
 
     return wrap_json([], status=1, statusText="update failed")
 
@@ -169,7 +158,7 @@ async def update(dto_dict: dict):
 #         "owners": [CTX_USER_ID.get("user_id")],
 #     }
 #     collection = Conf.MG_USER_DEPTS
-#     result = await collection.insert_one(dto)
+#     result = collection.insert_one(dto)
 
 @app.get("/query", summary="查询列表", tags=["user_depts"])
 async def query(_id: str = Query(None)):
@@ -179,7 +168,8 @@ async def query(_id: str = Query(None)):
     else:
         query = {"authority.owners": CTX_USER_ID.get("user_id")}
     collection = Conf.MG_USER_DEPTS
-    rows = await collection.find(query).to_list(length=None)
+    rows = collection.find(query)#.sort("updated_time", pymongo.DESCENDING)
+    rows = list(rows)
     return wrap_json(mongo_json_encoder(rows))
 
 
@@ -205,7 +195,8 @@ def build_tree(top_node, sub_rows):
 async def query_tree():
     query = {"authority.owners": CTX_USER_ID.get("user_id")}
     collection = Conf.MG_USER_DEPTS
-    rows = await collection.find(query).sort("order", pymongo.ASCENDING).to_list(length=None)
+    rows = collection.find(query).sort("order", pymongo.ASCENDING)
+    rows = list(rows)
     
     # 构建树形结构
     sub_rows = []
@@ -248,7 +239,7 @@ async def query_tree():
 #         query["enabled"] = search.query.enabled
 
 #     collection = collection
-#     total_count = await collection.count_documents(query)
+#     total_count = collection.count_documents(query)
 
 #     rows = []
 #     if search.pager.page_size > 0:

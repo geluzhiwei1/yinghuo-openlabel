@@ -1,17 +1,3 @@
-# Copyright (C) 2025 geluzhiwei.com
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 label rest api
 """
@@ -22,13 +8,13 @@ __date__ = "2023-09-01"
 import os
 import sys
 from fastapi import FastAPI, Request, APIRouter
-from fastapi.responses import FileResponse, ORJSONResponse
+from fastapi.responses import FileResponse, ORJSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi import BackgroundTasks
 
 from yinghuo_app.dto.response import FailJson, SuccessJson
 from yinghuo_conf.api_util.utils import wrap_json, mongo_json_encoder
-from yinghuo_conf import Conf
+from ..config import Conf
 if sys.version_info >= (3, 11):
     from datetime import UTC
 else:
@@ -46,9 +32,10 @@ from ..biz.services.anno_job import annoJobService
 from ..biz.services.anno import anno_service
 from ..dto.users import RoleEnum, UserJobAuth
 from ..log import logger
-from yinghuo_conf import Conf, settings
+from ..config import Conf, gConf, settings
+from .dependency import permission_required
 
-app = APIRouter(tags=["label api"])
+app = APIRouter(tags=["label api"], dependencies=[permission_required("business:label:write")])
 
 @app.post("/val")
 async def load_val(request: Request):
@@ -106,7 +93,7 @@ async def load_label(request: Request):
     
     logger.info(f"authority check")
     # check authority
-    auth = await job_service.get_user_job_auth(user_id, uuid)
+    auth = job_service.get_user_job_auth(user_id, uuid)
     logger.info(f"{user_id} has auth {auth}")
     if auth == UserJobAuth.FORBIDDEN:
         return wrap_json({}, status=1, statusText="无权限")
@@ -125,7 +112,7 @@ async def load_label(request: Request):
     #     query['authority.owner'] = user_id
 
     logger.info(f"finding data")
-    rows = await Conf.MG_COLLECTION[current_mission].find(query).to_list(length=None)
+    rows = Conf.MG_COLLECTION[current_mission].find(query)
     logger.info(f"finded.")
     # datas = mongo_json_encoder(list(rows))
     
@@ -189,7 +176,7 @@ async def frame_save(request: Request):
     user_id = CTX_USER_ID.get('user_id')
     uuid = jobConfig["uuid"]
     # check authority
-    auth = await job_service.get_user_job_auth(user_id, uuid)
+    auth = job_service.get_user_job_auth(user_id, uuid)
     if auth == UserJobAuth.FORBIDDEN:
         return wrap_json({}, status=1, statusText="无权限")
     
@@ -204,9 +191,9 @@ async def frame_save(request: Request):
     update = {
         "$set": {"frame_labels": frame_labels}
     }
-    frame_anno_doc = await collection.find_one_and_update(query, update)
+    frame_anno_doc = collection.find_one_and_update(query, update)
     if frame_anno_doc is None:
-        res = await collection.insert_one({
+        res = collection.insert_one({
             "jobConfig": jobConfig,
             "frame_labels": frame_labels,
             "update_time": datetime.now(UTC),
@@ -241,7 +228,7 @@ async def frame_load(request: Request):
         return wrap_json({}, status=1, statusText="参数错误")
     
     # check authority
-    auth = await job_service.get_user_job_auth(user_id, uuid)
+    auth = job_service.get_user_job_auth(user_id, uuid)
     if auth == UserJobAuth.FORBIDDEN:
         return wrap_json({}, status=1, statusText="无权限")
 
@@ -254,9 +241,9 @@ async def frame_load(request: Request):
             "jobConfig.stream": stream,
             "jobConfig.frame": frame,
     }
- 
+
     rows = Conf.MG_COLLECTION[current_mission].find(query)
-    datas = await rows.to_list(length=None)
+    datas = list(rows)    
     return wrap_json(mongo_json_encoder(datas))
 
 @app.post("/save")
@@ -282,7 +269,7 @@ async def save(request: Request, background_tasks: BackgroundTasks):
     user_id = CTX_USER_ID.get('user_id')
     uuid = jobConfig["uuid"]
     # check authority
-    auth = await job_service.get_user_job_auth(user_id, uuid)
+    auth = job_service.get_user_job_auth(user_id, uuid)
     if auth == UserJobAuth.FORBIDDEN:
         return wrap_json({}, status=1, statusText="无权限")
     
@@ -295,9 +282,9 @@ async def save(request: Request, background_tasks: BackgroundTasks):
     }
     
     frame_anno_id = None
-    frame_anno_doc = await collection.find_one(query)
+    frame_anno_doc = collection.find_one(query)
     if frame_anno_doc is None:
-        res = await collection.insert_one({
+        res = collection.insert_one({
             "jobConfig": jobConfig,
             "frame_labels": {},
             "update_time": datetime.now(UTC),
@@ -306,7 +293,7 @@ async def save(request: Request, background_tasks: BackgroundTasks):
         if not res.acknowledged:
             return wrap_json({}, status=1, statusText="save frame anno failed")
         frame_anno_id = res.inserted_id
-        frame_anno_doc = await collection.find_one({
+        frame_anno_doc = collection.find_one({
             "_id": frame_anno_id
         })
         
@@ -342,7 +329,7 @@ async def save(request: Request, background_tasks: BackgroundTasks):
                 'time': datetime.now(UTC),
                 'action': 'create',
             }]
-            result = await collection.update_one(update_query, {
+            result = collection.update_one(update_query, {
                 "$set": {
                     f'frame_labels.{o["label_uuid"]}': o,
                     "frame_properties": frame_properties,
@@ -366,7 +353,7 @@ async def save(request: Request, background_tasks: BackgroundTasks):
                     'time': datetime.now(UTC),
                     'action': 'create',
                 }]
-            result = await collection.update_one(update_query, {
+            result = collection.update_one(update_query, {
                 "$set": {
                     f'frame_labels.{o["label_uuid"]}': o,
                     "frame_properties": frame_properties,
@@ -377,7 +364,7 @@ async def save(request: Request, background_tasks: BackgroundTasks):
         elif op_type == "remove":
             label_uuid = o['label_uuid']
             if label_uuid is not None and label_uuid in frame_anno_doc['frame_labels']:
-                # result = await collection.update_one(update_query, {
+                # result = collection.update_one(update_query, {
                 #     "$set": {
                 #         f'frame_labels.{label_uuid}.is_removed': True,
                 #     },
@@ -389,7 +376,7 @@ async def save(request: Request, background_tasks: BackgroundTasks):
                 #         }
                 #     }
                 # })
-                result = await collection.update_one(update_query, {
+                result = collection.update_one(update_query, {
                     "$unset": {
                         f'frame_labels.{label_uuid}': ""
                     }
@@ -430,7 +417,7 @@ async def deleteSeqAll(request: Request):
     user_id = CTX_USER_ID.get('user_id')
     uuid = jobConfig["uuid"]
     # check authority
-    auth = await job_service.get_user_job_auth(user_id, uuid)
+    auth = job_service.get_user_job_auth(user_id, uuid)
     if auth == UserJobAuth.FORBIDDEN:
         return wrap_json({}, status=1, statusText="无权限")
     
@@ -443,7 +430,7 @@ async def deleteSeqAll(request: Request):
         "authority.owner": user_id,
     }
     
-    result = await collection.update_many(query, {
+    result = collection.update_many(query, {
             "$set": {
                 'frame_labels': {},
             },
@@ -473,7 +460,7 @@ async def seq_save(request: Request):
     user_id = CTX_USER_ID.get('user_id')
     uuid = jobConfig["uuid"]
     # check authority
-    auth = await job_service.get_user_job_auth(user_id, uuid)
+    auth = job_service.get_user_job_auth(user_id, uuid)
     if auth == UserJobAuth.FORBIDDEN:
         return wrap_json({}, status=1, statusText="无权限")
     
@@ -491,9 +478,9 @@ async def seq_save(request: Request):
     update = {
         "$set": {"frame_labels": frame_labels}
     }
-    frame_anno_doc = await collection.find_one_and_update(query, update)
+    frame_anno_doc = collection.find_one_and_update(query, update)
     if frame_anno_doc is None:
-        res = await collection.insert_one({
+        res = collection.insert_one({
             "jobConfig": jobConfig,
             "frame_labels": frame_labels,
             "update_time": datetime.now(UTC),
@@ -526,7 +513,7 @@ async def seq_load(request: Request):
         return wrap_json({}, status=1, statusText="参数错误")
     
     # check authority
-    auth = await job_service.get_user_job_auth(user_id, uuid)
+    auth = job_service.get_user_job_auth(user_id, uuid)
     if auth == UserJobAuth.FORBIDDEN:
         return wrap_json({}, status=1, statusText="无权限")
 
@@ -541,9 +528,9 @@ async def seq_load(request: Request):
     
     if data["mission"] == "videoEvents":
         query["jobConfig.frame"] = data["frame"]
- 
+
     rows = Conf.MG_COLLECTION[current_mission].find(query)
-    datas = await rows.to_list(length=None)
+    datas = list(rows)    
     return wrap_json(mongo_json_encoder(datas))
 
 
@@ -553,3 +540,61 @@ async def export_coco(request: Request):
     job_uuid = data["job_uuid"]
     d = await anno_service.export_to_coco(job_uuid=job_uuid)
     return wrap_json(d, status=0, statusText="")
+
+
+@app.post("/export_format")
+async def export_format(request: Request):
+    """按格式和范围导出标签
+
+    Body:
+        format: 'OpenLabel' | 'YOLO' | 'COCO'
+        scope: 'currentFrame' | 'currentTask'
+        mission: str
+        seq, stream, frame, uuid
+    """
+    data = await request.json()
+    fmt = data.get("format") or "OpenLabel"
+    scope = data.get("scope") or "currentFrame"
+    mission = data.get("mission")
+    seq = data.get("seq", "")
+    stream = data.get("stream", "")
+    frame = data.get("frame")
+    uuid = data.get("uuid")
+
+    if not uuid or not mission or mission not in Conf.MG_COLLECTION:
+        return wrap_json({}, status=1, statusText="参数错误")
+
+    user_id = CTX_USER_ID.get("user_id")
+    auth = job_service.get_user_job_auth(user_id, uuid)
+    if auth == UserJobAuth.FORBIDDEN:
+        return wrap_json({}, status=1, statusText="无权限")
+
+    if fmt == "OpenLabel":
+        rows = anno_service._collect_anno_rows(uuid, mission, scope, seq, stream, frame)
+        return wrap_json(rows)
+
+    if fmt == "COCO":
+        try:
+            d = anno_service.export_to_coco_v2(
+                job_uuid=uuid, mission=mission, scope=scope,
+                seq=seq, stream=stream, frame=frame,
+            )
+            return wrap_json(d)
+        except Exception as e:
+            return wrap_json({}, status=1, statusText=f"COCO 导出失败: {e}")
+
+    if fmt == "YOLO":
+        try:
+            zip_bytes, file_name = anno_service.export_to_yolo(
+                job_uuid=uuid, mission=mission, scope=scope,
+                seq=seq, stream=stream, frame=frame,
+            )
+            return Response(
+                content=zip_bytes,
+                media_type="application/zip",
+                headers={"Content-Disposition": f'attachment; filename="{file_name}"'},
+            )
+        except Exception as e:
+            return wrap_json({}, status=1, statusText=f"YOLO 导出失败: {e}")
+
+    return wrap_json({}, status=1, statusText="不支持的格式")

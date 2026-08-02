@@ -1,17 +1,3 @@
-# Copyright (C) 2025 geluzhiwei.com
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 rest api
 """
@@ -30,15 +16,16 @@ from enum import Enum
 import pydash
 
 from yinghuo_conf.api_util.utils import wrap_json, mongo_json_encoder
-from yinghuo_conf import Conf
+from ..config import Conf, gConf
 from ..dto.data_seq import SimpleDataSeq
 from .ctx import CTX_USER_ID
 from ..dto.response import SuccessJson, SuccessPage, FailJson
 from ..biz.db.collection import Pager, CollectionBase, UserResource
 from ..exceptions import BizException
 from openlabel import OpenLabel
+from .dependency import permission_required
 
-app = APIRouter()
+app = APIRouter(dependencies=[permission_required("admin:role:write")])
 
 
 @app.post("/create", summary="创建", tags=["user_res"])
@@ -56,7 +43,7 @@ async def create(dto: UserResource, request: Request):
         "owners": [CTX_USER_ID.get("user_id")],
     }
     collection = Conf.MG_user_res
-    result = await collection.insert_one(dto)
+    result = collection.insert_one(dto)
     if result.acknowledged:
         return wrap_json([])
     else:
@@ -72,19 +59,19 @@ async def delete_list(request: Request):
     
     collection = Conf.MG_user_res
     query = {"_id": ObjectId(_id), "authority.owners": CTX_USER_ID.get("user_id")}
-    rows = await collection.find(query)
+    rows = collection.find(query)
     rows = list(rows)
     if len(rows) == 0:
         return wrap_json([], status=1, statusText="没有权限")
     
     # children 节点有子元素，不允许删除
     query = {"parent_id": _id, "authority.owners": CTX_USER_ID.get("user_id")}
-    rows = await collection.find(query)
+    rows = collection.find(query)
     rows = list(rows)
     if len(rows) != 0:
         return wrap_json([], status=1, statusText="该节点有子节点，不可以删除")
     
-    result = await collection.delete_one({
+    result = collection.delete_one({
             "_id": ObjectId(_id),
             "authority.owners": CTX_USER_ID.get("user_id"),
     })
@@ -121,9 +108,9 @@ async def update(dto_dict: dict):
         for field in fields:
             update["$set"][field] = dto_dict[field]
 
-        result = await collection.update_one(query, update)
+        result = collection.update_one(query, update)
         if result.modified_count == 1:
-            rows = await collection.find(query)
+            rows = collection.find(query)
             return wrap_json(mongo_json_encoder(list(rows)))
 
     return wrap_json([], status=1, statusText="update failed")
@@ -137,7 +124,7 @@ async def query(_id: str = Query(None)):
     else:
         query = {"authority.owners": CTX_USER_ID.get("user_id")}
     collection = Conf.MG_user_res
-    rows = await collection.find(query)#.sort("updated_time", pymongo.DESCENDING)
+    rows = collection.find(query)#.sort("updated_time", pymongo.DESCENDING)
     rows = list(rows)
     return wrap_json(mongo_json_encoder(rows))
 
@@ -170,7 +157,7 @@ def build_tree(top_node, sub_rows):
 async def query_tree():
     query = {"authority.owners": CTX_USER_ID.get("user_id")}
     collection = Conf.MG_USER_RES
-    rows = await collection.find(query).sort("order", pymongo.ASCENDING)
+    rows = collection.find(query).sort("order", pymongo.ASCENDING)
     rows = list(rows)
     
     # 构建树形结构

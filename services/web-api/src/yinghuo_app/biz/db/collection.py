@@ -1,17 +1,3 @@
-# Copyright (C) 2025 geluzhiwei.com
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from enum import Enum
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, Dict, List, Any
@@ -24,7 +10,7 @@ from glob import glob
 import pathlib
 from pydash import _
 from yinghuo_app.dto.resource import ResourceType
-from yinghuo_conf import Conf
+from ...config import Conf
 from datetime import datetime, timezone
 from typing import Optional, Dict, List, Any, Annotated
 
@@ -45,7 +31,7 @@ class CollectionBase(BaseModel):
     updated_time: datetime = Field(default_factory=get_utc_now)
     deleted_time: Optional[datetime] = None  # 默认为None，可以在删除时设置
     creater: int = None
-    is_deleted: Annotated[bool, Field(default=False, description="是否被删除")]
+    is_deleted: bool = Field(default=False, description="是否被删除")
     authority: Optional[DataAuthority] = None
 
 
@@ -62,10 +48,10 @@ class Pager(BaseModel):
 
 
 class Data(BaseModel):
-    clip_key: Optional[str]
-    format: Optional[str]
-    root_dir: Optional[str]
-    seq: Optional[str]
+    clip_key: Optional[str] = None
+    format: Optional[str] = None
+    root_dir: Optional[str] = None
+    seq: Optional[str] = None
     # streams:Optional[list]
 
     class Config:
@@ -75,7 +61,7 @@ class LabelSpec(BaseModel):
     domain: Dict[str, str]
     mission: Dict[str, str]
     taxonomy: Dict[str, str]
-    data: Optional[Data]
+    data: Optional[Data] = None
 
     class Config:
         extra = "allow"
@@ -102,16 +88,16 @@ class AnnoJob(CollectionBase):
     Args:
         CollectionBase (_type_): _description_
     """
-    auto_job_id: Optional[int]
-    data_clip_id: Optional[int]
-    desc: Optional[str]
-    id: Optional[int]
-    label_spec: Optional[LabelSpec]
-    name: Optional[str]
-    priority: Optional[int]
-    taxonomy_key: Optional[str]
-    type: Optional[int]
-    version: Optional[str]
+    auto_job_id: Optional[int] = None
+    data_clip_id: Optional[int] = None
+    desc: Optional[str] = None
+    id: Optional[int] = None
+    label_spec: Optional[LabelSpec] = None
+    name: Optional[str] = None
+    priority: Optional[int] = None
+    taxonomy_key: Optional[str] = None
+    type: Optional[int] = None
+    version: Optional[str] = None
     current_status: Optional[JobStatus] = None
     status_history: Optional[list[JobStatus]] = None
 
@@ -137,7 +123,7 @@ class JobPerform(BaseModel):
 
 class UserRoles(CollectionBase):
     label: Annotated[str, Field(max_length=100, min_length=1, description="名称", example="标注员")]
-    desc: Optional[Annotated[str, Field(default='', max_length=1000, description="备注", example="")]] = None
+    desc: Optional[Annotated[str, Field(max_length=1000, description="备注", example="")]] = None
     is_system: Optional[bool] = False
     # TODO 权限
 
@@ -181,3 +167,9 @@ class UserResource(CollectionBase):
     
 class UserProfile(CollectionBase):
     max_job_count: Optional[int] = 15
+    avatar: Optional[str] = None
+    note: Optional[str] = None
+    preferences: Optional[Dict[str, Any]] = None
+
+    class Config:
+        extra = "allow"

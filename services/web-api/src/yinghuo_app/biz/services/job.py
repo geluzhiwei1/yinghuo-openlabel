@@ -1,33 +1,19 @@
-# Copyright (C) 2025 geluzhiwei.com
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from typing import List
 from bson import ObjectId
 from datetime import datetime, timezone
 import os
 import pydash
 import functools
-from async_lru import alru_cache
 
 from ..db.collection import AnnoJob, JobStatus
-from yinghuo_conf import Conf, settings
+from ...config import Conf, settings
 from .user import user_service
 from ...dto.data_seq import SimpleDataSeq
 from .team import team_service
 from ...dto.users import RoleEnum, UserJobAuth
 from .role import role_service
 from ...log import logger
+from yinghuo_app.dto.seq_data import SeqData
 
 
 class JobService(object):
@@ -73,7 +59,11 @@ class JobService(object):
             job_def["label_spec"]["data"]["streams"] = streams
         elif job_def["label_spec"]["data"]["format"] == "openlabel":
             data_root = os.path.join(settings.YH_USER_DATA_ROOT, str(user_id))
-            seqData = SeqData.from_seq_data_dir(data_root + seq)
+            seq_dir = os.path.join(data_root, seq.lstrip("/"))
+            meta_path = os.path.join(seq_dir, "meta.json")
+            if not os.path.exists(meta_path):
+                raise Exception(f"数据路径无效：{seq} 下未找到 meta.json（OpenLABEL格式），请选择包含 meta.json 的数据目录，或将数据格式改为 directory")
+            seqData = SeqData.from_seq_data_dir(seq_dir)
             meta_dict = seqData.seq_meta_obj.meta_dict
             # stream_meta_dicts = {k:v.meta_dict for k, v in seqData.stream_metas_obj.streams.items()}
             streams = job_def["label_spec"]["data"]["streams"]
@@ -83,9 +73,9 @@ class JobService(object):
         
         if len(streams) < 1:
             raise Exception("streams不存在")
-        result = await Conf.MG_ANNO_JOB_PERFORM.insert_one(job_def)
+        result = Conf.MG_ANNO_JOB_PERFORM.insert_one(job_def)
         if result.acknowledged:
-            r1 = await Conf.MG_DATA_SEQ_META.insert_one(
+            r1 = Conf.MG_DATA_SEQ_META.insert_one(
                 {
                     "authority": {
                         "owners": [user_id],
@@ -98,7 +88,7 @@ class JobService(object):
                 raise Exception("插入seq_meta数据失败")
             
             for stream, stream_meta_dict in zip(streams, stream_meta_dicts):
-                await Conf.MG_DATA_STREAM_META.insert_one(
+                Conf.MG_DATA_STREAM_META.insert_one(
                     {
                         "authority": {
                             "owners": [user_id],
@@ -114,8 +104,8 @@ class JobService(object):
         else:
             raise Exception("插入job数据失败")
 
-    @alru_cache(maxsize=1024)
-    async def can_user_see_job(self, user_id: int, job_id: str, freshness=0):
+    @functools.lru_cache(maxsize=1024)
+    def can_user_see_job(self, user_id: int, job_id: str, freshness=0):
         """user_id是否能标注job_id的数据
 
         Args:
@@ -128,24 +118,24 @@ class JobService(object):
         
         query1 = {"authority.owners": user_id}
         query2 = {"authority.collaborators": user_id}
-        my_depts = await team_service.find_my_dept_ids(user_id)
+        my_depts = team_service.find_my_dept_ids(user_id)
         query3 = {"authority.dept": {"$in": my_depts}}
         role_query = {"$or": [query1, query2, query3]}
         id_query = {"_id": ObjectId(job_id)}
         
         all_query = {"$and": [id_query, role_query]} # 数据存在，并且我有权限
-        doc = await Conf.MG_ANNO_JOB_PERFORM.find_one(all_query)
+        doc = Conf.MG_ANNO_JOB_PERFORM.find_one(all_query)
         return doc
     
     
-    async def get_job(self, job_id: str):
+    def get_job(self, job_id: str):
         """
         """
         id_query = {"_id": ObjectId(job_id)}
-        doc = await Conf.MG_ANNO_JOB_PERFORM.find_one(id_query)
+        doc = Conf.MG_ANNO_JOB_PERFORM.find_one(id_query)
         return doc
     
-    async def get_user_job_auth(self, user_id: int, job_id: str)->UserJobAuth:
+    def get_user_job_auth(self, user_id: int, job_id: str)->UserJobAuth:
         """获取用户对某个job的权限
 
         Args:
@@ -160,7 +150,7 @@ class JobService(object):
         query2 = {"authority.collaborators": user_id}
         
         _rows = team_service.find_my_team(user_id)
-        rows = await _rows.to_list(length=None)
+        rows = list(_rows)
         
         my_depts = []
         my_dept_roles = {}
@@ -175,7 +165,7 @@ class JobService(object):
         id_query = {"_id": ObjectId(job_id)}
         
         all_query = {"$and": [id_query, role_query]} # 数据存在，并且我有权限
-        doc = await Conf.MG_ANNO_JOB_PERFORM.find_one(all_query)
+        doc = Conf.MG_ANNO_JOB_PERFORM.find_one(all_query)
         if doc is None:
             return UserJobAuth.FORBIDDEN
         if user_id in pydash.get(doc, "authority.owners", []):
@@ -186,7 +176,7 @@ class JobService(object):
         # dept 权限
         dept_id = doc["authority"]["dept"]
         my_roles = my_dept_roles.get(dept_id, [])
-        role_names = await role_service.get_role_name(my_roles)
+        role_names = role_service.get_role_name(my_roles)
         logger.info(f"role ids names : {my_roles} : {role_names}")
         if RoleEnum.ADMIN.value in role_names or RoleEnum.MANAGER.value in role_names:
             return UserJobAuth.DEPT_ROLE_MANAGE
