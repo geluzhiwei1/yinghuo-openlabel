@@ -1,0 +1,14 @@
+.resizeable {
+  resize: both;
+  /* border: 1px solid green; */
+  border-radius: 4px;
+  background: white;
+  outline: none;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow: hidden;
+}
+
+.tool-setting .el-input {
+  width: 100px;
+}
