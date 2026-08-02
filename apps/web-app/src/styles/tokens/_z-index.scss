@@ -1,0 +1,14 @@
+// Z-index scale (single source of truth to avoid stacking chaos)
+:root {
+  --y-z-base:        0;
+  --y-z-dropdown:    100;
+  --y-z-sticky:      200;
+  --y-z-fixed:       300;
+  --y-z-toast:       1300;
+  --y-z-modal-backdrop: 900;
+  --y-z-modal:       1000;
+  --y-z-popover:     1100;
+  --y-z-tooltip:     1200;
+  --y-z-notification: 1300;
+  --y-z-loading:     1400;
+}

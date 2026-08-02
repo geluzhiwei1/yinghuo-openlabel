@@ -1,0 +1,27 @@
+// Lab shadow tokens — design.md §3
+//
+// Cards default to borderless + soft shadow.
+// Lift shadows for overlays; pop shadow for emphasized buttons.
+
+:root {
+  // 卡片默认阴影
+  --lab-shadow-soft: 0 1px 0 rgba(14, 14, 16, 0.04),
+                     0 8px 24px -12px rgba(14, 14, 16, 0.10);
+
+  // 浮层 / 弹出菜单
+  --lab-shadow-lift: 0 20px 40px -24px rgba(14, 14, 16, 0.35);
+
+  // 强调按钮的"硬"投影
+  --lab-shadow-pop:  0 2px 0 #0e0e10;
+
+  // Lime glow halo on dark cards (quote card, topbar logo)
+  --lab-shadow-lime-glow: 0 0 32px -4px rgba(200, 250, 75, 0.55);
+
+  // Bridge to existing --y-shadow-* names so legacy components inherit
+  --y-shadow-1: var(--lab-shadow-soft);
+  --y-shadow-2: var(--lab-shadow-soft);
+  --y-shadow-3: var(--lab-shadow-lift);
+  --y-shadow-sm: var(--lab-shadow-soft);
+  --y-shadow-md: var(--lab-shadow-soft);
+  --y-shadow-lg: var(--lab-shadow-lift);
+}

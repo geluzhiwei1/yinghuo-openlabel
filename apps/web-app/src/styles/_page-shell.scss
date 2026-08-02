@@ -1,0 +1,113 @@
+/**
+ * Unified page shell — shared across business / admin / platform faces.
+ *
+ * Replaces src/platform/styles/common.scss (.platform-*) and
+ * src/tenant_admin/styles/common.scss (.ta-*) with a single .yh-* namespace.
+ * Loaded globally so view components reference classes directly without scoped imports.
+ *
+ * Convention:
+ * - .yh-page-header: top of page (title left, actions right)
+ * - .yh-page-title: page heading with optional leading icon
+ * - .yh-page-actions: right-aligned action button cluster
+ * - .yh-card: card container (border-only, no shadow — Linear style)
+ * - .yh-card-flat: even more minimal, just padding
+ * - .yh-filter: filter row above the table
+ * - .yh-pager: pagination row below the table
+ * - .yh-muted: secondary text
+ * - .yh-danger-text: danger text
+ * - .yh-dialog-footer: right-aligned button row at dialog bottom
+ */
+
+// ===== Page header =====
+.yh-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--y-spacing-4);  // 16px
+  gap: var(--y-spacing-3);            // 12px
+}
+
+.yh-page-title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--y-spacing-2);            // 8px
+  font-size: var(--y-font-size-xl);   // 18px
+  font-weight: var(--y-font-weight-semibold);
+  margin: 0;
+  color: var(--y-color-text-primary);
+  letter-spacing: var(--y-letter-spacing-tight);
+}
+
+.yh-page-actions {
+  display: inline-flex;
+  gap: var(--y-spacing-2);
+  align-items: center;
+}
+
+// ===== Cards =====
+.yh-card {
+  border: 1px solid var(--y-color-border);
+  border-radius: var(--y-radius-lg);
+  background: var(--y-color-bg-card);
+  box-shadow: none;
+  padding: var(--y-spacing-4);
+
+  &.is-flat {
+    padding: var(--y-spacing-3);
+  }
+}
+
+.yh-card-flat {
+  background: var(--y-color-bg-card);
+  border: 1px solid var(--y-color-border-light);
+  border-radius: var(--y-radius-md);
+  padding: var(--y-spacing-3);
+}
+
+// ===== Filter / pager rows =====
+.yh-filter {
+  display: flex;
+  gap: var(--y-spacing-2);
+  align-items: center;
+  margin-bottom: var(--y-spacing-3);
+  flex-wrap: wrap;
+}
+
+.yh-pager {
+  margin-top: var(--y-spacing-3);
+  display: flex;
+  justify-content: flex-end;
+}
+
+// ===== Inline text utilities =====
+.yh-muted {
+  color: var(--y-color-text-secondary);
+}
+
+.yh-danger-text {
+  color: var(--y-color-danger);
+}
+
+// ===== Dialog footer =====
+.yh-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--y-spacing-2);
+  align-items: center;
+}
+
+// ===== Section header (smaller than page header, used inside cards) =====
+.yh-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--y-spacing-2);
+  margin-bottom: var(--y-spacing-3);
+
+  .yh-section-title {
+    font-size: var(--y-font-size-md);
+    font-weight: var(--y-font-weight-medium);
+    color: var(--y-color-text-primary);
+    margin: 0;
+  }
+}

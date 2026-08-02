@@ -10,7 +10,7 @@ const initFromQuery = () => {
   const frame = parseInt(url.searchParams.get('frame') || '0')
   const ts = parseInt(url.searchParams.get('ts') || '0')
 
-  annoJobPerformApi.info({ uuid }).then((res) => {
+  annoJobPerformApi.info({uuid}).then((res) => {
     if (!res.data || !res.data[0]) {
       ElMessageBox.alert('任务不存在', 'error')
       return false
@@ -54,4 +54,5 @@ const jobConfig = reactive({
   inited: false
 })
 
-export { initFromQuery, jobConfig }
+
+export { initFromQuery, jobConfig}

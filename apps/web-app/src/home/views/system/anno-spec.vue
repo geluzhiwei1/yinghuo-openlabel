@@ -2,55 +2,29 @@
   <div>
     <TableSearch :query="query" :options="searchOpt" :search="handleSearch" />
     <div class="container">
-      <TableCustom
-        :columns="columns"
-        :tableData="tableData"
-        :total="pager.total"
-        :page="pager.page"
-        :pageSize="pager.page_size"
-        :viewFunc="handleView"
-        :delFunc="handleDelete"
-        :changePage="changePage"
-        :refresh="getData"
+      <TableCustom :columns="columns" :tableData="tableData" :total="pager.total" :page="pager.page"
+        :pageSize="pager.page_size" :viewFunc="handleView" :delFunc="handleDelete" :changePage="changePage" :refresh="getData"
         ::changeSize="changeSize"
-        :editFunc="handleEdit"
-        :loading="tableLoading"
-      >
+        :editFunc="handleEdit" :loading="tableLoading">
         <template #enabled="{ rows }">
           <!-- <span v-if="rows.enabled">有效</span>
           <span v-else>无效</span> -->
           <el-switch v-model="rows.enabled" @change="handleEnable(rows)" />
         </template>
         <template #editSpec="{ rows }">
-          <el-button type="primary" size="small" plain @click="handleSpecEdit(rows)"
-            >编辑规范</el-button
-          >
+          <el-button type="primary" size="small" plain @click="handleSpecEdit(rows)">编辑规范</el-button>
         </template>
         <template #toolbarBtn>
-          <el-button type="primary" size="small" :icon="CirclePlusFilled" @click="handleNew"
-            >新增</el-button
-          >
+          <el-button  type="primary" size="small" @click="handleNew"><Icon icon="lucide:plus-circle" />新增</el-button>
         </template>
       </TableCustom>
     </div>
-    <el-dialog
-      :title="isEdit ? '编辑' : '新增'"
-      v-model="visible"
-      width="700px"
-      destroy-on-close
-      :close-on-click-modal="false"
-      @close="closeDialog"
-    >
+    <el-dialog :title="isEdit ? '编辑' : '新增'" v-model="visible" width="700px" destroy-on-close
+      :close-on-click-modal="false" @close="closeDialog">
       <TableEdit :form-data="rowData" :options="options" :edit="isEdit" :update="updateData">
         <template #desc>
-          <el-input
-            v-model="rowData.desc"
-            style="width: 100%"
-            autosize
-            clearable
-            type="textarea"
-            placeholder="请输入简要说明"
-          />
+          <el-input v-model="rowData.desc" style="width: 100%" autosize clearable type="textarea"
+            placeholder="请输入简要说明" />
         </template>
       </TableEdit>
     </el-dialog>
@@ -61,21 +35,21 @@
       align-center="true" style="width: 90%; height: 100%" @close="handleCloseEditor">
       <AnnoSpecEditorPreview :rowData="rowData"></AnnoSpecEditorPreview>
     </el-dialog> -->
-    <el-drawer v-model="formEditVisible" :size="'70%'" destroy-on-close @close="handleCloseEditor">
-      <template #header>
-        <h4>编辑标注规范</h4>
-      </template>
-      <template #default>
-        <AnnoSpecEditorPreview :rowData="rowData"></AnnoSpecEditorPreview>
-      </template>
+    <el-drawer v-model="formEditVisible" :size="'70%'" destroy-on-close  @close="handleCloseEditor">
+        <template #header>
+            <h4>编辑标注规范</h4>
+        </template>
+        <template #default>
+            <AnnoSpecEditorPreview :rowData="rowData"></AnnoSpecEditorPreview>
+        </template>
     </el-drawer>
   </div>
 </template>
 
 <script setup lang="ts" name="anno-specification">
+import { Icon } from "@iconify/vue"
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { CirclePlusFilled } from '@element-plus/icons-vue'
 import { type AnnoSpec } from '@/types/annoSpec'
 import { annoSpecApi } from '@/api'
 import TableCustom from '@/components/table-custom.vue'
@@ -104,7 +78,7 @@ const handleSearch = () => {
 }
 
 // 表格相关
-const columns = ref([
+let columns = ref([
   { type: 'index', label: '序号', width: 55, align: 'center' },
   { prop: 'name', label: '名称' },
   { prop: 'version', label: '版本' },
@@ -165,9 +139,9 @@ const changePage = (val: number) => {
 }
 
 const changeSize = (val: number) => {
-  pager.page_size = val
-  getData()
-}
+  pager.page_size = val;
+  getData();
+};
 
 // 新增/编辑弹窗相关
 const handleNew = () => {
@@ -180,7 +154,7 @@ const handleNew = () => {
   isEdit.value = false
   visible.value = true
 }
-const options = ref<FormOption>({
+let options = ref<FormOption>({
   labelWidth: '100px',
   span: 12,
   list: [

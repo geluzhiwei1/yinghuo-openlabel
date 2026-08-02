@@ -1,8 +1,8 @@
 <template>
-  <el-dropdown style="margin-right: 5px">
-    <el-button circle>
-      <Icon icon="flowbite:user-settings-solid"></Icon>
-    </el-button>
+  <el-dropdown :teleported="true" popper-class="y-toolbar-popper">
+    <span class="header-action">
+      <Icon icon="lucide:user" width="18" />
+    </span>
     <template #dropdown>
       <el-dropdown-menu>
         <!-- <el-dropdown-item @click="toMainPage()">主页</el-dropdown-item> -->
@@ -11,18 +11,10 @@
       </el-dropdown-menu>
     </template>
   </el-dropdown>
-  <el-tag effect="plain" type="success">{{ appVersion }}</el-tag>
-  <UserProfilePanel ref="userProfilePanelRef" />
+  <UserProfilePanel ref="userProfilePanelRef"/>
 </template>
 <script lang="tsx" setup>
-import {
-  ElDropdown,
-  ElButton,
-  ElDropdownItem,
-  ElDropdownMenu,
-  ElTag,
-  ElMessage
-} from 'element-plus'
+import { ElDropdown, ElDropdownItem, ElDropdownMenu, ElMessage } from 'element-plus'
 import { Icon } from '@iconify/vue'
 import UserProfilePanel from '@/home/views/system/user/UserProfilePanel.vue'
 import { watch, ref } from 'vue'
@@ -30,76 +22,65 @@ import { messages } from '@/states'
 import { isEmpty } from 'radash'
 import { cleanLoginfo } from '@/states/UserState'
 
-interface UserProfilePanelRef {
-  open: () => void
-  close: () => void
-}
+const userProfilePanelRef = ref(null)
 
-const userProfilePanelRef = ref<InstanceType<typeof UserProfilePanel> | null>(null)
-const appVersion = import.meta.env.VITE_APP_VERSION
+const toMainPage = () => {
+  window.location.href = 'dashboard'
+}
 
 const modifyPassword = () => {
   userProfilePanelRef.value?.open()
 }
 
 const logout = () => {
-  cleanLoginfo()
-  localStorage.clear()
-  sessionStorage.clear()
-  window.location.href = 'login.html'
+  cleanLoginfo();
+  localStorage.clear();
+  sessionStorage.clear();
+  window.location.href = 'auth.html'
 }
 
-watch(
-  () => messages.lastFailed,
-  (newVal) => {
+
+watch(() => messages.lastFailed, (newVal, oldVal) => {
     if (isEmpty(newVal)) {
-      return
+        return
     }
     ElMessage({
-      message: newVal,
-      type: 'warning'
+        message: newVal,
+        type: 'warning',
     })
     messages.lastFailed = ''
-  }
-)
+})
 
-watch(
-  () => messages.lastException,
-  (newVal) => {
+watch(() => messages.lastException, (newVal, oldVal) => {
     if (isEmpty(newVal)) {
-      return
+        return
     }
     ElMessage({
-      message: newVal,
-      type: 'error'
+        message: newVal,
+        type: 'error',
     })
-  }
-)
+})
 
-watch(
-  () => messages.lastError,
-  (newVal) => {
+watch(() => messages.lastError, (newVal, oldVal) => {
     if (isEmpty(newVal)) {
-      return
+        return
     }
     ElMessage({
-      message: newVal,
-      type: 'error'
+        message: newVal,
+        type: 'error',
     })
-  }
-)
+})
 
-watch(
-  () => messages.lastSuccess,
-  (newVal) => {
+watch(() => messages.lastSuccess, (newVal, oldVal) => {
     if (isEmpty(newVal)) {
-      return
+        return
     }
     ElMessage({
-      message: newVal,
-      type: 'success'
+        message: newVal,
+        type: 'success',
     })
-    messages.lastSuccess = ''
-  }
-)
+    messages.lastSuccess=''
+})
+
+
 </script>

@@ -1,0 +1,43 @@
+// Typography tokens — Lab aesthetic (design.md §2)
+:root {
+  // Font family — Inter for latin, system fallback for CJK
+  --y-font-family-base:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+    "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --y-font-family-mono:
+    "JetBrains Mono", "SF Mono", "Fira Code", Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  // Display — Instrument Serif italic for Hero titles (design.md §2)
+  --y-font-family-display:
+    "Instrument Serif", "Songti SC", "Source Han Serif SC", Georgia,
+    "Times New Roman", serif;
+
+  // Font size scale — base 13 (down from 14) for Linear density
+  --y-font-size-xs:   11px;
+  --y-font-size-sm:   12px;
+  --y-font-size-base: 13px;
+  --y-font-size-md:   14px;
+  --y-font-size-lg:   16px;
+  --y-font-size-xl:   18px;
+  --y-font-size-2xl:  20px;
+  --y-font-size-3xl:  24px;
+  --y-font-size-4xl:  30px;
+  --y-font-size-5xl:  38px;
+
+  // Line height — slightly tighter
+  --y-line-height-tight:   1.25;
+  --y-line-height-base:    1.45;
+  --y-line-height-relaxed: 1.65;
+
+  // Font weight — Linear uses mostly 400/500/600
+  --y-font-weight-regular:  400;
+  --y-font-weight-medium:   500;
+  --y-font-weight-semibold: 600;
+  --y-font-weight-bold:     700;
+
+  // Letter spacing
+  --y-letter-spacing-tight:  -0.01em;
+  --y-letter-spacing-normal: 0;
+  --y-letter-spacing-wide:   0.01em;
+}

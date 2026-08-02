@@ -1,101 +1,509 @@
-import home from '@/home/locales/zh-CN'
-import video from '@/video/locales/zh-CN'
-import auth from '@/login/locales/zh-CN'
-import admin from '@/home/locales/zh-CN'
-
-const pointcloud = {}
-
 export default {
-  app: {
-    title: '萤火',
-    description: '2D视觉数据标注工具',
-    welcome: '欢迎使用'
-  },
-  'action.create': '创建',
-  'action.edit': '编辑',
-  jobManage: {
-    title: '任务管理',
-    toolbar: {
-      create: '新建任务'
-    }
-  },
-  components: {
-    annoSpecSelector: {
-      tooltip: '选择标签分类标准',
-      systemSpec: '系统规范',
-      mySpec: '我的规范',
-      newSpec: '新建规范',
-      select: '选择',
-      name: '名称',
-      code: '编码',
-      category: '分类',
-      version: '版本',
-      language: '语言',
-      reference: '参考',
-      description: '说明',
-      updatedTime: '更新时间',
-      enabled: '是否启用',
-      desc: '描述',
-      loadSystemSpec: '刷新',
+    app: {
+        title: '萤火',
+        description: '2D视觉数据标注工具',
     },
-    prioritySelect: {
-      placeholder: '请选择优先级',
-      lowest: '1-最低',
-      medium: '3-中等',
-      highest: '5-最高'
+    dashboard: {
+        guest: '游客',
+        lastLogin: '上次登录：{time}',
+        kpi: {
+            myJobs: '我的任务',
+            collabJobs: '协作任务',
+            myAnnotations: '我的标注',
+            rejectionRate: '退回率',
+        },
+        section: {
+            taskProgress: '近7日任务进展',
+            myTodo: '待处理任务',
+        },
+        todo: {
+            empty: '暂无待处理任务',
+        },
+        chart: {
+            new: '新建',
+            completed: '已完成',
+        },
+        action: {
+            feedback: '提需求/建议',
+            tutorial: '视频教程',
+            newJob: '新建任务',
+            myJobs: '我的任务',
+            specs: '标注规范',
+        },
     },
-    rolesSelect: {
-      placeholder: '请选择角色'
+    'action.create': '创建',
+    'action.edit': '编辑',
+    'action.reset': '重置',
+    'action.search': '查询',
+    'action.save': '保存',
+    'action.cancel': '取消',
+    'action.confirm': '确认',
+    'action.close': '关闭',
+    'action.retry': '重试',
+    'action.refresh': '刷新',
+    'action.delete': '删除',
+    'action.export': '导出',
+    'action.import': '导入',
+    annoJob: {
+        title: '标注任务',
+        description: '管理和跟踪所有标注任务的状态',
+        detailTitle: '任务详情',
+        totalCount: '共 {n} 个任务',
+        field: {
+            dataSeq: '数据',
+            mission: '分类',
+            status: '状态',
+        },
+        placeholder: {
+            dataSeq: '输入数据序列名',
+            mission: '输入任务分类',
+            status: '选择状态',
+            reviewNote: '请输入备注（可选）',
+        },
+        action: {
+            annotate: '标注',
+            openAnnotate: '进入标注',
+            submitReview: '提交审核',
+            statistics: '统计',
+            view: '查看',
+            viewDetail: '详情',
+        },
+        status: {
+            locked: '已锁定',
+        },
     },
-    tableCustom: {
-      deleteSelection: '删除选中',
-      refresh: '刷新',
-      columnSettings: '列设置',
-      view: '详情',
-      edit: '编辑',
-      delete: '删除',
-      deleteConfirm: '确定要删除吗？',
-      deleteTitle: '提示'
+    result: {
+        successTitle: '操作成功',
+        errorTitle: '操作失败',
+        warningTitle: '提示',
+        infoTitle: '消息',
+        successHeadline: '已完成',
+        errorHeadline: '未能完成',
+        warningHeadline: '请注意',
+        infoHeadline: '提示',
     },
-    tableEdit: {
-      save: '保存',
-      required: '{label}不能为空'
+    filter: {
+        savedViews: '我的视图',
+        saveCurrent: '保存当前条件',
+        viewName: '视图名称',
+        empty: '暂无数据',
+        emptyHint: '尝试调整筛选条件或新建任务',
     },
-    tableSearch: {
-      rangeSeparator: '至',
-      startDate: '开始日期',
-      endDate: '结束日期',
-      search: '搜索',
-      reset: '重置'
+    table: {
+        density: '行高',
+        densityCompact: '紧凑',
+        densityCozy: '默认',
+        densityLoose: '宽松',
+        columns: '列设置',
+        columnsTitle: '显示的列',
+        empty: '暂无数据',
     },
-    tabs: {
-      options: '标签选项',
-      refresh: '刷新',
-      closeOther: '关闭其他',
-      closeCurrent: '关闭当前',
-      closeAll: '关闭所有'
+    jobManage: {
+        title: '',
+        toolbar: {
+            create: '新建任务',
+        },
     },
-    teamMembersSelect: {
-      placeholder: '请选择',
-      noMembers: '请先添加团队成员'
-    }
-  },
-  states: {
-    dataSeqState: {
-      alert: {
-        title: '提示',
-        message: '本任务数据在您的计算机上，请选择文件夹：{stream}。本操作不会上传数据文件。',
-        confirmButtonText: '选择数据文件夹'
-      },
-      messages: {
-        fileNotFound: '找不到文件: {fileExts}, 请重新选择',
-        exception: '异常：{err}'
-      }
-    }
-  },
-  home,
-  pointcloud,
-  auth,
-  admin,
-  video
+    adminUsers: {
+        title: '用户管理',
+        totalCount: '共 {n} 个用户',
+        field: {
+            email: '邮箱',
+            registered: '注册状态',
+            joined: '加入状态',
+            active: '是否可用',
+            superuser: '系统账号',
+            password: '密码',
+        },
+        placeholder: {
+            email: '输入邮箱搜索',
+            registered: '选择注册状态',
+            joined: '选择加入状态',
+            emailInput: '请输入邮箱',
+            passwordCreate: '请输入密码',
+            passwordEdit: '留空则不修改密码',
+        },
+        option: {
+            all: '所有',
+            registered: '已注册',
+            unregistered: '未注册',
+            joined: '已加入',
+            notJoined: '未加入',
+        },
+        tag: {
+            system: '系统',
+            normal: '普通',
+            active: '正常',
+            inactive: '禁用',
+        },
+        col: {
+            operator: '操作',
+        },
+        action: {
+            create: '新增',
+            model: '模型',
+            pipeline: '管线',
+            permission: '权限',
+            loginAs: '登录此账号',
+        },
+        dialog: {
+            create: '新增用户',
+            edit: '编辑用户',
+            detail: '用户详情',
+        },
+        drawer: {
+            permission: '权限管理',
+        },
+        validation: {
+            emailRequired: '请输入邮箱',
+            emailInvalid: '请输入正确的邮箱格式',
+        },
+        message: {
+            createSuccess: '创建成功',
+            updateSuccess: '更新成功',
+            deleteSuccess: '删除成功',
+        },
+    },
+    error: {
+        network: '网络连接异常，请检查后重试',
+        auth: '登录已失效，请重新登录',
+        forbidden: '没有访问权限',
+        notFound: '请求的资源不存在',
+        server: '服务器后台异常',
+        validation: '提交的数据字段不完整或格式错误',
+        business: '业务处理失败',
+        fallback: '服务器处理异常',
+        empty: '响应内容为空',
+    },
+    funcManager: {
+        title: 'Func 管理',
+        totalCount: '共 {n} 条',
+        field: {
+            name: '名称',
+            description: '描述',
+            version: '版本号',
+            id: 'ID',
+            appServiceName: 'app服务名',
+            appModuleName: 'app模块名',
+        },
+        placeholder: {
+            name: '输入名称搜索',
+            description: '输入描述',
+            version: '输入版本号',
+            id: '输入 ID',
+            appServiceName: '输入 app 服务名',
+            appModuleName: '输入 app 模块名',
+        },
+        col: {
+            operator: '操作',
+        },
+        action: {
+            viewDetail: '详情',
+        },
+        dialog: {
+            create: '新增 Func',
+            edit: '编辑 Func',
+            detail: 'Func 详情',
+        },
+        message: {
+            createSuccess: '创建成功',
+            updateSuccess: '更新成功',
+            deleteSuccess: '删除成功',
+        },
+    },
+    modalManager: {
+        title: '模型管理',
+        totalCount: '共 {n} 条',
+        field: {
+            modelName: '模型名称',
+            dataset: '模型数据集',
+            classes: '模型输出类别',
+            infer: '推理',
+        },
+        placeholder: {
+            modelName: '输入模型名称搜索',
+        },
+        col: {
+            operator: '操作',
+        },
+        action: {
+            viewDetail: '详情',
+        },
+        dialog: {
+            create: '新增模型',
+            edit: '编辑模型',
+            detail: '模型详情',
+        },
+        message: {
+            createSuccess: '创建成功',
+            updateSuccess: '更新成功',
+            deleteSuccess: '删除成功',
+        },
+    },
+    flowManager: {
+        title: 'Flow 管理',
+        totalCount: '共 {n} 条',
+        field: {
+            name: '名称',
+            description: '描述',
+            version: '版本号',
+            stages: '阶段',
+            id: 'ID',
+        },
+        placeholder: {
+            name: '输入名称搜索',
+            description: '输入描述',
+            version: '输入版本号',
+            stages: '输入阶段',
+            id: '输入 ID',
+        },
+        col: {
+            operator: '操作',
+        },
+        action: {
+            viewDetail: '详情',
+        },
+        dialog: {
+            create: '新增 Flow',
+            edit: '编辑 Flow',
+            detail: 'Flow 详情',
+        },
+        message: {
+            createSuccess: '创建成功',
+            updateSuccess: '更新成功',
+            deleteSuccess: '删除成功',
+        },
+    },
+    resetpwd: {
+        step1Title: '重置密码',
+        step1Subtitle: '输入您注册的邮箱地址',
+        step2Title: '设置新密码',
+        step2Subtitle: '查收邮件中的验证码完成密码重置',
+        placeholder: {
+            newPassword: '请输入新密码',
+        },
+        action: {
+            sendResetEmail: '发送重置邮件',
+            confirmReset: '确认重置',
+            backToLogin: '返回登录',
+        },
+        message: {
+            emailSent: '重置密码邮件已发送，请到邮箱查收',
+            resetSuccess: '密码重置成功，即将跳转登录...',
+        },
+        error: {
+            sendFailed: '发送失败，请稍后重试',
+        },
+    },
+    register: {
+        placeholder: {
+            captchaId: '输入邮箱收到的验证码ID',
+            emailCaptcha: '输入邮箱收到的6位数字验证码',
+            confirmPassword: '请再次输入密码',
+        },
+        action: {
+            register: '注册',
+            loginNow: '立即登录',
+        },
+        hint: {
+            hasAccount: '已有账号？',
+        },
+        pwdStrength: {
+            weak: '弱',
+            medium: '中',
+            strong: '强',
+        },
+        message: {
+            codeSent: '验证码已发送到邮箱',
+            codeVerified: '验证码校验通过',
+            registerSuccess: '注册成功，即将跳转登录...',
+        },
+        error: {
+            codeSendFailed: '验证码发送失败',
+            codeWrong: '验证码错误',
+            codeCheckFailed: '验证码校验失败',
+            passwordMismatch: '两次输入的密码不一致',
+            registerFailed: '注册失败，您可能已经注册过',
+        },
+    },
+    auth: {
+        method: {
+            phone: '手机号登录',
+            email: '邮箱登录',
+        },
+        placeholder: {
+            email: '请输入邮箱账号',
+            password: '请输入密码',
+            phone: '请输入手机号',
+            captcha: '请输入验证码',
+            smsCode: '请输入短信验证码',
+        },
+        action: {
+            login: '登录',
+            forgotPassword: '忘记密码？',
+            noAccount: '没有账号？立即注册',
+            sendCode: '发送验证码',
+            rememberMe: '保持登录（一周）',
+        },
+        hint: {
+            phoneAutoRegister: '手机号未注册时，系统将自动注册',
+        },
+        validation: {
+            emailRequired: '请输入邮箱账号',
+            emailInvalid: '请输入正确的邮箱格式',
+            passwordRequired: '请输入密码',
+            passwordLength: '密码长度为6-50位',
+            phoneRequired: '请输入手机号',
+            phoneLength: '手机号长度为11位',
+            captchaRequired: '请输入验证码',
+            captchaLength: '验证码长度为6位',
+            smsCodeRequired: '请输入短信验证码',
+            smsCodeLength: '短信验证码长度为6位',
+        },
+        message: {
+            loginSuccess: '登录成功，正在跳转...',
+            smsSent: '短信发送成功',
+        },
+        error: {
+            loginFailed: '账号或密码错误',
+            captchaWrong: '验证码错误',
+            captchaFirst: '请先完成图形验证',
+            captchaLoadFailed: '验证码加载失败',
+            captchaCheckFailed: '验证码校验失败',
+            smsSendFailed: '短信发送失败',
+        },
+        captcha: {
+            alt: '点击刷新验证码',
+        },
+    },
+    nrrd: {
+        grayscale: '灰度',
+        blackWhite: '黑白',
+        saturation: '饱和度',
+        contrast: '对比度',
+        brightness: '亮度',
+        hue: '色相',
+        pixelate: '像素化',
+    },
+    statusBar: {
+        saved: '已保存',
+        unsaved: '未保存',
+        saving: '保存中',
+        saveFailed: '保存失败',
+        undoDepth: '可撤销 ×{n}',
+        saveSuccess: '帧{frame}保存成功',
+    },
+    pcStatus: {
+        saved: '已保存',
+        unsaved: '未保存',
+        saving: '保存中',
+        saveFailed: '保存失败',
+        mainView: '主视图',
+        deleteAllConfirm: '是否要删除表格中所有数据？操作不可恢复。',
+    },
+    shortcutCheatsheet: {
+        title: '快捷键中心',
+        searchPlaceholder: '搜索快捷键...',
+        empty: '未找到匹配的快捷键',
+        group: {
+            file: '文件',
+            edit: '编辑',
+            navigation: '导航',
+            tools: '工具',
+        },
+        save: '保存标注',
+        load: '加载标注',
+        undo: '撤销',
+        redo: '重做',
+        deleteSelected: '删除选中',
+        deleteAll: '删除本帧',
+        deleteTask: '删除任务标签',
+        prevImage: '上一张',
+        nextImage: '下一张',
+        newVideoEvent: '新建视频事件',
+        toggleVideoEvent: '切换视频事件工具',
+        restoreLastSubTool: '恢复上次子工具',
+        box3dTool: '3D框工具',
+        point3dTool: '3D点工具',
+        polylineTool: '3D线工具',
+        rotatePan: '左键旋转/滚轮缩放/右键平移',
+        resetView: '重置视角',
+        translateView: '平移',
+        scaleView: '缩放',
+        rotateView: '旋转',
+    },
+    aria: {
+        addEntity: '添加实体',
+        deleteAll: '删除全部',
+        copyObject: '复制',
+        pasteObject: '粘贴',
+        focusObject: '聚焦',
+        editObject: '编辑',
+        reverseOrder: '反向',
+        autoAnnotate: '自动标注',
+        closeSettings: '关闭设置',
+        expandSettings: '展开设置',
+        toggleVisibility: '切换可见性',
+        focusRow: '聚焦行',
+        changeFrame: '切换帧',
+        viewHelp: '查看帮助',
+        logo: '萤火数据标注平台',
+    },
+    workbench: {
+        navi: '导航',
+        show: '显示',
+        viewAngle: '视角',
+        reset: '重置',
+        firstFrame: '第一帧',
+        prevFrame: '上一帧',
+        nextFrame: '下一帧',
+        lastFrame: '最后帧',
+        jumpFirst: '跳到第一帧',
+        jumpPrev: '跳到上一帧',
+        jumpNext: '跳到下一帧',
+        jumpLast: '跳到最后一帧',
+        box3d: '3D框',
+        line3d: '3D线',
+        point3d: '3D点',
+        box3dDesc: '3D包围框标注',
+        line3dDesc: '3D曲线标注',
+        point3dDesc: '点云语义、实例标注',
+        newVideoEvent: '新增(N)',
+        restoreImage: '恢复图像',
+        restoreImageDesc: '恢复至默认大小、默认颜色',
+        task: '任务',
+        data: '数据',
+        annotation: '标注',
+        semantic: '语义',
+        seq: '序列',
+        image: '图像',
+        object: '对象',
+        hidePanel: '隐藏面板',
+        panelWidth: '面板宽度',
+        confirm: '确定',
+        undo: '撤销',
+        undoDesc: '取消上次的编辑',
+        redo: '重做',
+        redoDesc: '重做上次的编辑',
+        save: '保存标注',
+        saveDesc: '保存当前帧所有件',
+        load: '加载标注',
+        loadDesc: '重新从后台加载已经保存的标签',
+        deleteSelected: '删除选中',
+        deleteSelectedDesc: '删除选中件',
+        deleteFrame: '删除本帧',
+        deleteFrameDesc: '清除本帧所有标注',
+        deleteTask: '删除任务标签',
+        deleteTaskDesc: '删除本任务所有标签',
+        deleteConfirm: '是否删除？本操作将清空本帧所有已标注的数据。',
+        deleteTaskConfirm: '本操作将清除本任务所有标签数据，无法恢复。是否删除？',
+        clearFrame: '清空',
+        deleteSuccess: '删除成功',
+        deleteAbnormal: '删除异常',
+        yes: '是',
+        no: '否',
+        settings: '设置',
+        lowResTitle: '分辨率过低',
+        lowResDesc: '建议在 1920×1080 以上分辨率使用以获得最佳体验',
+    },
 }

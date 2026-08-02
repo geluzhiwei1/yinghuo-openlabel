@@ -1,0 +1,11 @@
+// Border radius tokens — Linear style
+:root {
+  --y-radius-none:  0;
+  --y-radius-xs:    2px;   // tags, tiny chips
+  --y-radius-sm:    4px;   // buttons, inputs
+  --y-radius-md:    6px;   // small cards, sub-panels
+  --y-radius-lg:    8px;   // primary cards
+  --y-radius-xl:    10px;  // modals, large panels (down from 12)
+  --y-radius-2xl:   14px;  // feature modals (down from 16)
+  --y-radius-full:  9999px;
+}

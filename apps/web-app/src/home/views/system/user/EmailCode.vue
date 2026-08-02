@@ -31,8 +31,9 @@
             placeholder="请输入您邮箱收到的6位数字"
           />
         </el-col>
-        <el-col :span="6"> </el-col>
-      </el-row>
+        <el-col :span="6">
+        </el-col>
+        </el-row>
     </el-form-item>
 
     <el-form-item>
@@ -49,6 +50,8 @@
 import { onMounted, toRaw, ref, reactive, watch } from 'vue'
 import { ElButton, ElForm, ElFormItem, ElDialog, ElInput } from 'element-plus'
 import { clone } from 'radash'
+import { messages } from '@/states'
+import { capchaApi } from '@/api'
 
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
@@ -59,15 +62,15 @@ const captchaSrc = ref('') // capcha
 const rules = ref({
   username: [
     { required: true, message: '请输入账号' },
-    { min: 6, max: 50, message: '长度为6-50', triggle: 'blur' }
+    { min: 6, max: 50, message: '长度为6-50', trigger: 'blur' }
   ],
   password: [
     { required: true, message: '请输入密码' },
-    { min: 6, max: 50, message: '长度为6-50', triggle: 'blur' }
+    { min: 6, max: 50, message: '长度为6-50', trigger: 'blur' }
   ],
   captchaText: [
     { required: true, message: '请输入验证码' },
-    { min: 6, max: 6, message: '长度为6', triggle: 'blur' }
+    { min: 6, max: 6, message: '长度为6', trigger: 'blur' }
   ]
 })
 

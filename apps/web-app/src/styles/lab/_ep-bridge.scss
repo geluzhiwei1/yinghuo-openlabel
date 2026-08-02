@@ -1,0 +1,529 @@
+// Element Plus → Lab bridge
+//
+// Re-skins all 428 EP-using .vue files to look lab-ish WITHOUT touching them.
+// This is the "visual hemostat" that prevents indigo-vs-lime visual chaos
+// during the multi-phase migration.
+//
+// Loaded LAST in main.ts (after lab/_index.scss). Higher-specificity selectors
+// here win over _element-overrides.scss and _component-patches.scss.
+//
+// design.md: §1 colors, §3 shape, §5 component specs
+
+@use './palette';
+@use './shape';
+@use './shadow';
+
+// ===== Buttons — rounded-full, primary = ink-black =====
+.el-button {
+  border-radius: var(--lab-radius-pill) !important;
+  font-weight: 500;
+  height: var(--lab-ctrl-h-md);
+  padding: 0 16px;
+  transition: background-color var(--lab-duration-base), color var(--lab-duration-base),
+              border-color var(--lab-duration-base);
+
+  // Primary — ink-black with optional lime-ball icon slot via ::after
+  &.el-button--primary:not(.is-plain) {
+    --el-button-bg-color: var(--lab-ink);
+    --el-button-border-color: var(--lab-ink);
+    --el-button-hover-bg-color: #2a2a2e;
+    --el-button-hover-border-color: #2a2a2e;
+    --el-button-active-bg-color: #000;
+    --el-button-active-border-color: #000;
+    --el-button-text-color: #fff;
+    --el-button-hover-text-color: #fff;
+    --el-button-active-text-color: #fff;
+    --el-button-disabled-bg-color: #c8c9cc;
+    --el-button-disabled-border-color: #c8c9cc;
+    --el-button-disabled-text-color: #fff;
+  }
+
+  // Default — cream surface, no harsh border
+  &.el-button--default {
+    --el-button-bg-color: var(--lab-cream);
+    --el-button-border-color: transparent;
+    --el-button-text-color: var(--lab-slate);
+    --el-button-hover-bg-color: var(--lab-line);
+    --el-button-hover-border-color: transparent;
+    --el-button-hover-text-color: var(--lab-ink);
+    --el-button-active-bg-color: var(--lab-line);
+    --el-button-active-border-color: transparent;
+  }
+
+  // Danger / warning — coral
+  &.el-button--danger,
+  &.el-button--warning {
+    --el-button-bg-color: var(--lab-coral);
+    --el-button-border-color: var(--lab-coral);
+    --el-button-text-color: #fff;
+    --el-button-hover-bg-color: #ff7e57;
+    --el-button-hover-border-color: #ff7e57;
+    --el-button-hover-text-color: #fff;
+    --el-button-active-bg-color: #e85a30;
+    --el-button-active-border-color: #e85a30;
+  }
+
+  // Success — muted green (small surface only)
+  &.el-button--success {
+    --el-button-bg-color: #2f7a3e;
+    --el-button-border-color: #2f7a3e;
+    --el-button-hover-bg-color: #286a35;
+    --el-button-hover-border-color: #286a35;
+  }
+
+  // Plain — soft cream with ink border on hover
+  &.is-plain {
+    --el-button-bg-color: var(--lab-cream);
+    --el-button-border-color: var(--lab-line);
+    --el-button-text-color: var(--lab-slate);
+    --el-button-hover-bg-color: var(--lab-ink);
+    --el-button-hover-border-color: var(--lab-ink);
+    --el-button-hover-text-color: #fff;
+  }
+
+  // Circle / icon buttons
+  &.is-circle {
+    width: var(--lab-ctrl-h-md);
+    padding: 0;
+  }
+
+  // Small / large size tweaks
+  &--small {
+    height: var(--lab-ctrl-h-sm) !important;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+  &--large {
+    height: var(--lab-ctrl-h-lg) !important;
+    padding: 0 20px;
+  }
+}
+
+// Button group — keep pills tight, no gap
+.el-button-group {
+  gap: 0;
+
+  > .el-button {
+    border-radius: 0 !important;
+
+    &:first-child { border-top-left-radius: var(--lab-radius-pill) !important; border-bottom-left-radius: var(--lab-radius-pill) !important; }
+    &:last-child  { border-top-right-radius: var(--lab-radius-pill) !important; border-bottom-right-radius: var(--lab-radius-pill) !important; }
+  }
+}
+
+// ===== Cards — borderless, rounded-3xl, soft shadow =====
+.el-card {
+  border: none !important;
+  border-radius: var(--lab-radius-3xl) !important;
+  box-shadow: var(--lab-shadow-soft) !important;
+  background: var(--lab-snow);
+  overflow: hidden;
+
+  .el-card__header {
+    padding: 16px 20px 8px;
+    border-bottom: 1px solid var(--lab-hairline);
+    background: transparent;
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--lab-ink);
+  }
+
+  .el-card__body {
+    padding: 20px;
+  }
+}
+
+// ===== Inputs / Selects / Textareas — cream bg, rounded-lg (8px), ink focus =====
+// design.md update: triggers that pop menus use 8px (professional rectangle),
+// buttons/tags/badges stay 999px pill for hierarchy.
+.el-input__wrapper,
+.el-textarea__inner,
+.el-select__wrapper,
+.el-date-editor.el-input__wrapper {
+  border-radius: var(--lab-radius-lg) !important;
+  background: var(--lab-cream) !important;
+  box-shadow: 0 0 0 1px transparent inset !important;
+  transition: box-shadow var(--lab-duration-base), background-color var(--lab-duration-base);
+  min-height: var(--lab-ctrl-h-md);
+
+  &:hover {
+    background: #f3f1e8 !important;
+    box-shadow: 0 0 0 1px var(--lab-line) inset !important;
+  }
+
+  &.is-focus,
+  &:focus-within {
+    background: var(--lab-snow) !important;
+    box-shadow: 0 0 0 1.5px var(--lab-ink) inset !important;
+  }
+}
+
+.el-textarea__inner {
+  padding: 10px 14px;
+}
+
+.el-input__inner {
+  color: var(--lab-ink);
+  font-family: var(--y-font-family-base);
+  font-size: 13px;
+
+  &::placeholder {
+    color: var(--lab-ash);
+  }
+}
+
+// ===== Tags — rounded-full, subtle category colors =====
+.el-tag {
+  border-radius: var(--lab-radius-pill);
+  height: 22px;
+  line-height: 20px;
+  padding: 0 10px;
+  font-size: 11.5px;
+  font-weight: 500;
+  border: none;
+
+  &--default {
+    background: var(--lab-cream);
+    color: var(--lab-slate);
+  }
+  &--info, &--success {
+    background: var(--lab-sky);
+    color: #1e3a5f;
+  }
+  &--warning {
+    background: var(--lab-butter);
+    color: #6b4a16;
+  }
+  &--danger {
+    background: #ffd6c8;
+    color: #8c2e15;
+  }
+}
+
+// ===== Dialog — rounded-2xl, shadow-lift =====
+.el-dialog,
+.el-message-box {
+  border-radius: var(--lab-radius-2xl) !important;
+  box-shadow: var(--lab-shadow-lift) !important;
+  border: none !important;
+  background: var(--lab-snow);
+  overflow: hidden;
+}
+
+.el-dialog {
+  .el-dialog__header {
+    padding: 18px 24px 12px;
+    border-bottom: 1px solid var(--lab-hairline);
+    margin-right: 0;
+  }
+  .el-dialog__title {
+    font-family: var(--y-font-family-display);
+    font-style: italic;
+    font-size: 20px;
+    color: var(--lab-ink);
+  }
+  .el-dialog__body { padding: 20px 24px; }
+  .el-dialog__footer {
+    padding: 12px 24px 18px;
+    border-top: 1px solid var(--lab-hairline);
+  }
+}
+
+// ===== Dropdown menus — rounded-2xl popovers =====
+.el-dropdown-menu,
+.el-select__popper.el-popper,
+.el-popper.el-popover {
+  border-radius: var(--lab-radius-2xl) !important;
+  border: none !important;
+  box-shadow: var(--lab-shadow-lift) !important;
+  background: var(--lab-snow);
+  padding: 8px;
+
+  .el-dropdown-menu__item,
+  .el-select-dropdown__item {
+    border-radius: 12px;
+    height: 32px;
+    line-height: 32px;
+    padding: 0 12px;
+    font-size: 13px;
+    color: var(--lab-slate);
+    transition: background-color var(--lab-duration-base), color var(--lab-duration-base);
+
+    &:hover, &.hover, &.is-hovering {
+      background: var(--lab-cream);
+      color: var(--lab-ink);
+    }
+    &.is-active, &.selected {
+      background: var(--lab-ink);
+      color: #fff;
+    }
+  }
+}
+
+// ===== Table — lab style: hairline rows, no outer border =====
+.el-table {
+  --el-table-border-color: transparent;
+  --el-table-border: none;
+  --el-table-header-bg-color: transparent;
+  --el-table-header-text-color: var(--lab-ash);
+  --el-table-row-hover-bg-color: rgba(251, 250, 245, 0.6);
+  --el-table-text-color: var(--lab-ink);
+  background: transparent !important;
+  font-size: 13px;
+
+  &::before { display: none; }  // kill bottom blue line
+
+  th.el-table__cell {
+    background: transparent !important;
+    border-bottom: 1px solid var(--lab-line);
+    color: var(--lab-ash);
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 8px 10px;
+  }
+
+  .el-table__row {
+    height: 32px;
+    transition: background-color var(--lab-duration-base);
+
+    &:hover > td { background: rgba(251, 250, 245, 0.7) !important; }
+  }
+
+  .el-table__cell {
+    border-bottom: 1px solid var(--lab-hairline);
+    padding: 5px 10px;
+  }
+
+  // last row no border
+  .el-table__body tr:last-child > td {
+    border-bottom: none;
+  }
+
+  // inner wrapper no shadow/border
+  .el-table__inner-wrapper { box-shadow: none !important; }
+}
+
+// ===== Pagination — pill buttons =====
+.el-pagination {
+  --el-pagination-button-color: var(--lab-slate);
+  --el-pagination-button-bg-color: transparent;
+  --el-pagination-hover-color: var(--lab-ink);
+  --el-pagination-button-width: 28px;
+  --el-pagination-button-height: 28px;
+
+  button,
+  .el-pager li {
+    background: transparent !important;
+    border-radius: var(--lab-radius-pill);
+    margin: 0 2px;
+    font-weight: 500;
+    font-size: 12.5px;
+    height: 28px;
+    line-height: 28px;
+    transition: background-color var(--lab-duration-base), color var(--lab-duration-base);
+
+    &:hover { background: var(--lab-cream) !important; color: var(--lab-ink); }
+    &.is-active {
+      background: var(--lab-ink) !important;
+      color: #fff;
+    }
+  }
+}
+
+// ===== Tabs — pill nav (lab style) =====
+.el-tabs {
+  .el-tabs__header {
+    margin: 0 0 16px;
+    border-bottom: none;
+  }
+  .el-tabs__nav-wrap::after { display: none; }
+
+  .el-tabs__item {
+    height: 36px;
+    line-height: 36px;
+    padding: 0 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--lab-slate);
+    border-bottom: none;
+    border-radius: var(--lab-radius-pill);
+    margin-right: 4px;
+    transition: background-color var(--lab-duration-base), color var(--lab-duration-base);
+
+    &:hover { color: var(--lab-ink); background: var(--lab-cream); }
+    &.is-active {
+      background: var(--lab-ink);
+      color: #fff;
+    }
+  }
+  .el-tabs__active-bar { display: none; }
+}
+
+// ===== Sidebar menu — lab style =====
+.el-menu {
+  border-right: none;
+  background: transparent;
+
+  .el-menu-item,
+  .el-sub-menu__title {
+    height: 38px;
+    line-height: 38px;
+    border-radius: var(--lab-radius-lg);
+    margin: 2px 6px;
+    padding: 0 14px !important;
+    color: var(--lab-slate);
+    font-weight: 500;
+    font-size: 13px;
+    transition: background-color var(--lab-duration-base), color var(--lab-duration-base);
+
+    &:hover {
+      background: var(--lab-cream);
+      color: var(--lab-ink);
+    }
+    &.is-active {
+      background: var(--lab-ink);
+      color: #fff;
+    }
+  }
+
+  // nested indent
+  &:not(.el-menu--collapse) .el-sub-menu .el-menu-item {
+    padding-left: 30px !important;
+  }
+}
+
+// Collapsed-sidebar popup flyout — proper popover per design.md §5
+// EP wraps the popup in .el-popper which we globally pill-shaped for tooltips;
+// strip the outer pill so only the inner rectangular menu--popup shows.
+.el-popper:has(.el-menu--popup) {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+
+  .el-popper__arrow::before { display: none !important; }
+}
+
+.el-menu--popup {
+  border-radius: var(--lab-radius-2xl) !important;
+  box-shadow: var(--lab-shadow-lift) !important;
+  background: var(--lab-snow) !important;
+  padding: 6px;
+
+  .el-menu-item,
+  .el-sub-menu__title {
+    border-radius: var(--lab-radius-xl);
+    margin: 2px 0;
+  }
+}
+
+// ===== Form labels — small ash =====
+.el-form-item__label {
+  font-size: 11px;
+  color: var(--lab-ash);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+  padding-bottom: 6px;
+}
+
+// ===== Notification / Message — lab pop style =====
+.el-message {
+  border-radius: var(--lab-radius-pill);
+  background: var(--lab-ink);
+  color: #fff;
+  border: none;
+  box-shadow: var(--lab-shadow-lift);
+  padding: 10px 18px;
+  min-width: auto;
+
+  .el-message__content { color: #fff; }
+  &.el-message--success { background: #2f7a3e; }
+  &.el-message--warning { background: var(--lab-coral); }
+  &.el-message--error   { background: var(--lab-coral); }
+  &.el-message--info    { background: var(--lab-ink); }
+}
+
+.el-notification {
+  border-radius: var(--lab-radius-2xl);
+  border: 1px solid var(--lab-hairline);
+  box-shadow: var(--lab-shadow-lift);
+  background: var(--lab-snow);
+}
+
+// ===== Switch — lab style =====
+.el-switch.is-checked .el-switch__core {
+  background-color: var(--lab-ink) !important;
+  border-color: var(--lab-ink) !important;
+}
+
+// ===== Segmented — lab style (rectangular, matches select trigger) =====
+.el-segmented {
+  border-radius: var(--lab-radius-lg) !important;
+  background: var(--lab-cream);
+  padding: 3px;
+
+  .el-segmented__item {
+    border-radius: calc(var(--lab-radius-lg) - 3px);
+    transition: background-color var(--lab-duration-base), color var(--lab-duration-base);
+
+    &.is-selected {
+      background: var(--lab-ink);
+      color: var(--lab-snow);
+    }
+  }
+}
+
+// ===== Loading — lab style =====
+.el-loading-spinner .circular {
+  width: 28px;
+  height: 28px;
+}
+.el-loading-spinner .path {
+  stroke: var(--lab-ink);
+}
+
+// ===== Empty state =====
+.el-empty__description {
+  color: var(--lab-ash);
+  font-size: 12.5px;
+}
+
+// ===== Tooltips — small dark popovers =====
+.el-popper.is-dark,
+.el-popper.is-light {
+  border-radius: var(--lab-radius-pill) !important;
+  font-size: 12px;
+  padding: 6px 12px;
+}
+
+.el-popper.is-dark {
+  background: var(--lab-ink) !important;
+  color: #fff !important;
+  border: none !important;
+
+  .el-popper__arrow::before { background: var(--lab-ink) !important; }
+}
+
+// ===== Checkbox / Radio =====
+.el-checkbox__input.is-checked .el-checkbox__inner,
+.el-radio__input.is-checked .el-radio__inner {
+  background-color: var(--lab-ink);
+  border-color: var(--lab-ink);
+}
+.el-checkbox__input.is-checked + .el-checkbox__label,
+.el-radio__input.is-checked + .el-radio__label {
+  color: var(--lab-ink);
+}
+
+// ===== Breadcrumb =====
+.el-breadcrumb__item .el-breadcrumb__inner {
+  color: var(--lab-ash);
+  font-weight: 500;
+  &.is-link:hover { color: var(--lab-ink); }
+}
+.el-breadcrumb__item:last-child .el-breadcrumb__inner {
+  color: var(--lab-ink);
+}

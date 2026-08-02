@@ -1,0 +1,1 @@
+export { mix, setProperty } from './color'

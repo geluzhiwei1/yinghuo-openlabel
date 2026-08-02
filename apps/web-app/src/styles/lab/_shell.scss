@@ -1,0 +1,458 @@
+/**
+ * Lab aesthetic bridge for tenant_admin's `.yh-*` shell classes.
+ *
+ * Phase 4: instead of rewriting ProjectsView/RolesView/OrgTreeView/WorkflowsView
+ * file by file (all four share the same yh-page-header/yh-card/yh-filter pattern),
+ * we apply lab styling globally. This file is imported once in tenant_admin/main.ts.
+ */
+
+/* ── Page header ───────────────────────────────── */
+.yh-page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0 8px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--lab-hairline);
+  flex-wrap: wrap;
+}
+
+.yh-page-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--y-font-family-display, "Instrument Serif", Georgia, serif) !important;
+  font-style: italic !important;
+  font-size: 36px !important;
+  font-weight: 400 !important;
+  color: var(--lab-ink) !important;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  margin: 0 !important;
+
+  /* Add coral period after title text */
+}
+
+.yh-page-title::after {
+  content: '.';
+  color: var(--lab-coral);
+  font-style: italic;
+}
+
+.yh-page-title > svg,
+.yh-page-title > .iconify {
+  color: var(--lab-ink);
+}
+
+.yh-page-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Card (replaces el-card shadow="never") ──── */
+.yh-card {
+  background: var(--lab-snow) !important;
+  border: 1px solid var(--lab-hairline) !important;
+  border-radius: var(--lab-radius-xl, 12px) !important;
+  box-shadow: var(--lab-shadow-soft, 0 1px 2px rgba(14,14,16,0.04), 0 4px 14px rgba(14,14,16,0.04)) !important;
+  padding: 12px 14px !important;
+
+  /* Strip EP card chrome */
+}
+
+.yh-card > :first-child {
+  margin-top: 0;
+}
+
+.yh-card .el-card__body {
+  padding: 0 !important;
+}
+
+/* ── Filter form ──────────────────────────────── */
+.yh-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+  padding: 10px 12px;
+  background: var(--lab-cream);
+  border-radius: var(--lab-radius-lg, 8px);
+  margin-bottom: 12px;
+}
+
+.yh-filter .el-form-item {
+  margin-bottom: 0 !important;
+  margin-right: 0 !important;
+}
+
+.yh-filter .el-form-item__label {
+  font-family: var(--y-font-family-mono, "JetBrains Mono", monospace) !important;
+  font-size: 10px !important;
+  letter-spacing: 0.18em !important;
+  color: var(--lab-ash) !important;
+  text-transform: uppercase;
+  padding: 0 0 4px !important;
+  line-height: 1.4 !important;
+}
+
+.yh-filter .el-input__wrapper,
+.yh-filter .el-select .el-input__wrapper {
+  border-radius: var(--lab-radius-lg, 8px) !important;
+  background: var(--lab-snow) !important;
+  box-shadow: none !important;
+  border: 1px solid transparent;
+  transition: border-color 150ms ease;
+}
+
+.yh-filter .el-input__wrapper:hover,
+.yh-filter .el-input.is-focus .el-input__wrapper {
+  border-color: var(--lab-ink) !important;
+}
+
+.yh-filter .el-input__inner {
+  color: var(--lab-ink);
+  height: 32px;
+}
+
+/* ── Pager ────────────────────────────────────── */
+.yh-pager {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 14px;
+  margin-top: 8px;
+  border-top: 1px dashed var(--lab-line);
+}
+
+.yh-pager .el-pagination.is-background .el-pager li.is-active {
+  background: var(--lab-ink) !important;
+  color: var(--lab-snow) !important;
+}
+
+.yh-pager .el-pagination.is-background .el-pager li:hover {
+  color: var(--lab-ink);
+}
+
+/* ── Muted ────────────────────────────────────── */
+.yh-muted {
+  color: var(--lab-fog) !important;
+  font-size: 12px;
+  font-family: var(--y-font-family-mono, "JetBrains Mono", monospace);
+  letter-spacing: 0.02em;
+}
+
+/* ── Table tweaks inside yh-card ──────────────── */
+.yh-card .el-table {
+  --el-table-border-color: var(--lab-line);
+  --el-table-header-bg-color: transparent;
+  --el-table-tr-bg-color: transparent;
+  background: transparent;
+}
+
+.yh-card .el-table th.el-table__cell {
+  background: transparent !important;
+  border-bottom: 1px solid var(--lab-line) !important;
+}
+
+.yh-card .el-table th.el-table__cell .cell {
+  font-family: var(--y-font-family-mono, "JetBrains Mono", monospace);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  color: var(--lab-ash);
+  text-transform: uppercase;
+}
+
+.yh-card .el-table td.el-table__cell {
+  border-bottom: 1px solid var(--lab-hairline) !important;
+}
+
+.yh-card .el-table__row:hover > td.el-table__cell {
+  background: var(--lab-cream) !important;
+}
+
+.yh-card .el-table__row .cell {
+  font-size: 12.5px;
+  color: var(--lab-graphite);
+}
+
+/* ── Buttons inside actions ───────────────────── */
+.yh-page-actions .el-button {
+  border-radius: var(--lab-radius-pill, 999px) !important;
+  height: 28px;
+  font-weight: 500;
+}
+
+.yh-page-actions .el-button--primary {
+  background: var(--lab-ink) !important;
+  border-color: var(--lab-ink) !important;
+  color: var(--lab-snow) !important;
+}
+
+.yh-page-actions .el-button--primary:hover {
+  background: var(--lab-graphite) !important;
+  color: var(--lab-lime) !important;
+}
+
+.yh-page-actions .el-button:not(.el-button--primary) {
+  background: transparent !important;
+  border: 1px solid var(--lab-line) !important;
+  color: var(--lab-slate) !important;
+}
+
+.yh-page-actions .el-button:not(.el-button--primary):hover {
+  border-color: var(--lab-ink) !important;
+  color: var(--lab-ink) !important;
+  background: var(--lab-cream) !important;
+}
+
+/* ── Dialog ───────────────────────────────────── */
+.el-dialog.yh-dialog,
+.el-dialog {
+  border-radius: var(--lab-radius-2xl, 16px) !important;
+  background: var(--lab-snow) !important;
+  box-shadow: var(--lab-shadow-lift, 0 12px 40px rgba(0,0,0,0.12)) !important;
+  overflow: hidden;
+}
+
+.el-dialog__header {
+  padding: 10px 12px 6px !important;
+  border-bottom: 1px solid var(--lab-hairline) !important;
+  margin-bottom: 0 !important;
+}
+
+.el-dialog__title {
+  font-family: var(--y-font-family-display, "Instrument Serif", Georgia, serif) !important;
+  font-style: italic !important;
+  font-size: 22px !important;
+  font-weight: 400 !important;
+  color: var(--lab-ink) !important;
+}
+
+.el-dialog__body {
+  padding: 12px !important;
+}
+
+.el-dialog__footer {
+  padding: 8px 12px 10px !important;
+  border-top: 1px solid var(--lab-hairline) !important;
+}
+
+/* form inside dialog */
+.el-dialog .el-form-item__label {
+  font-family: var(--y-font-family-mono, "JetBrains Mono", monospace) !important;
+  font-size: 11px !important;
+  letter-spacing: 0.04em !important;
+  color: var(--lab-slate) !important;
+  text-transform: uppercase;
+}
+
+/* Inputs inside dialogs inherit global snow-bg / line-border / ink-focus
+   styling from _component-patches.scss. The older cream-bg + transparent
+   border override that lived here broke design.md §5 ("input bg must be
+   snow") and made dialog inputs visually sink into the dialog body. */
+
+.el-dialog .el-input__inner {
+  color: var(--lab-ink);
+}
+
+/* ── Dark theme ───────────────────────────────── */
+html.dark .yh-page-title { color: var(--lab-snow) !important; }
+html.dark .yh-card {
+  background: rgba(255,255,255,0.04) !important;
+  border-color: rgba(255,255,255,0.06) !important;
+}
+html.dark .yh-filter { background: rgba(255,255,255,0.04); }
+html.dark .yh-filter .el-input__wrapper { background: rgba(255,255,255,0.06) !important; }
+
+/* ── EP link buttons → lab link-btn ───────────── */
+.yh-card .el-button.el-button--text,
+.yh-card .el-button.is-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px;
+  border-radius: var(--lab-radius-pill, 999px) !important;
+  padding: 4px 10px !important;
+  height: auto !important;
+  font-size: 11.5px !important;
+  background: transparent !important;
+  border: none !important;
+  transition: all 150ms ease;
+}
+
+.yh-card .el-button.is-link:hover {
+  background: var(--lab-cream) !important;
+  color: var(--lab-ink) !important;
+}
+
+.yh-card .el-button.is-link.el-button--primary {
+  color: var(--lab-ink) !important;
+}
+
+.yh-card .el-button.is-link.el-button--primary:hover {
+  background: var(--lab-ink) !important;
+  color: var(--lab-lime) !important;
+}
+
+.yh-card .el-button.is-link.el-button--danger {
+  color: var(--lab-slate) !important;
+}
+
+.yh-card .el-button.is-link.el-button--danger:hover {
+  background: rgba(255,106,61,0.14) !important;
+  color: var(--lab-coral) !important;
+}
+
+.yh-card .el-button.is-link.el-button--warning:hover {
+  background: var(--lab-butter, #ffe58a) !important;
+  color: var(--lab-graphite) !important;
+}
+
+/* ── EP el-tag → lab chip ─────────────────────── */
+.yh-card .el-tag,
+.el-dialog .el-tag {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px;
+  border-radius: var(--lab-radius-pill, 999px) !important;
+  border: none !important;
+  padding: 2px 10px !important;
+  height: auto !important;
+  font-family: var(--y-font-family-mono, "JetBrains Mono", monospace) !important;
+  font-size: 10.5px !important;
+  letter-spacing: 0.04em !important;
+  background: var(--lab-cream) !important;
+  color: var(--lab-slate) !important;
+}
+
+.yh-card .el-tag.el-tag--success,
+.el-dialog .el-tag.el-tag--success {
+  background: var(--lab-mint, #b8f0d0) !important;
+  color: var(--lab-graphite) !important;
+}
+
+.yh-card .el-tag.el-tag--info,
+.el-dialog .el-tag.el-tag--info {
+  background: var(--lab-lilac, #d9ccff) !important;
+  color: var(--lab-graphite) !important;
+}
+
+.yh-card .el-tag.el-tag--warning,
+.el-dialog .el-tag.el-tag--warning {
+  background: var(--lab-butter, #ffe58a) !important;
+  color: var(--lab-graphite) !important;
+}
+
+.yh-card .el-tag.el-tag--danger,
+.el-dialog .el-tag.el-tag--danger {
+  background: rgba(255,106,61,0.18) !important;
+  color: var(--lab-coral) !important;
+}
+
+/* ── EP el-empty → lab empty state ────────────── */
+.yh-card .el-empty,
+.el-dialog .el-empty {
+  padding: 40px 0 !important;
+}
+
+.yh-card .el-empty__description p,
+.el-dialog .el-empty__description p {
+  font-family: var(--y-font-family-mono, "JetBrains Mono", monospace) !important;
+  font-size: 12px !important;
+  letter-spacing: 0.04em !important;
+  color: var(--lab-fog) !important;
+}
+
+.yh-card .el-empty__image svg,
+.el-dialog .el-empty__image svg {
+  color: var(--lab-fog);
+}
+
+/* ── Switch ───────────────────────────────────── */
+.yh-card .el-switch.is-checked .el-switch__core {
+  background: var(--lab-ink) !important;
+  border-color: var(--lab-ink) !important;
+}
+
+.yh-card .el-switch__core {
+  border-radius: var(--lab-radius-pill, 999px);
+}
+
+/* ── Popover / tooltip ────────────────────────── */
+.el-popover.el-popper {
+  border-radius: var(--lab-radius-2xl, 16px) !important;
+  border: 1px solid var(--lab-hairline) !important;
+  padding: 10px 12px !important;
+  box-shadow: var(--lab-shadow-lift, 0 12px 32px rgba(0,0,0,0.1)) !important;
+}
+
+.el-popper.is-dark,
+.el-popper.is-light {
+  font-family: var(--y-font-family-mono, "JetBrains Mono", monospace);
+}
+
+/* ── Pagination (used in yh-pager) ────────────── */
+.el-pagination.is-background .btn-prev,
+.el-pagination.is-background .btn-next,
+.el-pagination.is-background .el-pager li {
+  border-radius: var(--lab-radius-pill, 999px) !important;
+  background: var(--lab-cream) !important;
+  color: var(--lab-slate) !important;
+  font-family: var(--y-font-family-mono, "JetBrains Mono", monospace);
+  font-size: 11px;
+  margin: 0 2px;
+}
+
+.el-pagination.is-background .el-pager li.is-active {
+  background: var(--lab-ink) !important;
+  color: var(--lab-snow) !important;
+}
+
+.el-pagination.is-background .btn-prev:hover,
+.el-pagination.is-background .btn-next:hover,
+.el-pagination.is-background .el-pager li:hover {
+  color: var(--lab-ink) !important;
+}
+
+/* ── Drawer ───────────────────────────────────── */
+.el-drawer {
+  background: var(--lab-snow) !important;
+}
+
+.el-drawer__header {
+  margin-bottom: 0 !important;
+  padding: 10px 12px 8px !important;
+  border-bottom: 1px solid var(--lab-hairline) !important;
+}
+
+.el-drawer__title {
+  font-family: var(--y-font-family-display, "Instrument Serif", Georgia, serif) !important;
+  font-style: italic !important;
+  font-size: 22px !important;
+  font-weight: 400 !important;
+  color: var(--lab-ink) !important;
+}
+
+.el-drawer__body {
+  padding: 12px !important;
+}
+
+/* ── Tree (for OrgTreeView) ───────────────────── */
+.el-tree {
+  background: transparent !important;
+  font-family: var(--y-font-family-mono, "JetBrains Mono", monospace);
+}
+
+.el-tree-node__content {
+  height: auto !important;
+  padding: 6px 0 !important;
+}
+
+.el-tree-node__content:hover {
+  background: var(--lab-cream) !important;
+  border-radius: var(--lab-radius-pill, 999px);
+}
+
+.el-tree-node.is-current > .el-tree-node__content {
+  background: var(--lab-cream) !important;
+}

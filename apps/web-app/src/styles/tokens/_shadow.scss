@@ -1,0 +1,14 @@
+// Box shadow tokens — Linear style: minimal, low-contrast
+// Cards rely on borders, not shadows. Shadows reserved for floating layers (popovers, menus, modals).
+:root {
+  --y-shadow-1: 0 1px 2px var(--y-shadow-color-1);
+  --y-shadow-2: 0 2px 4px var(--y-shadow-color-2);
+  --y-shadow-3: 0 4px 12px var(--y-shadow-color-3);
+
+  // Aliases
+  --y-shadow-sm:     var(--y-shadow-1);
+  --y-shadow-md:     var(--y-shadow-2);
+  --y-shadow-lg:     var(--y-shadow-3);
+  --y-shadow-none:   none;
+  --y-shadow-inner:  inset 0 1px 2px var(--y-shadow-color-1);
+}

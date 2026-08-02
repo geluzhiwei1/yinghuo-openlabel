@@ -1,0 +1,206 @@
+// Color tokens — Linear/Notion aesthetic
+// Single source of truth for all colors. Use as: var(--y-color-*)
+//
+// Design philosophy:
+// - Neutral grayscale dominant; brand color used sparingly (links, primary buttons, focus rings)
+// - Very light borders (#EAECF0) — cards rely on borders not shadows
+// - Status colors desaturated for enterprise feel
+// - Three faces differentiated by data-face attribute, but all stay in Linear palette
+:root {
+  // Brand (default — business face)
+  --y-color-primary:         #5E6AD2;  // Linear indigo
+  --y-color-primary-hover:   #4D5BC9;
+  --y-color-primary-active:  #4046B4;
+  --y-color-primary-soft:    rgba(94, 106, 210, 0.08);
+  --y-color-primary-border:  rgba(94, 106, 210, 0.40);
+
+  // Semantic
+  --y-color-success: #16A34A;
+  --y-color-warning: #F59E0B;
+  --y-color-danger:  #E5484D;
+  --y-color-info:    #98A2B3;
+
+  // Neutral grayscale (Gray-900 → Gray-300, Web GrayScale standard)
+  --y-color-text-primary:     #101828;  // Gray-900
+  --y-color-text-regular:     #344054;  // Gray-700
+  --y-color-text-secondary:   #475467;  // Gray-600
+  --y-color-text-placeholder: #98A2B3;  // Gray-400
+  --y-color-text-disabled:    #D0D5DD;  // Gray-300
+  --y-color-text-inverse:     #FFFFFF;
+
+  // Backgrounds
+  --y-color-bg-base:      #FFFFFF;
+  --y-color-bg-canvas:    #FAFAFA;  // app background (subtle warmth)
+  --y-color-bg-card:      #FFFFFF;
+  --y-color-bg-hover:     #F5F5F5;
+  --y-color-bg-active:    #EAEAEA;
+  --y-color-bg-overlay:   rgba(16, 24, 40, 0.50);
+
+  // Borders & dividers
+  --y-color-border:         #EAECF0;  // Gray-200, the Linear staple
+  --y-color-border-light:   #F0F0F0;
+  --y-color-border-lighter: #F5F5F5;
+  --y-color-border-strong:  #D0D5DD;  // for inputs / focusable edges
+  --y-color-divider:        #EAECF0;
+
+  // Layout-specific
+  --y-color-header-bg:     var(--y-color-bg-card);
+  --y-color-header-text:   var(--y-color-text-primary);
+  --y-color-sidebar-bg:    #FFFFFF;
+  --y-color-sidebar-text:  #475467;
+  --y-color-sidebar-active: #F5F5F5;
+
+  // Shadows (color-component)
+  --y-shadow-color-1: rgba(16, 24, 40, 0.05);
+  --y-shadow-color-2: rgba(16, 24, 40, 0.06);
+  --y-shadow-color-3: rgba(16, 24, 40, 0.08);
+
+  // Chart palette — for ECharts/Plotly.
+  // Semantic colors alias from above for direct series binding.
+  // Read at runtime via useChartTheme() — see src/components/charts/useChartTheme.ts
+  --y-chart-primary:    var(--y-color-primary);
+  --y-chart-success:    var(--y-color-success);
+  --y-chart-warning:    var(--y-color-warning);
+  --y-chart-danger:     var(--y-color-danger);
+  --y-chart-info:       #0EA5E9;   // sky-500 — distinct from primary indigo for multi-series
+  --y-chart-neutral:    var(--y-color-info);
+
+  // Categorical palette (7 distinct hues for multi-series charts)
+  --y-chart-cat-1: #5E6AD2;  // indigo (brand)
+  --y-chart-cat-2: #0EA5E9;  // sky
+  --y-chart-cat-3: #16A34A;  // green
+  --y-chart-cat-4: #F59E0B;  // amber
+  --y-chart-cat-5: #E5484D;  // red
+  --y-chart-cat-6: #6E56CF;  // violet
+  --y-chart-cat-7: #98A2B3;  // gray
+
+  // Heatmap anchors (low / mid / high stops for Plotly colorscale)
+  --y-chart-heat-low:    #F5F5F5;
+  --y-chart-heat-mid:    #FCD9D9;
+  --y-chart-heat-high:   #E5484D;
+  --y-chart-heat-warn:   #FDE68A;
+  --y-chart-heat-success: #BBF7D0;
+
+  // Chart axis / grid lines
+  --y-chart-axis-line: var(--y-color-border-light);
+  --y-chart-axis-label: var(--y-color-text-secondary);
+  --y-chart-tooltip-bg: var(--y-color-bg-card);
+  --y-chart-tooltip-border: var(--y-color-border);
+
+  // Canvas workspace — annotation canvas is always a dark work surface
+  // (like Photoshop's canvas), regardless of UI theme. These don't switch.
+  // Used by: nrrd / pointcloud Three.js renderer wrappers + overlays.
+  --y-color-canvas-bg:          #000000;
+  --y-color-canvas-text:        rgba(255, 255, 255, 0.85);
+  --y-color-canvas-text-muted:  rgba(255, 255, 255, 0.55);
+  --y-color-canvas-border:      rgba(255, 255, 255, 0.20);
+  --y-color-canvas-active:      var(--y-color-primary);  // active tool indicator
+
+  // Canvas surface — theme-aware (video annotator: white in light, dark grey in dark)
+  --y-color-canvas-surface:     #ffffff;
+}
+
+
+:root.dark {
+  --y-color-primary:         #8B93E5;
+  --y-color-primary-hover:   #9CA2EB;
+  --y-color-primary-active:  #6F78D9;
+  --y-color-primary-soft:    rgba(139, 147, 229, 0.16);
+  --y-color-primary-border:  rgba(139, 147, 229, 0.40);
+
+  --y-color-success: #4ADE80;
+  --y-color-warning: #FBBF24;
+  --y-color-danger:  #F87171;
+  --y-color-info:    #94A3B8;
+
+  --y-color-text-primary:     rgba(255, 255, 255, 0.92);
+  --y-color-text-regular:     rgba(255, 255, 255, 0.72);
+  --y-color-text-secondary:   rgba(255, 255, 255, 0.50);
+  --y-color-text-placeholder: rgba(255, 255, 255, 0.32);
+  --y-color-text-disabled:    rgba(255, 255, 255, 0.28);
+  --y-color-text-inverse:     #101828;
+
+  --y-color-bg-base:      #0B0F19;
+  --y-color-bg-canvas:    #0F1420;
+  --y-color-bg-card:      #161B26;
+  --y-color-bg-hover:     rgba(255, 255, 255, 0.06);
+  --y-color-bg-active:    rgba(255, 255, 255, 0.10);
+  --y-color-bg-overlay:   rgba(0, 0, 0, 0.65);
+
+  --y-color-border:         rgba(255, 255, 255, 0.10);
+  --y-color-border-light:   rgba(255, 255, 255, 0.08);
+  --y-color-border-lighter: rgba(255, 255, 255, 0.06);
+  --y-color-border-strong:  rgba(255, 255, 255, 0.16);
+  --y-color-divider:        rgba(255, 255, 255, 0.10);
+
+  --y-color-header-bg:     var(--y-color-bg-card);
+  --y-color-header-text:   var(--y-color-text-primary);
+  --y-color-sidebar-bg:    #0F1420;
+  --y-color-sidebar-text:  rgba(255, 255, 255, 0.72);
+  --y-color-sidebar-active: rgba(255, 255, 255, 0.06);
+
+  --y-shadow-color-1: rgba(0, 0, 0, 0.30);
+  --y-shadow-color-2: rgba(0, 0, 0, 0.40);
+  --y-shadow-color-3: rgba(0, 0, 0, 0.55);
+
+  // Chart palette — dark mode adjustments
+  --y-chart-info:    #38BDF8;
+  --y-chart-cat-1: #8B93E5;
+  --y-chart-cat-2: #38BDF8;
+  --y-chart-cat-3: #4ADE80;
+  --y-chart-cat-4: #FBBF24;
+  --y-chart-cat-5: #F87171;
+  --y-chart-cat-6: #A78BFA;
+  --y-chart-cat-7: #94A3B8;
+  --y-chart-heat-low:    rgba(255, 255, 255, 0.06);
+  --y-chart-heat-mid:    rgba(248, 113, 113, 0.35);
+  --y-chart-heat-high:   #F87171;
+  --y-chart-heat-warn:   rgba(251, 191, 36, 0.40);
+  --y-chart-heat-success: rgba(74, 222, 128, 0.35);
+
+  // Canvas surface — dark mode
+  --y-color-canvas-surface: #1a1a1a;
+}
+
+// ===== Three-face differentiation =====
+// data-face on <body> / root element differentiates business / admin / platform.
+// Only brand color and header bg shift; semantic + neutral + dark logic inherit.
+//
+// business (default) — Linear indigo (defined above in :root)
+// admin — sky blue (calmer than current teal, fits Linear palette)
+// platform — muted violet (slightly desaturated from current)
+
+[data-face='business'] {
+  // inherits :root
+}
+
+[data-face='admin'] {
+  --y-color-primary:         #0EA5E9;  // sky-500
+  --y-color-primary-hover:   #0284C7;
+  --y-color-primary-active:  #0369A1;
+  --y-color-primary-soft:    rgba(14, 165, 233, 0.10);
+  --y-color-primary-border:  rgba(14, 165, 233, 0.40);
+}
+
+[data-face='platform'] {
+  --y-color-primary:         #6E56CF;  // muted violet
+  --y-color-primary-hover:   #5E45C0;
+  --y-color-primary-active:  #4F37B0;
+  --y-color-primary-soft:    rgba(110, 86, 207, 0.10);
+  --y-color-primary-border:  rgba(110, 86, 207, 0.40);
+}
+
+// dark mode brand sync per face
+:root.dark[data-face='admin'] {
+  --y-color-primary:         #38BDF8;
+  --y-color-primary-hover:   #7DD3FC;
+  --y-color-primary-active:  #0EA5E9;
+  --y-color-primary-soft:    rgba(56, 189, 248, 0.18);
+}
+
+:root.dark[data-face='platform'] {
+  --y-color-primary:         #A78BFA;
+  --y-color-primary-hover:   #C4B5FD;
+  --y-color-primary-active:  #8B5CF6;
+  --y-color-primary-soft:    rgba(167, 139, 250, 0.18);
+}

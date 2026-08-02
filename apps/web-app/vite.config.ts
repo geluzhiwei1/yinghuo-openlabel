@@ -27,16 +27,17 @@ import { version as pkgVersion } from './package.json'
 process.env.VITE_APP_VERSION = pkgVersion
 
 
-// YH_EDITION 控制入口:ce(社区版)只构建 9 个业务面;ee/saas 额外加 platform/tenant_admin。
-// 阶段 1 暂不拆 SaaS 专属前端入口(待 SaaS 新功能 view 实现后再分)。
+// YH_EDITION 控制入口:ce(社区版)只构建 9 个业务面;ee 加 platform/tenant_admin;
+// saas 用 ee/tenant_admin.html + saas/platform.html(SaaS 专属 platform 视图)。
 const EDITION = process.env.YH_EDITION ?? 'ce'
 
 export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  const eeInputs = EDITION !== 'ce' ? {
+  const extraInputs = EDITION === 'ce' ? {} : {
     tenantAdmin: resolve(__dirname, 'ee/tenant_admin.html'),
-    platform: resolve(__dirname, 'ee/platform.html'),
-  } : {}
+    platform: resolve(__dirname,
+      EDITION === 'saas' ? 'saas/platform.html' : 'ee/platform.html'),
+  }
   return {
     // base 硬编码,%VITE_APP_BASE_URI% 仅用于 HTML 模板内联资源引用,
     // 设为空避免 vite 再叠一层前缀(/guis/v0.3.4/guis/v0.3.4/...)
@@ -85,7 +86,7 @@ export default defineConfig(({ command, mode }) => {
           qualityDashboard: resolve(__dirname, 'dashboard.html'),
           reviewWorkbench: resolve(__dirname, 'review.html'),
           qaWorkbench: resolve(__dirname, 'qa.html'),
-          ...eeInputs,
+          ...extraInputs,
         }
       }
     },

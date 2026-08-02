@@ -1,27 +1,10 @@
 <template>
-  <el-dialog style="width: 800px" :title="dialogTitle" v-model="dialogVisible">
-    <el-form
-      ref="formRef"
-      :model="form"
-      :rules="rules"
-      v-loading="formLoading"
-      label-position="right"
-      label-width="auto"
-      style="max-width: 500px"
-    >
+  <el-dialog style="width:800px" :title="dialogTitle" v-model="dialogVisible">
+    <el-form ref="formRef" :model="form" :rules="rules" v-loading="formLoading" label-position="right"
+      label-width="auto" style="max-width: 500px">
       <el-form-item label="选择数据段" prop="data_clip_id">
-        <el-select
-          v-model="form.label_spec.data.seq"
-          collapse-tags
-          collapse-tags-tooltip
-          placeholder="Select"
-        >
-          <el-option
-            v-for="item in dataClipIds"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          />
+        <el-select v-model="form.label_spec.data.seq" collapse-tags collapse-tags-tooltip placeholder="Select">
+          <el-option v-for="item in dataClipIds" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
       </el-form-item>
       <!-- <el-form-item label="选择数据" prop="streams">
@@ -43,33 +26,13 @@
       </el-form-item> -->
 
       <el-form-item label="选择领域" prop="domain">
-        <el-select
-          v-model="form.label_spec.domain.key"
-          collapse-tags
-          collapse-tags-tooltip
-          placeholder="Select"
-        >
-          <el-option
-            v-for="item in domains"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          />
+        <el-select v-model="form.label_spec.domain.key" collapse-tags collapse-tags-tooltip placeholder="Select">
+          <el-option v-for="item in domains" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
       </el-form-item>
       <el-form-item label="选择任务" prop="mission">
-        <el-select
-          v-model="form.label_spec.mission.key"
-          collapse-tags
-          collapse-tags-tooltip
-          placeholder="Select"
-        >
-          <el-option
-            v-for="item in missions"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          />
+        <el-select v-model="form.label_spec.mission.key" collapse-tags collapse-tags-tooltip placeholder="Select">
+          <el-option v-for="item in missions" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
       </el-form-item>
 
@@ -80,21 +43,13 @@
         <PrioritySelect v-model:modelValue="form.priority" />
       </el-form-item>
       <el-form-item label="备注" prop="priority">
-        <el-input
-          v-model="form.desc"
-          maxlength="1024"
-          style="width: 100%"
-          placeholder="Please input"
-          show-word-limit
-          type="textarea"
-        />
+        <el-input v-model="form.desc" maxlength="1024" style="width: 100%" placeholder="Please input" show-word-limit
+          type="textarea" />
       </el-form-item>
     </el-form>
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="submitForm(formRef)" type="primary" :disabled="formLoading"
-          >确定</el-button
-        >
+        <el-button @click="submitForm(formRef)" type="primary" :disabled="formLoading">确定</el-button>
         <el-button @click="dialogVisible = false">取消</el-button>
         <el-button @click="resetForm()">重置</el-button>
       </div>
@@ -102,8 +57,17 @@
   </el-dialog>
 </template>
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
-import { ElButton, ElForm, ElFormItem, ElSelect, ElOption, ElDialog, ElInput } from 'element-plus'
+import { onMounted, toRaw, ref, reactive, watch } from 'vue'
+import {
+  ElButton,
+  ElForm,
+  ElFormItem,
+  ElSelect,
+  ElOption,
+  ElDialog,
+  ElInput,
+} from 'element-plus'
+import _ from 'lodash'
 import { annoJobPerformApi } from '@ui-common/api'
 import TaxonomySelectTable from './TaxonomySelectTable.vue'
 import PrioritySelect from '@ui-common/components/PrioritySelect.vue'
@@ -126,11 +90,11 @@ const domains = ref<any[]>([
   { value: 'intelligent-driving', label: '智能驾驶' },
   { value: 'industrial-robot', label: '工业机器人' },
   { value: 'human-robot', label: '人形机器人' },
-  { value: 'medical-image', label: 'Medical Image' }
+  { value: 'medical-image', label: 'Medical Image' },
 ])
 const missions = ref<any[]>([
   { value: 'objectDet2d', label: '目标检测' },
-  { value: 'semantic2d', label: '语义分割' }
+  { value: 'semantic2d', label: '语义分割' },
   // { value: 'trafficLine2d', label: '交通标线' },
   // { value: 'parkingSlot2d', label: '停车场/车位' },
   // { value: 'trafficSignal2d', label: '信号灯' },
@@ -154,9 +118,9 @@ const rules = ref({
           callback()
         }
       },
-      triggle: 'blur'
+      trigger: 'blur'
     },
-    { min: 1, max: 1024, message: '长度为1-1024', triggle: 'blur' }
+    { min: 1, max: 1024, message: '长度为1-1024', trigger: 'blur' }
   ]
 })
 
@@ -167,26 +131,26 @@ const formDefault = {
   type: 0,
   taxonomy_key: '',
   priority: 1,
-  version: '1.0.0',
-  name: 'demo-data-1-objectDet2d',
-  desc: 'demo job',
+  version: "1.0.0",
+  name: "demo-data-1-objectDet2d",
+  desc: "demo job",
   label_spec: {
-    domain: { key: 'intelligent-driving' },
-    mission: { key: 'objectDet2d' },
-    taxonomy: { key: 'road_objects_simple_1.0.0_zh-CN' },
+    domain: { "key": "intelligent-driving" },
+    mission: { "key": "objectDet2d" },
+    taxonomy: { "key": "road_objects_simple_1.0.0_zh-CN" },
     data: {
-      format: 'simple-directory',
-      root_dir: 'xxx',
-      seq: 'demo-data-1',
+      format: "simple-directory",
+      root_dir: "xxx",
+      seq: "demo-data-1",
       streams: [],
       clip_key: ''
     }
-  }
+  },
 }
 const form = ref({ ...formDefault })
 
 const open = async (type: string, params) => {
-  const { id } = params
+  const { id, data_clip_id, clip_key, batch_key } = params
 
   dialogVisible.value = true
   dialogTitle.value = 'action.' + type
@@ -196,7 +160,7 @@ const open = async (type: string, params) => {
     formLoading.value = true
     try {
       const { data } = await annoJobPerformApi.query({
-        uuid: id
+        uuid:id,
       })
       form.value = data
     } finally {
@@ -208,7 +172,7 @@ const open = async (type: string, params) => {
 const emit = defineEmits(['success'])
 const submitForm = async (formEl) => {
   if (!formEl) return
-  await formEl.validate(async (valid) => {
+  await formEl.validate(async (valid, fields) => {
     if (valid) {
       // 设置name
       form.value.name = form.value.label_spec.data.seq + '-' + form.value.label_spec.mission.key
@@ -228,7 +192,6 @@ const submitForm = async (formEl) => {
         formLoading.value = false
       }
     } else {
-      // do nothing
     }
   })
 }
@@ -238,32 +201,25 @@ const resetForm = () => {
 
 const loadDataClipIds = async () => {
   // TODO
-  dataClipIds.value = [
-    { label: 'demo-data-1', value: 0 },
-    { label: 'demo-data-2', value: 1 }
-  ]
+  dataClipIds.value = [{ label: 'demo-data-1', value: 0 }, { label: 'demo-data-2', value: 1 }]
 }
 const loadStreams = async () => {
   // TODO
-  seqStreams.value = [
-    { label: 'back_cam', value: 0 },
-    { label: 'front_cam', value: 1 }
-  ]
+  seqStreams.value = [{ label: 'back_cam', value: 0 }, { label: 'front_cam', value: 1 }]
 }
-watch(
-  () => form.value.data_clip_id,
-  (newVal, oldVal) => {
-    if (newVal === oldVal) {
-      return
-    }
-    loadStreams().then(() => {
-      form.value.label_spec.data.streams = []
-    })
+watch(() => form.value.data_clip_id, (newVal, oldVal) => {
+  if (newVal === oldVal) {
+    return
   }
-)
+  loadStreams().then(() => {
+    form.value.label_spec.data.streams = []
+  })
+})
 
 const loadData = () => {
-  Promise.all([loadDataClipIds()]).catch((error) => {
+  Promise.all([
+    loadDataClipIds()
+  ]).catch((error) => {
     messages.lastException = `异常${error.message}`
   })
 }

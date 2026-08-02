@@ -1,121 +1,145 @@
-/*
-Copyright (C) 2025 格律至微
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
-import { type Menus } from '@/types/menu'
+import { type Menus } from '@/types/menu';
 
 // TODO 后台接口获取
 export const menuData: Menus[] = [
-  {
-    id: '0',
-    title: 'home.menu.dashboard',
-    index: '/dashboard',
-    role: 'dashboard',
-    icon: 'ic:sharp-dashboard'
-  },
-  {
-    id: '2',
-    title: 'home.menu.annojob',
-    icon: 'fluent:clipboard-task-list-24-filled',
-    index: '/annojob',
-    role: 'annojob'
-  },
-  {
-    id: '4',
-    title: 'home.menu.anno-manager',
-    index: '4',
-    icon: 'icon-park-outline:data-user',
-    children: [
-      {
-        id: '41',
-        pid: '1',
-        index: '/my-job',
-        role: 'my-job',
-        title: 'home.menu.my-job'
-      },
-      {
-        id: '43',
-        pid: '1',
-        index: '/anno-specification',
-        role: 'anno-specification',
-        title: 'home.menu.anno-specification'
-      }
-      // {
-      //     id: '42',
-      //     pid: '1',
-      //     index: '/data-package-manager',
-      //     role: 'data-package-manager',
-      //     title: '数据包管理'
-      // },
-      // {
-      //     id: '45',
-      //     pid: '1',
-      //     index: '/label-batch',
-      //     role: 'label-batch',
-      //     title: '标注批次'
-      // },
-    ]
-  },
-  {
-    id: '5',
-    title: 'home.menu.system-data',
-    index: '5',
-    icon: 'bi:database-fill-gear',
-    children: [
-      {
-        id: '13',
-        pid: '5',
-        index: '/system-user',
-        role: 'system-user',
-        title: 'home.menu.system-user'
-      },
-      {
-        id: '10',
-        pid: '5',
-        index: '/system-dept',
-        role: 'system-dept',
-        title: 'home.menu.system-dept'
-      },
-      {
-        id: '12',
-        pid: '5',
-        index: '/system-role',
-        role: 'system-role',
-        title: 'home.menu.system-role'
-      }
-    ]
-  }
-  // {
-  //     id: '1',
-  //     title: '系统设置',
-  //     index: '2',
-  //     icon: 'carbon:gui-management',
-  //     children: [
-  //         {
-  //             id: '11',
-  //             pid: '1',
-  //             index: '/user-info',
-  //             role: 'user-info',
-  //             title: '我的信息',
-  //         },
-  //         {
-  //             id: '13',
-  //             pid: '1',
-  //             index: '/system-menu',
-  //             title: '菜单管理',
-  //         },
-  //     ],
-  // },
-]
+    {
+        id: '0v2',
+        title: '首页',
+        icon: 'material-symbols:dashboard-outline',
+        index: '/dashboard-v2',
+    },
+    {
+        id: '2v2',
+        title: '标注任务',
+        icon: 'material-symbols:draw-outline',
+        index: '/annojob-v2',
+        role: 'annojob-v2',
+    },
+    {
+        id: '4',
+        title: '标注管理',
+        index: '4',
+        icon: 'material-symbols:description-outline',
+        children: [
+            {
+                id: '41',
+                pid: '1',
+                index: '/my-job',
+                role: 'my-job',
+                title: '我的任务'
+            },
+            {
+                id: '43',
+                pid: '1',
+                index: '/anno-specification',
+                role: 'anno-specification',
+                title: '标注规范'
+            },
+            {
+                id: '42',
+                pid: '1',
+                index: '/data-package-manager',
+                role: 'data-package-manager',
+                title: '数据包管理'
+            },
+            {
+                id: '45',
+                pid: '1',
+                index: '/label-batch',
+                role: 'label-batch',
+                title: '标注批次'
+            },
+            {
+                // Stage 9.6: workflow 驱动的批次管理
+                id: '46',
+                pid: '1',
+                index: '/batches',
+                role: 'batches-list',
+                title: '批次管理',
+                permiss: 'business:anno-job:read',
+            },
+            {
+                // Stage 10.2: 工作流运行态监控
+                id: '47',
+                pid: '1',
+                index: '/workflow-monitor',
+                role: 'workflow-monitor',
+                title: '工作流监控',
+                permiss: 'business:workflow:read',
+            },
+        ]
+    },
+    {
+        id: '3',
+        title: '团队信息',
+        index: '3',
+        icon: 'material-symbols:groups-outline',
+        children: [
+            {
+                id: '32',
+                pid: '1',
+                index: '/my-group',
+                role: 'my-group',
+                title: '我的团队'
+            },
+            {
+                id: '31',
+                pid: '1',
+                index: '/other-group',
+                role: 'other-group',
+                title: '我参加的'
+            },
+        ]
+    },
+    {
+        id: '5',
+        title: '系统数据',
+        index: '5',
+        icon: 'material-symbols:database-outline',
+        children: [
+            {
+                id: '10',
+                pid: '1',
+                index: '/system-dept',
+                role: 'system-dept',
+                title: '部门管理',
+            },
+            {
+                id: '12',
+                pid: '1',
+                index: '/system-role',
+                role: 'system-role',
+                title: '角色管理',
+            },
+            {
+                id: '14',
+                pid: '1',
+                index: '/system-data',
+                role: 'system-data',
+                title: '我的数据',
+            },
+        ]
+    },
+    {
+        id: '1',
+        title: '系统设置',
+        index: '2',
+        icon: 'material-symbols:settings-outline',
+        children: [
+            {
+                id: '11',
+                pid: '1',
+                index: '/user-info',
+                role: 'user-info',
+                title: '我的信息',
+            },
+            {
+                id: '13',
+                pid: '1',
+                index: '/system-menu',
+                title: '菜单管理',
+            },
+        ],
+    },
+    
+];

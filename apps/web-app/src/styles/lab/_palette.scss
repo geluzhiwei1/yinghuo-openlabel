@@ -1,0 +1,103 @@
+// Lab palette — design.md §1
+//
+// Single source of truth for the "paper + lab notebook" aesthetic.
+// Loaded after src/styles/tokens/_color.scss so lab tokens override face-specific ones.
+//
+// Discipline (design.md §1):
+// - paper #f7f6f2 is the only background color
+// - lime + coral combined must stay ≤3% of any screen
+// - sky/lilac/mint/butter are for category badges only, never large surfaces
+
+:root {
+  // Surfaces
+  --lab-paper:    #f7f6f2;  // 全局底色（唯一背景）
+  --lab-cream:    #fbfaf5;  // 次级填充：输入框、hover、内嵌胶囊
+  --lab-snow:     #ffffff;  // 卡片 / 面板 / 浮层
+
+  // Ink scale
+  --lab-ink:      #0e0e10;  // 主文字、主按钮底、Logo
+  --lab-graphite: #1c1c20;  // 深色面板（点云视口边栏）
+  --lab-slate:    #3f4046;  // 正文次级文字
+  --lab-ash:      #8a8b92;  // 标签、占位符、单位、辅助说明
+  --lab-fog:      #b8b9be;  // 深底上的弱文字
+
+  // Lines
+  --lab-line:     #e6e4dc;  // 结构分隔线
+  --lab-hairline: #ececea;  // 表格行线、卡内细线（比 line 更淡）
+
+  // Signal colors (use sparingly)
+  --lab-lime:     #c8fa4b;  // 唯一"活着"的信号：在线点、选中态、主按钮图标球
+  --lab-lime-ink: #1f2a05;  // lime 底上的文字
+  --lab-coral:    #ff6a3d;  // 动作/警示：刷新按钮、标题句点、进行中状态
+
+  // Category badge colors (low saturation, small area only)
+  --lab-sky:      #b6dcff;
+  --lab-lilac:    #d9ccff;
+  --lab-mint:     #b8f0d0;
+  --lab-butter:   #ffe58a;
+
+  // === Aliases into existing --y-* namespace ===
+  // Bridge so existing components using --y-color-* pick up lab palette
+  // automatically. Face-specific indigo/sky/violet are overridden.
+  --y-color-bg-canvas:       var(--lab-paper);
+  --y-color-bg-base:         var(--lab-snow);
+  --y-color-bg-card:         var(--lab-snow);
+  --y-color-bg-hover:        var(--lab-cream);
+  --y-color-bg-active:       #f0eee5;
+
+  --y-color-text-primary:     var(--lab-ink);
+  --y-color-text-regular:     var(--lab-slate);
+  --y-color-text-secondary:   var(--lab-slate);
+  --y-color-text-placeholder: var(--lab-ash);
+  --y-color-text-disabled:    var(--lab-fog);
+  --y-color-text-inverse:     var(--lab-snow);
+
+  --y-color-border:         var(--lab-line);
+  --y-color-border-light:   var(--lab-hairline);
+  --y-color-border-lighter: var(--lab-hairline);
+  --y-color-border-strong:  var(--lab-line);
+  --y-color-divider:        var(--lab-hairline);
+
+  // Brand — design.md mandates lime + coral, replacing Linear indigo
+  --y-color-primary:         var(--lab-ink);         // buttons are ink-black by default
+  --y-color-primary-hover:   #2a2a2e;
+  --y-color-primary-active:  #000000;
+  --y-color-primary-soft:    rgba(14, 14, 16, 0.06);
+  --y-color-primary-border:  rgba(14, 14, 16, 0.20);
+
+  // Semantic — design.md uses coral for "in progress / action / warning"
+  --y-color-success: #2f7a3e;     // muted green for "完成" only
+  --y-color-warning: var(--lab-coral);
+  --y-color-danger:  var(--lab-coral);
+  --y-color-info:    var(--lab-slate);
+
+  // Layout-specific
+  --y-color-header-bg:     var(--lab-paper);
+  --y-color-header-text:   var(--lab-ink);
+  --y-color-sidebar-bg:    var(--lab-paper);
+  --y-color-sidebar-text:  var(--lab-slate);
+  --y-color-sidebar-active: var(--lab-cream);
+
+  // Sidebar / header accent
+  --lab-accent: var(--lab-lime);
+
+  color-scheme: light;
+}
+
+// Dark mode is intentionally NOT defined globally — design.md says
+// "深色只在画布". Canvas-only dark is handled by [data-surface='canvas']
+// in _textures.scss and the existing body.anno-app scoped themes.
+// We keep :root.dark rules from _color.scss active for any legacy dark paths,
+// but new lab UI is always paper.
+
+// Face override — all three faces now share the same lab palette.
+// Indigo (business), sky (admin), violet (platform) are gone.
+[data-face='business'],
+[data-face='admin'],
+[data-face='platform'] {
+  --y-color-primary:         var(--lab-ink);
+  --y-color-primary-hover:   #2a2a2e;
+  --y-color-primary-active:  #000000;
+  --y-color-primary-soft:    rgba(14, 14, 16, 0.06);
+  --y-color-primary-border:  rgba(14, 14, 16, 0.20);
+}

@@ -4,13 +4,11 @@
       width="220"
       confirm-button-text="是"
       cancel-button-text="否"
-      :icon="WarningFilled"
-      icon-color="#626AEF"
       title="是否要清除已标注的语义点? 操作不可恢复。"
       @confirm.stop="handleDeleteAll"
     >
       <template #reference>
-        <el-button :icon="DeleteFilled" size="small" type="danger" />
+        <el-button size="small" type="danger"><Icon icon="lucide:trash-2" /></el-button>
       </template>
     </el-popconfirm>
   </el-button-group>
@@ -33,13 +31,10 @@
             <span v-html="scope.row.properties.description"></span>
           </template>
           <template #reference>
-            <el-button
-              :icon="InfoFilled"
-              circle
+            <el-button circle
               size="small"
               style="font-size: 20px"
-              :style="{ color: scope.row.color }"
-            />
+              :style="{ color: scope.row.color }"><Icon icon="lucide:info" /></el-button>
           </template>
         </el-popover>
       </template>
@@ -55,36 +50,25 @@
     <el-table-column>
       <template #default="scope">
         <el-button-group class="ml-4">
-          <el-button
-            :icon="Hide"
-            circle
+          <el-button circle
             size="small"
             :style="{ color: scope.row.mute ? 'blue' : '' }"
-            @click.stop="handleMute(scope.$index, scope.row)"
-          />
-          <el-button
-            :icon="View"
-            circle
+            @click.stop="handleMute(scope.$index, scope.row)"><Icon icon="lucide:eye-off" /></el-button>
+          <el-button circle
             size="small"
             :style="{ color: scope.row.solo ? 'blue' : '' }"
-            @click.stop="handleSolo(scope.$index, scope.row)"
-          />
+            @click.stop="handleSolo(scope.$index, scope.row)"><Icon icon="lucide:eye" /></el-button>
           <el-popconfirm
             width="220"
             confirm-button-text="是"
             cancel-button-text="否"
-            :icon="WarningFilled"
-            icon-color="#626AEF"
             title="是否清除该类别？操作不可恢复。"
             @confirm.stop="handleDelete(scope.$index, scope.row)"
           >
             <template #reference>
-              <el-button
-                :icon="Delete"
-                circle
+              <el-button circle
                 size="small"
-                :disabled="scope.row.label_id === 0 ? true : false"
-              />
+                :disabled="scope.row.label_id === 0 ? true : false"><Icon icon="lucide:trash-2" /></el-button>
             </template>
           </el-popconfirm>
         </el-button-group>
@@ -99,26 +83,17 @@
 </template>
 
 <script lang="js">
+import { Icon } from "@iconify/vue"
 import { computed, ref, toRaw, defineComponent } from 'vue'
 import {
   ElTable,
   ElTableColumn,
   ElPopover,
-  ElIcon,
-  ElButton,
+    ElButton,
   ElButtonGroup,
   ElInput,
   ElPopconfirm
 } from 'element-plus'
-import {
-  View,
-  Hide,
-  Delete,
-  Timer,
-  WarningFilled,
-  DeleteFilled,
-  InfoFilled
-} from '@element-plus/icons-vue'
 // import SseToolbar from '@/seman3d/sem/common/SseToolbar'
 
 export default defineComponent({
@@ -135,15 +110,7 @@ export default defineComponent({
   },
   extends: SseToolbar,
   setup() {
-    return {
-      View,
-      Hide,
-      Delete,
-      Timer,
-      WarningFilled,
-      DeleteFilled,
-      InfoFilled
-    }
+    return {}
   },
   data() {
     return {
@@ -198,7 +165,7 @@ export default defineComponent({
      * 清除所有类别
      */
     handleDeleteAll() {
-      const labelIds = []
+      let labelIds = []
       toRaw(this.filterTableData).forEach((v) => {
         labelIds.push(v.label_id)
       })
@@ -210,7 +177,7 @@ export default defineComponent({
      * @param {*} row
      */
     handleDelete(index, row) {
-      const clsDesc = toRaw(row)
+      let clsDesc = toRaw(row)
       this.sendMsg('sem-clear-label', { labelIds: [clsDesc.label_id] })
     },
     /**
@@ -219,7 +186,7 @@ export default defineComponent({
      * @param {*} row
      */
     handleMute(index, row) {
-      const clsDesc = toRaw(row)
+      let clsDesc = toRaw(row)
       if (this.state.counters[clsDesc.label_id]) {
         clsDesc.mute = !clsDesc.mute
         this.sendMsg('mute', clsDesc)
@@ -239,7 +206,7 @@ export default defineComponent({
      * @param {*} row
      */
     handleSolo(index, row) {
-      const clsDesc = toRaw(row)
+      let clsDesc = toRaw(row)
       // this.displayOther('solo', clsDesc, clsDesc.label_id)
       if (this.state.counters[clsDesc.label_id]) {
         clsDesc.solo = !clsDesc.solo

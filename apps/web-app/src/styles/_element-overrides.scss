@@ -1,0 +1,144 @@
+// Element Plus → y- token bridge
+//
+// Element Plus is themed via CSS custom properties at runtime (no SCSS compile-time vars).
+// By aliasing --el-* to --y-* here, every el-* component automatically tracks our design tokens.
+//
+// This file is imported once globally (in main.ts of each entry, after tokens/index.scss).
+// Component-specific refinements live in _component-patches.scss.
+
+:root {
+  // Brand
+  --el-color-primary:          var(--y-color-primary);
+  --el-color-primary-light-3:  var(--y-color-primary-hover);
+  --el-color-primary-light-5:  var(--y-color-primary-soft);
+  --el-color-primary-light-7:  var(--y-color-primary-soft);
+  --el-color-primary-light-8:  var(--y-color-primary-soft);
+  --el-color-primary-light-9:  var(--y-color-primary-soft);
+  --el-color-primary-dark-2:   var(--y-color-primary-active);
+
+  // Semantic
+  --el-color-success: var(--y-color-success);
+  --el-color-warning: var(--y-color-warning);
+  --el-color-danger:  var(--y-color-danger);
+  --el-color-error:   var(--y-color-danger);
+  --el-color-info:    var(--y-color-info);
+
+  // Text
+  --el-text-color-primary:     var(--y-color-text-primary);
+  --el-text-color-regular:     var(--y-color-text-regular);
+  --el-text-color-secondary:   var(--y-color-text-secondary);
+  --el-text-color-placeholder: var(--y-color-text-placeholder);
+  --el-text-color-disabled:    var(--y-color-text-disabled);
+
+  // Border
+  --el-border-color:           var(--y-color-border);
+  --el-border-color-light:     var(--y-color-border-light);
+  --el-border-color-lighter:   var(--y-color-border-lighter);
+  --el-border-color-extra-light: var(--y-color-border-lighter);
+  --el-border-color-dark:      var(--y-color-border-strong);
+  --el-border-color-darker:    var(--y-color-border-strong);
+  --el-border-color-hover:     var(--y-color-border-strong);
+
+  // Fill / Background
+  --el-fill-color:         var(--y-color-bg-hover);
+  --el-fill-color-light:   var(--y-color-bg-hover);
+  --el-fill-color-lighter: var(--y-color-bg-hover);
+  --el-fill-color-extra-light: var(--y-color-bg-hover);
+  --el-fill-color-blank:   var(--y-color-bg-card);
+  --el-fill-color-dark:    var(--y-color-bg-active);
+
+  --el-bg-color:        var(--y-color-bg-card);
+  --el-bg-color-page:   var(--y-color-bg-canvas);
+  --el-bg-color-overlay: var(--y-color-bg-card);
+
+  // Radius
+  --el-border-radius-base:  var(--y-radius-sm);  // 4px
+  --el-border-radius-small: var(--y-radius-xs);  // 2px
+  --el-border-radius-round: var(--y-radius-lg);  // 8px
+  --el-border-radius-circle: var(--y-radius-full);
+
+  // Typography
+  --el-font-size-base:  var(--y-font-size-base);  // 13px
+  --el-font-size-small: var(--y-font-size-sm);
+  --el-font-size-large: var(--y-font-size-md);
+  --el-font-size-medium: var(--y-font-size-md);
+  --el-font-family:     var(--y-font-family-base);
+
+  // Shadow
+  --el-box-shadow:         var(--y-shadow-3);
+  --el-box-shadow-light:   var(--y-shadow-2);
+  --el-box-shadow-lighter: var(--y-shadow-1);
+  --el-box-shadow-dark:    var(--y-shadow-3);
+
+  // Component sizes — extra-compact (design.md §3). 24px default matches the
+  // 13px body text at a 1.85× ratio, the sweet spot for dense tool UIs.
+  --el-component-size-small: 22px;
+  --el-component-size:       24px;
+  --el-component-size-large: 28px;
+  --el-component-size-default: 24px;
+
+  // Disabled
+  --el-disabled-bg-color:     var(--y-color-bg-hover);
+  --el-disabled-text-color:   var(--y-color-text-disabled);
+  --el-disabled-border-color: var(--y-color-border);
+
+  // Mask
+  --el-mask-color: var(--y-color-bg-overlay);
+}
+
+// Dark mode — Element Plus's own dark css-vars.css (html.dark selector) has higher
+// specificity than :root above and would override our bridge. Re-assert here.
+html.dark {
+  --el-color-primary:          var(--y-color-primary);
+  --el-color-primary-light-3:  var(--y-color-primary-hover);
+  --el-color-primary-light-5:  var(--y-color-primary-soft);
+  --el-color-primary-light-7:  var(--y-color-primary-soft);
+  --el-color-primary-light-8:  var(--y-color-primary-soft);
+  --el-color-primary-light-9:  var(--y-color-primary-soft);
+  --el-color-primary-dark-2:   var(--y-color-primary-active);
+
+  --el-color-success: var(--y-color-success);
+  --el-color-warning: var(--y-color-warning);
+  --el-color-danger:  var(--y-color-danger);
+  --el-color-error:   var(--y-color-danger);
+  --el-color-info:    var(--y-color-info);
+
+  --el-text-color-primary:     var(--y-color-text-primary);
+  --el-text-color-regular:     var(--y-color-text-regular);
+  --el-text-color-secondary:   var(--y-color-text-secondary);
+  --el-text-color-placeholder: var(--y-color-text-placeholder);
+  --el-text-color-disabled:    var(--y-color-text-disabled);
+
+  --el-border-color:           var(--y-color-border);
+  --el-border-color-light:     var(--y-color-border-light);
+  --el-border-color-lighter:   var(--y-color-border-lighter);
+  --el-border-color-extra-light: var(--y-color-border-lighter);
+  --el-border-color-dark:      var(--y-color-border-strong);
+  --el-border-color-darker:    var(--y-color-border-strong);
+  --el-border-color-hover:     var(--y-color-border-strong);
+
+  --el-fill-color:         var(--y-color-bg-hover);
+  --el-fill-color-light:   var(--y-color-bg-hover);
+  --el-fill-color-lighter: var(--y-color-bg-hover);
+  --el-fill-color-extra-light: var(--y-color-bg-hover);
+  --el-fill-color-blank:   var(--y-color-bg-card);
+  --el-fill-color-dark:    var(--y-color-bg-active);
+
+  --el-bg-color:        var(--y-color-bg-card);
+  --el-bg-color-page:   var(--y-color-bg-canvas);
+  --el-bg-color-overlay: var(--y-color-bg-card);
+
+  --el-disabled-bg-color:     var(--y-color-bg-hover);
+  --el-disabled-text-color:   var(--y-color-text-disabled);
+  --el-disabled-border-color: var(--y-color-border);
+
+  --el-mask-color: var(--y-color-bg-overlay);
+
+  // el-menu — 桥接到 sidebar token,去掉旧的 hardcoded #324157/#bfcbd9
+  --el-menu-bg-color:           var(--y-color-sidebar-bg);
+  --el-menu-text-color:         var(--y-color-sidebar-text);
+  --el-menu-active-color:       var(--y-color-primary);
+  --el-menu-hover-bg-color:     var(--y-color-bg-hover);
+  --el-menu-item-bg-color:      var(--y-color-sidebar-bg);
+  --el-menu-border-color:       transparent;
+}

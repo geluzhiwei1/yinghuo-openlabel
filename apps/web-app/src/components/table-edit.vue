@@ -53,9 +53,7 @@
             :on-success="handleAvatarSuccess"
           >
             <img v-if="form[item.prop]" :src="form[item.prop]" class="avatar" />
-            <el-icon v-else class="avatar-uploader-icon">
-              <Plus />
-            </el-icon>
+            <Icon icon="lucide:plus" v-else class="avatar-uploader-icon" />
           </el-upload>
           <el-tree-select
             v-else-if="item.type === 'treeSelect'"
@@ -72,72 +70,69 @@
 
     <el-form-item>
       <div style="width: 100%; display: flex; flex-direction: row-reverse">
-        <el-button type="primary" @click="saveEdit(formRef)">{{
-          t('components.tableEdit.save')
-        }}</el-button>
+        <el-button type="primary" @click="saveEdit(formRef)">保存</el-button>
       </div>
     </el-form-item>
   </el-form>
 </template>
 
 <script lang="ts" setup>
-import { type FormOption } from '@/types/form-option'
-import type { FormInstance, FormRules, UploadProps } from 'element-plus'
-import { type PropType, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
+import {type FormOption } from "@/types/form-option";
+import type { FormInstance, FormRules, UploadProps } from "element-plus";
+import {type PropType, ref } from "vue";
+import { Icon } from '@iconify/vue';
 
-const { t } = useI18n()
 const { options, formData, edit, update } = defineProps({
   options: {
     type: Object as PropType<FormOption>,
-    required: true
+    required: true,
   },
   formData: {
     type: Object,
-    required: true
+    required: true,
   },
   edit: {
     type: Boolean,
-    required: false
+    required: false,
   },
   update: {
     type: Function,
-    required: true
-  }
-})
+    required: true,
+  },
+});
 
-const form = ref({ ...(edit ? formData : {}) })
+const form = ref({ ...(edit ? formData : {}) });
 // const form = ref({ formData });
 
 const rules: FormRules = options.list
   .map((item) => {
-    const itemRules = []
+    let itemRules = [];
     if (item.required) {
       itemRules.push({
         required: true,
-        message: t('components.tableEdit.required', { label: item.label }),
-        trigger: 'blur'
-      })
+        message: `${item.label}不能为空`,
+        trigger: "blur",
+      });
     }
     if (item.rules) {
-      itemRules.push(item.rules)
+      itemRules.push(item.rules);
     }
-    return { [item.prop]: itemRules }
+    return { [item.prop]: itemRules };
   })
-  .reduce((acc, cur) => ({ ...acc, ...cur }), {})
+  .reduce((acc, cur) => ({ ...acc, ...cur }), {});
 
-const formRef = ref<FormInstance>()
+const formRef = ref<FormInstance>();
 const saveEdit = (formEl: FormInstance | undefined) => {
-  if (!formEl) return
+  if (!formEl) return;
   formEl.validate((valid) => {
-    if (!valid) return false
-    update(form.value)
-  })
-}
+    if (!valid) return false;
+    update(form.value);
+  });
+};
 
-const handleAvatarSuccess: UploadProps['onSuccess'] = (response, uploadFile) => {
-  form.value.thumb = URL.createObjectURL(uploadFile.raw!)
-}
+const handleAvatarSuccess: UploadProps["onSuccess"] = (response, uploadFile) => {
+  form.value.thumb = URL.createObjectURL(uploadFile.raw!);
+};
 </script>
 
 <style>
@@ -156,7 +151,7 @@ const handleAvatarSuccess: UploadProps['onSuccess'] = (response, uploadFile) => 
 
 .el-icon.avatar-uploader-icon {
   font-size: 28px;
-  color: #8c939d;
+  color: var(--y-color-text-placeholder);
   width: 178px;
   height: 178px;
   text-align: center;

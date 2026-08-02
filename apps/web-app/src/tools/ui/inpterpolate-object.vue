@@ -1,45 +1,26 @@
 <template>
-  <Draggable
-    v-slot="{ x, y }"
-    class="fixed"
-    :initial-value="{ x: canvaPanel.left_px, y: topBar.height_px + 50 }"
-    :storage-key="'yh-vd-tool-pos-' + toolStates.toolConf.id"
-    storage-type="session"
-    v-show="toolStates.activated"
-    :style="[topDivStyle]"
-    :handle="dragHandle"
-  >
+  <Draggable v-slot="{ x, y }" class="fixed" :initial-value="{ x: canvaPanel.left_px, y: topBar.height_px + 50 }"
+    :storage-key="'yh-vd-tool-pos-' + toolStates.toolConf.id" storage-type="session" v-show="toolStates.activated"
+    :style="[topDivStyle]" :handle="dragHandle">
     <div ref="dragHandle" class="cursor-move">
       {{ toolStates.toolConf.name }}
     </div>
     <el-card>
       <el-row style="width: 100%">
-        <el-button type="primary" @click="btnClik('doRequest')" :loading="toolStates.act.processing"
-          >确定</el-button
-        >
-        <el-button @click="btnClik('clearPrompts')" plain>重置</el-button>
+          <el-button type="primary" @click="btnClik('doRequest')"
+            :loading="toolStates.act.processing">确定</el-button>
+          <el-button @click="btnClik('clearPrompts')" plain>重置</el-button>
       </el-row>
-      <div style="width: 100%; height: 150px">
-        <el-auto-resizer
-          ><template #default="{ height, width }">
-            <el-table-v2
-              :columns="columns"
-              :row-height="35"
-              :header-height="35"
-              :data="toolStates.promptsTableDatas"
-              :max-height="height"
-              :width="width"
-              :height="100"
-              :key="refreshKey"
-            >
+      <div style="width:100%; height:150px;">
+        <el-auto-resizer><template #default="{ height, width }">
+            <el-table-v2 :columns="columns" :row-height="35" :header-height="35" :data="toolStates.promptsTableDatas"
+              :max-height=height :width="width" :height="100" :key="refreshKey">
               <template #empty>
                 <div class="flex items-center justify-center h-100%">
                   <el-text type="success">请添加对象</el-text>
                 </div>
               </template>
-            </el-table-v2></template
-          >
-        </el-auto-resizer>
+            </el-table-v2></template> </el-auto-resizer>
       </div>
     </el-card>
   </Draggable>
@@ -69,7 +50,7 @@ const columns: Column<any>[] = [
     dataKey: 'frameNo',
     width: 100,
     align: 'center',
-    sortable: true
+    sortable: true,
   },
   {
     key: 'ol_type_',
@@ -77,7 +58,7 @@ const columns: Column<any>[] = [
     dataKey: 'ol_type_',
     width: 150,
     align: 'center',
-    sortable: true
+    sortable: true,
   },
   {
     key: 'object_type',
@@ -85,7 +66,7 @@ const columns: Column<any>[] = [
     dataKey: 'object_type',
     width: 150,
     align: 'center',
-    sortable: true
+    sortable: true,
   },
   {
     key: 'operations',
@@ -97,30 +78,25 @@ const columns: Column<any>[] = [
       const onRemoveClick = () => {
         InpterpolateObject.instance().removeGeometry(rowData.label_uuid)
       }
-      return (
-        <>
-          <el-button size="small" onClick={onViewClick}>
-            查看
-          </el-button>
-          <el-button size="small" onClick={onRemoveClick}>
-            删除
-          </el-button>
-        </>
-      )
+      return <>
+        <el-button size="small" onClick={onViewClick} >查看</el-button>
+        <el-button size="small" onClick={onRemoveClick} >删除</el-button>
+      </>
     },
     width: 250,
-    align: 'center'
+    align: 'center',
   }
 ]
+
 
 const btnClik = (cmdId: string) => {
   switch (cmdId) {
     case 'doRequest':
-      toolStates.act.doAction += 1
+    toolStates.act.doAction += 1
       break
     case 'clearPrompts':
       InpterpolateObject.instance().reset()
-      break
+      break;
     default:
       break
   }

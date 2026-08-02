@@ -1,0 +1,10 @@
+// Mixins index — auto-injected into every <style lang="scss"> via vite config.
+
+@use 'layout';
+@use 'elevation';
+@use 'text';
+
+// Forward the most commonly used mixins so callers can `@include flex-center` etc.
+@forward 'layout';
+@forward 'elevation';
+@forward 'text';

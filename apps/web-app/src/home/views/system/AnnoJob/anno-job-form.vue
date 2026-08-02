@@ -4,33 +4,19 @@
       <h4>{{ dialogTitle }}</h4>
     </template>
     <template #default>
-      <el-form
-        ref="formRef"
-        :model="form"
-        :rules="rules"
-        v-loading="formLoading"
-        label-position="right"
-        label-width="auto"
-        style="max-width: 600px"
-      >
+      <el-form ref="formRef" :model="form" :rules="rules" v-loading="formLoading" label-position="right"
+        label-width="auto" style="max-width: 600px">
         <el-form-item label="数据源">
           <el-row>
-            <el-radio-group
-              v-model="form.label_spec.data.dataSource"
-              @change="handleDataSourceChange"
-              :disabled="formType === 'edit'"
-            >
+            <el-radio-group v-model="form.label_spec.data.dataSource" @change="handleDataSourceChange"
+              :disabled="formType === 'edit'">
               <el-radio value="localImage">我的计算机</el-radio>
               <el-radio value="imageURLs">互联网图像(HTTP)</el-radio>
               <el-radio value="serverLocalDir">服务器</el-radio>
             </el-radio-group>
           </el-row>
           <el-row v-show="form.label_spec.data.dataSource === 'localImage'">
-            <el-text type="success"
-              >选择存储在您本地计算机上的数据文件，这些数据文件<span style="color: red"
-                >不会上传</span
-              ></el-text
-            >
+            <el-text type="success">选择存储在您本地计算机上的数据文件，这些数据文件<span style="color: red;">不会上传</span></el-text>
           </el-row>
           <el-row v-show="form.label_spec.data.dataSource === 'imageURLs'">
             <el-text type="success">数据可以通过HTTP直接访问到，可存在任意服务器</el-text>
@@ -42,51 +28,25 @@
         <el-form-item label="任务类别" prop="label_spec.mission.key">
           <el-row style="width: 100%">
             <el-col :span="24">
-              <el-tree-select
-                v-model="form.label_spec.mission.key"
-                :data="missions"
-                :check-strictly="false"
-                :render-after-expand="false"
-                check-on-click-node
-                show-checkbox
-              />
+              <el-tree-select v-model="form.label_spec.mission.key" :data="missions" :check-strictly="false"
+                :render-after-expand="false" check-on-click-node show-checkbox />
             </el-col>
           </el-row>
         </el-form-item>
-        <el-form-item
-          label="选择数据"
-          v-if="form.label_spec.data.dataSource === 'serverLocalDir'"
-          prop="serverLocalDir"
-        >
+        <el-form-item label="选择数据" v-if="form.label_spec.data.dataSource === 'serverLocalDir'" prop="serverLocalDir">
           <el-row style="width: 100%">
             <el-col :span="6">数据根目录：</el-col>
             <el-col :span="18">
-              <el-tree-select
-                v-model="form.label_spec.data.seq"
-                :data="dataClipIds"
-                :render-after-expand="false"
-                check-strictly
-                show-checkbox
-                @change="handleSeqTreeSelectChange"
-              />
+              <el-tree-select v-model="form.label_spec.data.seq" :data="dataClipIds" :render-after-expand="false"
+                check-strictly show-checkbox @change="handleSeqTreeSelectChange" />
             </el-col>
           </el-row>
           <el-row style="width: 100%">
             <el-col :span="6">数据分组：</el-col>
             <el-col :span="18">
-              <el-select
-                v-model="form.label_spec.data.streams"
-                multiple
-                collapse-tags
-                collapse-tags-tooltip
-                placeholder="Select"
-              >
-                <el-option
-                  v-for="item in seqStreams"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                />
+              <el-select v-model="form.label_spec.data.streams" multiple collapse-tags collapse-tags-tooltip
+                placeholder="Select">
+                <el-option v-for="item in seqStreams" :key="item.value" :label="item.label" :value="item.value" />
               </el-select>
             </el-col>
           </el-row>
@@ -94,12 +54,7 @@
             <el-col :span="6">数据格式：</el-col>
             <el-col :span="18">
               <el-select v-model="form.label_spec.data.format" placeholder="数据格式">
-                <el-option
-                  v-for="item in dataFormats"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                />
+                <el-option v-for="item in dataFormats" :key="item.value" :label="item.label" :value="item.value"/>
               </el-select>
             </el-col>
           </el-row>
@@ -116,88 +71,43 @@
             </el-col>
           </el-row> -->
         </el-form-item>
-        <el-form-item
-          label="填写数据"
-          v-if="form.label_spec.data.dataSource === 'imageURLs'"
-          prop="imageURLs"
-        >
+        <el-form-item label="填写数据" v-if="form.label_spec.data.dataSource === 'imageURLs'" prop="imageURLs">
           <el-row style="width: 100%">
-            <el-col :span="12"
-              ><el-input
-                v-model="form.label_spec.data.seq"
-                maxlength="100"
-                style="width: 100%"
-                placeholder="数据段ID,如data-seq1"
-            /></el-col>
-            <el-col :span="12"
-              ><el-input
-                v-model="tempForm.streams"
-                maxlength="100"
-                style="width: 100%"
-                placeholder="数据名字,如camera1"
-            /></el-col>
+            <el-col :span="12"><el-input v-model="form.label_spec.data.seq" maxlength="100" style="width: 100%"
+                placeholder="数据段ID,如data-seq1" /></el-col>
+            <el-col :span="12"><el-input v-model="tempForm.streams" maxlength="100" style="width: 100%"
+                placeholder="数据名字,如camera1" /></el-col>
           </el-row>
           <el-row style="width: 100%">
             <el-col :span="24">输入图像URL，每行一条，必须以http开头</el-col>
           </el-row>
           <el-row style="width: 100%">
-            <el-col :span="24"
-              ><el-input
-                v-model="tempForm.imageURLs"
-                maxlength="102400"
-                style="width: 100%"
-                show-word-limit
-                type="textarea"
-            /></el-col>
+            <el-col :span="24"><el-input v-model="tempForm.imageURLs" maxlength="102400" style="width: 100%"
+                show-word-limit type="textarea" /></el-col>
           </el-row>
         </el-form-item>
         <el-form-item label="标注规范" prop="label_spec.taxonomy">
           <el-row style="width: 100%">
             <el-col :span="24">
-              <TaxonomySelectTable
-                v-model:modelValue="form.label_spec.taxonomy"
-                :options="{ btnLabel: '选择标注规范', inputVisible: true }"
-              />
+              <TaxonomySelectTable v-model:modelValue="form.label_spec.taxonomy"
+                :options="{ btnLabel: '选择标注规范', inputVisible: true }" />
             </el-col>
           </el-row>
         </el-form-item>
 
-        <el-form-item
-          label="任务数据"
-          v-if="form.label_spec.data.dataSource === 'localImage'"
-          prop="imageURLs"
-        >
+        <el-form-item label="任务数据" v-if="form.label_spec.data.dataSource === 'localImage'" prop="imageURLs">
           <el-row style="width: 100%">
-            <el-col :span="24"
-              ><el-button @click="openDir()">点击选择数据文件夹</el-button>
-            </el-col>
+            <el-col :span="24"><el-button @click="openDir()">点击选择数据文件夹</el-button> </el-col>
           </el-row>
           <el-row style="width: 100%">
-            <el-col :span="12"
-              ><el-input
-                v-model="form.label_spec.data.seq"
-                maxlength="100"
-                style="width: 100%"
-                placeholder="数据段ID,如data-seq1"
-            /></el-col>
-            <el-col :span="12"
-              ><el-input
-                v-model="tempForm.streams"
-                maxlength="100"
-                style="width: 100%"
-                placeholder="数据名字,如camera1"
-            /></el-col>
+            <el-col :span="12"><el-input v-model="form.label_spec.data.seq" maxlength="100" style="width: 100%"
+                placeholder="数据段ID,如data-seq1" /></el-col>
+            <el-col :span="12"><el-input v-model="tempForm.streams" maxlength="100" style="width: 100%"
+                placeholder="数据名字,如camera1" /></el-col>
           </el-row>
           <el-row style="width: 100%">
-            <el-col :span="24"
-              ><el-input
-                v-model="tempForm.imageURLs"
-                maxlength="102400"
-                style="width: 100%"
-                show-word-limit
-                type="textarea"
-                :rows="5"
-            /></el-col>
+            <el-col :span="24"><el-input v-model="tempForm.imageURLs" maxlength="102400" style="width: 100%"
+                show-word-limit type="textarea" :rows="5" /></el-col>
           </el-row>
         </el-form-item>
 
@@ -220,22 +130,14 @@
           <el-input v-model="form.name" />
         </el-form-item>
         <el-form-item label="备注" prop="desc">
-          <el-input
-            v-model="form.desc"
-            maxlength="10240"
-            style="width: 100%"
-            placeholder="备注"
-            show-word-limit
-            type="textarea"
-          />
+          <el-input v-model="form.desc" maxlength="10240" style="width: 100%" placeholder="备注" show-word-limit
+            type="textarea" />
         </el-form-item>
       </el-form>
     </template>
     <template #footer>
-      <div style="text-align: center">
-        <el-button @click="submitForm(formRef)" type="primary" :disabled="!saveButtonEnable"
-          >确定</el-button
-        >
+      <div style="text-align: center;">
+        <el-button @click="submitForm(formRef)" type="primary" :disabled="!saveButtonEnable">确定</el-button>
         <!-- <el-button @click="dialogVisible = false">取消</el-button> -->
         <el-button @click="resetForm(formRef)">重置</el-button>
       </div>
@@ -273,8 +175,8 @@ const tempForm = ref({
 })
 
 const dataFormats = [
-  { label: 'directory', value: 'simple-directory' },
-  { label: 'openlabel', value: 'openlabel' }
+  {label: 'directory', value: 'simple-directory'},
+  {label: 'openlabel', value: 'openlabel'},
 ]
 
 const handleSeqTreeSelectChange = (value, selectedData, selectedNodes) => {
@@ -291,11 +193,12 @@ const rules = ref({
   'label_spec.data.seq': [
     { required: true, message: '选择数据根目录', trigger: 'blur', type: 'string' }
   ],
-  'label_spec.data.file_exts': [{ required: true, message: '选择文件类型', trigger: 'blur' }],
+  'label_spec.data.file_exts': [
+    { required: true, message: '选择文件类型', trigger: 'blur' }
+  ],
   'label_spec.taxonomy': [
     {
-      trigger: 'blur',
-      validator: (rule, value, callback) => {
+      trigger: 'blur', validator: (rule, value, callback) => {
         if (!form.value.label_spec.taxonomy || !form.value.label_spec.taxonomy.key) {
           callback(new Error('请选择标注规范'))
         }
@@ -394,16 +297,13 @@ const form = ref({ ...cloneDeep(formDefault) })
 
 const openDir = () => {
   let fileExts = []
-  if (
-    [Mission.ObjectBBox3d, Mission.PcSemantic3d, Mission.PcPolyline3d].includes(
-      form.value.label_spec.mission.key
-    )
-  ) {
+  if ([Mission.ObjectBBox3d, Mission.PcSemantic3d, Mission.PcPolyline3d].includes(form.value.label_spec.mission.key)) {
     // 点云
     fileExts = fileTypes.pointcloud
   } else if (form.value.label_spec.mission.key === Mission.VideoEvents) {
     fileExts = fileTypes.videos
-  } else {
+  }
+  else {
     fileExts = fileTypes.images
   }
 
@@ -423,11 +323,12 @@ const openDir = () => {
 }
 
 const open = async (type: string, params) => {
+
   const { uuid } = params
 
   if (uuid) {
     formLoading.value = true
-    // load
+    // load 
     handleDataSourceChange(params.data.dataSource)
 
     form.value.uuid = uuid
@@ -462,7 +363,7 @@ const submitForm = async (formEl) => {
   await formEl.validate(async (valid, fields) => {
     if (valid) {
       let fileExts = []
-      switch (form.value.label_spec.mission.key) {
+      switch(form.value.label_spec.mission.key) {
         case Mission.ObjectBBox3d:
         case Mission.PcSemantic3d:
         case Mission.PcPolyline3d:
@@ -479,9 +380,10 @@ const submitForm = async (formEl) => {
       // 设置name
       formLoading.value = true
       const formData = {
-        ...form.value
+        ...form.value,
       }
       if (typeof form.value.label_spec.data.seq === 'string') {
+        ;
       } else if (typeof form.value.label_spec.data.seq === 'object') {
         formData.label_spec.data.seq = form.value.label_spec.data.seq.value // openlabel
       }
@@ -518,8 +420,8 @@ const formattedDateTime = () => {
 }
 
 const resetForm = (formEl: FormInstance | undefined) => {
-  if (formEl) formEl.resetFields()
-
+  if (formEl)  formEl.resetFields()
+  
   form.value = { ...cloneDeep(formDefault) }
   tempForm.value = {
     imageURLs: '',
@@ -590,7 +492,8 @@ watch(
 const handleDataSourceChange = (val) => {
   if (val === 'serverLocalDir') {
     loadDataClipIds()
-  } else {
+  }
+  else {
     saveButtonEnable.value = true
   }
 }

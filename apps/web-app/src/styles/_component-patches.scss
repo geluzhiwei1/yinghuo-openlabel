@@ -1,0 +1,431 @@
+// Component-level patches — applied after Element Plus token override
+//
+// Some Element Plus defaults still look "off" after token wiring; these refine them.
+// All rules use selectors scoped to Element Plus component classes (.el-*), not global HTML.
+
+@use './tokens/index.scss';
+
+// ===== el-form-item — global alignment + compact label box =====
+// EP's `.el-form-item--default .el-form-item__label` (specificity 0,2,0) hardcodes
+// `height: 32px; line-height: 32px` regardless of `--el-component-size`. So a
+// 24px input always sits beside a 32px label box — labels look "above" the
+// input in EVERY form (filter bars, dialog forms, drawer forms, settings).
+//
+// KEY: do NOT scope this under `.el-form`. FilterBar.vue renders form-items
+// inside `.y-filter-bar__body` with NO <el-form> wrapper, so any selector that
+// requires `.el-form` ancestor silently skips them. Target `.el-form-item`
+// directly with !important to win regardless of context.
+.el-form-item {
+  align-items: center;
+  margin-bottom: 14px;
+
+  // Label — kill the hardcoded 32px box (covers direct child AND label-wrap variants)
+  .el-form-item__label {
+    height: auto !important;
+    line-height: 1.4 !important;
+    display: inline-flex;
+    align-items: center;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  .el-form-item__content {
+    line-height: 1.4 !important;
+  }
+}
+
+// Inline filter rows (el-form inline, FilterBar, yh-filter): kill vertical gap,
+// tighten horizontal rhythm
+.el-form--inline .el-form-item,
+.y-filter-bar .el-form-item,
+.yh-filter .el-form-item {
+  margin-bottom: 0 !important;
+  margin-right: 12px;
+}
+
+// Date range picker: keep its internal padding tight
+.el-form-item .el-range-editor.el-input__wrapper {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+
+// ===== el-table — Linear density (36px row, no shadow, prominent header) =====
+.el-table {
+  --el-table-header-bg-color: var(--lab-snow);
+  --el-table-header-text-color: var(--lab-ink);
+  --el-table-row-hover-bg-color: var(--y-color-bg-hover);
+  --el-table-current-row-bg-color: var(--y-color-primary-soft);
+  --el-table-border-color: var(--y-color-border-light);
+  --el-table-border: 1px solid var(--y-color-border-light);
+  --el-table-text-color: var(--y-color-text-regular);
+  --el-table-fixed-box-shadow: none;
+
+  font-size: var(--y-font-size-base);
+
+  // Header: prominent ink-on-snow band with a strong baseline rule
+  th.el-table__cell {
+    font-weight: 600;
+    color: var(--lab-ink);
+    font-size: var(--y-font-size-sm);
+    letter-spacing: 0.01em;
+    background: var(--lab-snow) !important;
+    padding: 10px 0;
+    border-bottom: 1.5px solid var(--lab-ink) !important;
+  }
+
+  // Row: tighter height (design.md §3 — 32px)
+  .el-table__row {
+    height: 32px;
+  }
+
+  .el-table__cell {
+    padding: 4px 0;
+  }
+
+  // Remove default bottom border on last row to avoid double border with card
+  &:not(.el-table--border) .el-table__inner-wrapper::after {
+    background-color: transparent;
+  }
+}
+
+// ===== el-card — borderless default, no shadow, compact padding =====
+.el-card {
+  --el-card-padding: 14px;
+  --el-card-bg-color: var(--y-color-bg-card);
+  border-radius: var(--y-radius-lg);
+  border: 1px solid var(--y-color-border);
+  box-shadow: none;
+
+  &.is-always-shadow,
+  &.is-hover-shadow:hover {
+    box-shadow: var(--y-shadow-2);
+  }
+
+  .el-card__header {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--y-color-border);
+    font-weight: var(--y-font-weight-medium);
+  }
+
+  .el-card__body {
+    padding: var(--el-card-padding);
+  }
+}
+
+// ===== el-button — compact (28px), tighter horizontal padding (design.md §5) =====
+.el-button {
+  font-weight: var(--y-font-weight-medium);
+  border-radius: var(--y-radius-sm);
+  height: var(--el-component-size);
+  padding-left: 12px;
+  padding-right: 12px;
+  font-size: var(--y-font-size-sm);
+
+  // Icon-only buttons shrink to a square; default icon-button padding otherwise crowds.
+  &.is-icon-only,
+  &.is-circle {
+    padding-left: 0;
+    padding-right: 0;
+    width: var(--el-component-size);
+  }
+
+  // Buttons with both icon + text: tighten the gap
+  .el-icon + span {
+    margin-left: 4px;
+  }
+
+  // Primary button — solid fill, no shadow (plain buttons keep their tinted bg)
+  &.el-button--primary:not(.is-plain) {
+    --el-button-bg-color: var(--y-color-primary);
+    --el-button-border-color: var(--y-color-primary);
+    --el-button-hover-bg-color: var(--y-color-primary-hover);
+    --el-button-hover-border-color: var(--y-color-primary-hover);
+    --el-button-active-bg-color: var(--y-color-primary-active);
+    --el-button-active-border-color: var(--y-color-primary-active);
+  }
+
+  // Plain primary button — soft tint, primary text, visible at rest
+  &.el-button--primary.is-plain {
+    --el-button-bg-color: var(--y-color-primary-soft);
+    --el-button-border-color: var(--y-color-primary-border);
+    --el-button-text-color: var(--y-color-primary);
+    --el-button-hover-bg-color: var(--y-color-primary);
+    --el-button-hover-border-color: var(--y-color-primary);
+    --el-button-hover-text-color: var(--y-color-text-inverse);
+    --el-button-active-bg-color: var(--y-color-primary-active);
+    --el-button-active-border-color: var(--y-color-primary-active);
+    --el-button-active-text-color: var(--y-color-text-inverse);
+  }
+
+  // Default button — border only, no fill
+  &.el-button--default {
+    --el-button-bg-color: var(--y-color-bg-card);
+    --el-button-border-color: var(--y-color-border-strong);
+    --el-button-text-color: var(--y-color-text-regular);
+    --el-button-hover-bg-color: var(--y-color-bg-hover);
+    --el-button-hover-border-color: var(--y-color-border-strong);
+    --el-button-hover-text-color: var(--y-color-text-primary);
+  }
+
+  // Text/link button — minimal
+  &.el-button--text,
+  &.is-link {
+    font-weight: var(--y-font-weight-medium);
+  }
+}
+
+// ===== Topbar tool buttons — border-only, calm default style =====
+// The annotation workbench topbar uses el-button type="primary" everywhere,
+// which creates a wall of solid blue. Override to a calm border-only style
+// so tool groups read as a toolbar, not a row of CTAs.
+#topbar-container .el-button.el-button--primary:not(.is-disabled) {
+  --el-button-bg-color: var(--y-color-bg-card);
+  --el-button-border-color: var(--y-color-border-strong);
+  --el-button-text-color: var(--y-color-text-regular);
+  --el-button-hover-bg-color: var(--y-color-primary-soft);
+  --el-button-hover-border-color: var(--y-color-primary);
+  --el-button-hover-text-color: var(--y-color-primary);
+  --el-button-active-bg-color: var(--y-color-primary-soft);
+  --el-button-active-border-color: var(--y-color-primary);
+  --el-button-active-text-color: var(--y-color-primary);
+  --el-button-disabled-bg-color: var(--y-color-bg-card);
+  --el-button-disabled-border-color: var(--y-color-border-light);
+  --el-button-disabled-text-color: var(--y-color-text-disabled);
+}
+
+// Active tool selection — solid primary fill, white text
+#topbar-container .el-button.el-button--primary.is-tool-active {
+  --el-button-bg-color: var(--y-color-primary);
+  --el-button-border-color: var(--y-color-primary);
+  --el-button-text-color: var(--y-color-text-inverse);
+  --el-button-hover-bg-color: var(--y-color-primary-hover);
+  --el-button-hover-border-color: var(--y-color-primary-hover);
+  --el-button-hover-text-color: var(--y-color-text-inverse);
+}
+
+// ===== el-dialog — sharper radius, controlled shadow, compact padding =====
+.el-dialog {
+  border-radius: var(--y-radius-xl);
+  box-shadow: var(--y-shadow-3);
+  border: 1px solid var(--y-color-border);
+
+  .el-dialog__header {
+    padding: 10px 12px 6px;
+    border-bottom: 1px solid var(--y-color-border);
+    margin-right: 0;
+  }
+
+  .el-dialog__title {
+    font-weight: var(--y-font-weight-semibold);
+    font-size: var(--y-font-size-md);
+  }
+
+  .el-dialog__body {
+    padding: 12px;
+  }
+
+  .el-dialog__footer {
+    padding: 8px 12px 10px;
+    border-top: 1px solid var(--y-color-border);
+  }
+}
+
+// ===== el-input / el-select — snow bg, ink focus ring (design.md §5) =====
+// Inputs MUST sit on --lab-snow to read as a distinct layer above --lab-paper.
+// Resting border uses --lab-line (visible); hover/focus darken toward ink.
+// No blue glow anywhere — focus is a 1.5px ink ring.
+.el-input__wrapper,
+.el-textarea__inner,
+.el-select__wrapper {
+  background-color: var(--lab-snow);
+  border-radius: var(--y-radius-sm);
+  box-shadow: 0 0 0 1px var(--lab-line) inset;
+  transition: box-shadow var(--y-duration-base) var(--y-ease-out);
+
+  &:hover {
+    box-shadow: 0 0 0 1px var(--lab-slate) inset;
+  }
+
+  &.is-focus,
+  &:focus-within {
+    box-shadow: 0 0 0 1.5px var(--lab-ink) inset;
+  }
+
+  &:is(.is-disabled) {
+    background-color: var(--lab-paper);
+  }
+}
+
+// Date picker / cascader / time picker wrappers inherit the same look
+.el-date-editor.el-input__wrapper,
+.el-cascader .el-input__wrapper {
+  background-color: var(--lab-snow);
+}
+
+// ===== el-tag — subtler =====
+.el-tag {
+  border-radius: var(--y-radius-sm);
+  font-weight: var(--y-font-weight-medium);
+  height: 22px;
+  line-height: 20px;
+  padding: 0 8px;
+}
+
+// ===== el-tabs — cleaner active indicator =====
+.el-tabs__item {
+  font-weight: var(--y-font-weight-medium);
+  color: var(--y-color-text-secondary);
+  height: 36px;
+
+  &.is-active {
+    color: var(--y-color-primary);
+  }
+}
+
+.el-tabs__active-bar {
+  height: 2px;
+  background-color: var(--y-color-primary);
+}
+
+// ===== el-menu (sidebar) — flatter active indicator =====
+.el-menu {
+  border-right: none;
+  background: transparent;
+}
+
+.el-menu-item,
+.el-sub-menu__title {
+  height: 36px;
+  line-height: 36px;
+  border-radius: var(--y-radius-sm);
+  margin: 2px 8px;
+  padding-left: 12px !important;
+  font-weight: var(--y-font-weight-regular);
+
+  &:hover {
+    background: var(--y-color-bg-hover);
+    color: var(--y-color-text-primary);
+  }
+
+  &.is-active {
+    background: var(--y-color-bg-active);
+    color: var(--y-color-primary);
+    font-weight: var(--y-font-weight-medium);
+  }
+}
+
+// Submenu children — restore indentation so children visually nest under their parent.
+// The rule above flattens padding-left to 12px for every item, killing Element Plus's
+// default nesting indent.
+.el-menu:not(.el-menu--collapse) .el-sub-menu .el-menu-item {
+  padding-left: 34px !important;
+}
+
+// Sidebar icons — uniform size in expanded AND collapsed states.
+// The <Icon> components render raw <svg class="iconify"> without an <el-icon> wrapper,
+// so Element Plus's `.el-menu-item [class^=el-icon]` rule (which pins width and
+// flex-shrink) does not apply. Two symptoms follow:
+//   1. flex-shrink defaults to 1 — when the sidebar collapses, Element Plus wraps the
+//      item in `.el-menu-tooltip__trigger` (padding: 0 20px, position: absolute), which
+//      squeezes the flex container and visually shrinks the SVG.
+//   2. el-sub-menu__title in the collapsed state is also wrapped in that trigger, so
+//      without an explicit size both items render at the mercy of their flex container.
+// Pin the SVG box and prevent shrink so every icon renders at the same physical size
+// regardless of state or parent.
+.el-menu .el-menu-item > svg.iconify,
+.el-menu .el-sub-menu__title > svg.iconify,
+.el-menu .el-menu-item .el-menu-tooltip__trigger > svg.iconify,
+.el-menu .el-sub-menu__title.el-menu-tooltip__trigger > svg.iconify {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+// Collapsed sidebar — strip the 20px horizontal padding Element Plus adds to
+// `.el-menu-tooltip__trigger` so the icon can actually center inside the 48px item.
+.el-menu--collapse .el-menu-item .el-menu-tooltip__trigger,
+.el-menu--collapse .el-sub-menu > .el-menu-tooltip__trigger {
+  padding-left: 0;
+  padding-right: 0;
+  justify-content: center;
+}
+
+// ===== el-empty — smaller, less prominent =====
+.el-empty__description {
+  color: var(--y-color-text-secondary);
+  font-size: var(--y-font-size-sm);
+}
+
+// ===== el-message-box — match dialog style =====
+.el-message-box {
+  border-radius: var(--y-radius-xl);
+  border: 1px solid var(--y-color-border);
+  box-shadow: var(--y-shadow-3);
+
+  .el-message-box__header {
+    padding: 12px 16px 6px;
+  }
+
+  .el-message-box__content {
+    padding: 6px 16px 12px;
+    color: var(--y-color-text-regular);
+  }
+
+  .el-message-box__btns {
+    padding: 6px 16px 12px;
+  }
+}
+
+// ===== el-notification — flatter, subtler =====
+.el-notification {
+  border-radius: var(--y-radius-md);
+  border: 1px solid var(--y-color-border);
+  box-shadow: var(--y-shadow-2);
+}
+
+// ===== el-pagination — Linear compactness =====
+.el-pagination {
+  --el-pagination-button-color: var(--y-color-text-regular);
+  --el-pagination-button-bg-color: var(--y-color-bg-card);
+  --el-pagination-hover-color: var(--y-color-primary);
+
+  .el-pager li,
+  .btn-prev,
+  .btn-next {
+    border-radius: var(--y-radius-sm);
+    margin: 0 2px;
+    font-weight: var(--y-font-weight-regular);
+  }
+}
+
+// ===== Topbar popover/dropdown — must float, never expand the toolbar =====
+// Toolbars use el-popover/el-dropdown with :teleported="true" popper-class="y-toolbar-popper".
+// This rule guarantees high z-index for the teleported popper so it floats over the canvas.
+// It also guards against any future regression where a popper ends up inside #topbar-container:
+// absolute positioning + auto margins keep it from pushing the toolbar height.
+.y-toolbar-popper {
+  z-index: var(--y-z-popover, 1100) !important;
+}
+
+#topbar-container .el-popper,
+#topbar-container .el-popover.el-popper,
+#topbar-container .el-dropdown-menu.el-popper {
+  position: absolute !important;
+}
+
+// ===== Draggable tool panels — must float at their stored position =====
+// Tool setting panels render via Teleport into #_Draggable_teleport and rely on class="fixed"
+// to give them position: fixed so the inline left/top from useDraggable actually takes effect.
+// No atomic-CSS framework is wired up in this project, so .fixed is otherwise undefined —
+// without this rule the panels collapse to the teleport target's origin (0, 0) and ignore drag.
+// The teleport target itself has pointer-events: none (so the zero-sized anchor never blocks
+// clicks); re-enable pointer events on its direct children so the panels are interactive.
+.fixed {
+  position: fixed;
+}
+
+#_Draggable_teleport > * {
+  pointer-events: auto;
+}
+

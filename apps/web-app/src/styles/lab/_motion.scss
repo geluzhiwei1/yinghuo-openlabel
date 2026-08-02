@@ -1,0 +1,62 @@
+// Lab motion — design.md §6
+//
+// 克制、机械、循环——不要弹跳缓动。
+// Only transition-colors (150ms) for hover/active; never transition size.
+
+:root {
+  --lab-duration-fast: 100ms;
+  --lab-duration-base: 150ms;
+  --lab-duration-slow: 250ms;
+  --lab-ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// 在线指示点、录制态 — opacity → .35, 1.6s ease-in-out ∞
+@keyframes lab-blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.35; }
+}
+
+// 底部 Ticker — translateX 0 → -50%, 50s linear ∞
+@keyframes lab-marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+// 点云视口扫描线 — translateY -100% → 100%, 4s linear ∞
+@keyframes lab-sweep {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+// HUD 提示、空状态图形 — ±4px, 3.6s ease-in-out ∞
+@keyframes lab-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+
+.lab-animate-blink   { animation: lab-blink 1.6s ease-in-out infinite; }
+.lab-animate-marquee { animation: lab-marquee 50s linear infinite; }
+.lab-animate-sweep   { animation: lab-sweep 4s linear infinite; }
+.lab-animate-float   { animation: lab-float 3.6s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-animate-blink,
+  .lab-animate-marquee,
+  .lab-animate-sweep,
+  .lab-animate-float {
+    animation: none;
+  }
+}
+
+// 全站统一的 hover/active 颜色过渡 helper
+.lab-transition {
+  transition: background-color var(--lab-duration-base) var(--lab-ease),
+              color var(--lab-duration-base) var(--lab-ease),
+              border-color var(--lab-duration-base) var(--lab-ease);
+}
+
+// Text selection — design.md §6
+::selection {
+  background: var(--lab-lime);
+  color: var(--lab-ink);
+}

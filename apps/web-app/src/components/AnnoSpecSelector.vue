@@ -1,31 +1,23 @@
 <template>
   <el-row>
-    <el-text type="success" v-show="options.inputVisible && valueRef.key">{{
-      valueRef.key + ' (' + valueRef.name + ')'
-      }}</el-text>
+    <el-text type="success" v-show="options.inputVisible && valueRef.key">{{ valueRef.key + ' (' + valueRef.name + ')'}}</el-text>
   </el-row>
-  <el-tooltip placement="bottom-start" raw-content :content="t('components.annoSpecSelector.tooltip')">
-    <el-popover placement="bottom" width="1024" :auto-close="0" trigger="click">
+  <el-tooltip placement="bottom-start" raw-content content="选择标签分类标准">
+    <el-popover placement="bottom" width="1024" auto-close="0" trigger="click">
       <template #reference>
-        <el-button size="small">
+        <el-button size="small" >
           {{ options.btnLabel }}
         </el-button>
       </template>
       <div>
         <el-row>
-          <el-col :span="18">
-            <el-button-group>
+          <el-col :span="18"> <el-button-group>
               <el-button size="default" @click="currentTab = 'system-spec'"
-                :type="currentTab === 'system-spec' ? 'success' : ''">{{ t('components.annoSpecSelector.systemSpec')
-                }}</el-button>
+                :type="currentTab === 'system-spec' ? 'success' : ''">系统规范</el-button>
               <el-button size="default" @click="handleUserSpecClick"
-                :type="currentTab === 'my-spec' ? 'success' : ''">{{
-                  t('components.annoSpecSelector.mySpec') }}</el-button>
-            </el-button-group><el-button style="margin-left: 20px;" size="small" @click="handleLoadSystemSpecClick">{{
-              t('components.annoSpecSelector.loadSystemSpec') }}</el-button></el-col>
-          <el-col :span="6"><router-link to="/anno-specification">{{
-            t('components.annoSpecSelector.newSpec')
-              }}</router-link></el-col>
+                :type="currentTab === 'my-spec' ? 'success' : ''">我的规范</el-button>
+            </el-button-group></el-col>
+          <el-col :span="6"><router-link to="/anno-specification">新建规范</router-link></el-col>
         </el-row>
         <div v-show="currentTab === 'system-spec'">
           <el-table-v2 :columns="systemTableColumns" :loading="loading" :data="systemTableDataRef" :width="1000"
@@ -41,28 +33,10 @@
   </el-tooltip>
 </template>
 <script setup lang="tsx" name="AnnoBatch">
-/*
-Copyright (C) 2025 格律至微
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
 import { openlabelApi, annoSpecApi } from '@/api'
-import { ref, watch, onMounted } from 'vue'
-import { ElTableV2, ElCol, ElTooltip, ElRow, type Column, ElButton, ElPopover } from 'element-plus'
-import { useI18n } from 'vue-i18n'
+import { ref, watch, onMounted, reactive, computed } from 'vue'
+import { ElTableV2, ElCol, ElTooltip, ElRow, type Column, ElButton, ElPopover, } from 'element-plus'
 
-const { t } = useI18n()
 const tableRef = ref(null)
 const props = defineProps({
   modelValue: {
@@ -71,7 +45,7 @@ const props = defineProps({
     default: () => {
       return {
         key: '',
-        type: 'system'
+        type: 'system',
       }
     }
   },
@@ -79,8 +53,8 @@ const props = defineProps({
     type: Object,
     default: () => {
       return {
-        btnLabel: 'Select',
-        inputVisible: true
+        btnLabel: '选择',
+        inputVisible: true,
       }
     }
   }
@@ -91,96 +65,76 @@ const currentTab = ref('system-spec')
 const options = ref(props.options)
 const systemTableDataRef = ref([])
 const loading = ref(false)
+const label = ref('')
 const valueRef = ref(props.modelValue)
 
-watch(
-  () => valueRef.value,
-  (val) => {
-    // label.value = val.key + '(' + val.name + ')'
-    emit('update:modelValue', val)
-  }
-)
+watch(() => valueRef.value, (val) => {
+  // label.value = val.key + '(' + val.name + ')'
+  emit('update:modelValue', val)
+})
 
 const systemTableColumns: Column<any>[] = [
   {
     width: 200,
-    title: t('components.annoSpecSelector.name'),
+    title: '名称',
     dataKey: 'name',
     key: 'name'
   },
   {
     width: 200,
-    title: t('components.annoSpecSelector.code'),
+    title: '编码',
     dataKey: 'taxonomy_key',
     key: 'taxonomy_key'
   },
   {
     width: 200,
-    title: t('components.annoSpecSelector.category'),
+    title: '分类',
     dataKey: 'domain',
     key: 'domain'
   },
   {
     width: 50,
-    title: t('components.annoSpecSelector.version'),
+    title: '版本',
     dataKey: 'version',
     key: 'version'
   },
   {
     width: 50,
-    title: t('components.annoSpecSelector.language'),
+    title: '语言',
     dataKey: 'language',
     key: 'language'
   },
   {
     width: 50,
-    title: t('components.annoSpecSelector.reference'),
+    title: '参考',
     dataKey: 'url',
     key: 'url'
   },
   {
     width: 100,
-    title: t('components.annoSpecSelector.description'),
+    title: '说明',
     dataKey: 'description',
     key: 'description'
   }
 ]
 
 const myTableColumns: Column<any>[] = [
-  { dataKey: 'name', key: 'name', title: t('components.annoSpecSelector.name'), width: 200 },
-  {
-    dataKey: 'version',
-    key: 'version',
-    title: t('components.annoSpecSelector.version'),
-    width: 100
-  },
-  { dataKey: 'lang', key: 'lang', title: t('components.annoSpecSelector.language'), width: 100 },
-  {
-    dataKey: 'updated_time',
-    key: 'updated_time',
-    title: t('components.annoSpecSelector.updatedTime'),
-    width: 200
-  },
-  {
-    dataKey: 'enabled',
-    key: 'enabled',
-    title: t('components.annoSpecSelector.enabled'),
-    width: 100
-  },
-  { dataKey: 'desc', key: 'desc', title: t('components.annoSpecSelector.desc'), width: 200 }
+  { dataKey: 'name', key: 'name', title: '名称', width: 200 },
+  { dataKey: 'version', key: 'version', title: '版本', width: 100 },
+  { dataKey: 'lang', key: 'lang', title: '语言', width: 100 },
+  { dataKey: 'updated_time', key: 'updated_time', title: '更新时间', width: 200 },
+  { dataKey: 'enabled', key: 'enabled', title: '是否启用', width: 100 },
+  { dataKey: "desc", key: 'desc', title: "描述", width: 200 },
 ]
 const myTableDataRef = ref([])
 
 const loadSystemSpec = () => {
   loading.value = true
-  openlabelApi
-    .query({})
-    .then((res: any) => {
-      systemTableDataRef.value = res.data
-    })
-    .finally(() => {
-      loading.value = false
-    })
+  openlabelApi.query({}).then((res: any) => {
+    systemTableDataRef.value = res.data
+  }).finally(() => {
+    loading.value = false
+  })
 }
 
 const handleUserSpecClick = () => {
@@ -199,15 +153,13 @@ const loadMySpec = () => {
       enabled: true
     }
   }
-  annoSpecApi
-    .search(condition)
-    .then((res: any) => {
-      myTableDataRef.value = res.data
-    })
-    .finally(() => {
-      loading.value = false
-    })
+  annoSpecApi.search(condition).then((res: any) => {
+    myTableDataRef.value = res.data
+  }).finally(() => {
+    loading.value = false
+  })
 }
+
 
 // const selectVal = computed({
 //   get() {
@@ -219,23 +171,13 @@ const loadMySpec = () => {
 //   }
 // })
 
-const systemTableRowClick = (row: any) => {
-  valueRef.value = {
-    key: row.rowData['taxonomy_key'],
-    type: 'system',
-    name: row.rowData['name'],
-    domain: row.rowData['domain']
-  }
+const systemTableRowClick = (row) => {
+  valueRef.value = { key: row.rowData['taxonomy_key'], type: 'system', name: row.rowData['name'], domain: row.rowData['domain'] }
   // emit('update:modelValue', val)
 }
-const myTableRowClick = (row: any) => {
+const myTableRowClick = (row) => {
   valueRef.value = { key: row.rowData['_id'], type: 'user', name: row.rowData['name'] }
   // emit('update:modelValue', val)
-}
-
-const handleLoadSystemSpecClick = () => {
-  loadSystemSpec()
-  loadMySpec()
 }
 
 onMounted(() => {

@@ -1,0 +1,25 @@
+// Card / surface mixins
+
+@mixin card {
+  background: var(--y-color-bg-card);
+  border-radius: var(--y-radius-lg);
+  box-shadow: var(--y-shadow-2);
+  padding: var(--y-spacing-4);
+}
+
+@mixin card-flat {
+  background: var(--y-color-bg-card);
+  border-radius: var(--y-radius-lg);
+  border: 1px solid var(--y-color-border-lighter);
+  padding: var(--y-spacing-4);
+}
+
+@mixin hover-lift {
+  transition:
+    box-shadow var(--y-duration-base) var(--y-ease-out),
+    transform var(--y-duration-base) var(--y-ease-out);
+  &:hover {
+    box-shadow: var(--y-shadow-3);
+    transform: translateY(-1px);
+  }
+}

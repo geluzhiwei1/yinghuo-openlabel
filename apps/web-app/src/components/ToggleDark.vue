@@ -1,10 +1,9 @@
 <template>
-  <el-button @click="toggleDark()" circle>
-    <Icon :icon="isDark ? 'carbon-moon' : 'carbon-sun'" />
-  </el-button>
+    <span class="header-action" @click="toggleDark()">
+        <Icon :icon="isDark ? 'lucide:moon' : 'lucide:sun'" width="18" />
+    </span>
 </template>
-<script setup lang="tsx">
-import { ElButton } from 'element-plus'
+<script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { useDark, useToggle } from '@vueuse/core'
 

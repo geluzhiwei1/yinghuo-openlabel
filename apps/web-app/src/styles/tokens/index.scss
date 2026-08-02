@@ -1,0 +1,11 @@
+// Design token index
+// Import this file once globally (in main.ts of each entry).
+// Each partial defines CSS custom properties on :root and :root.dark.
+
+@use 'color';
+@use 'spacing';
+@use 'typography';
+@use 'radius';
+@use 'shadow';
+@use 'motion';
+@use 'z-index';

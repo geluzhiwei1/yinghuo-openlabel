@@ -1,0 +1,39 @@
+// Lab shape tokens — design.md §3
+//
+// Pill geometry everywhere; cards rely on shadow not borders.
+
+:root {
+  // Radius scale — only these values are allowed
+  // NOTE: --lab-radius-pill demoted from 999px → 8px per user preference.
+  // Kept the name so legacy `var(--lab-radius-pill, 999px)` fallbacks resolve to 8px.
+  --lab-radius-pill: 8px;       // buttons, inputs, badges, tabs (rect, was 999px)
+  --lab-radius-3xl:  24px;      // primary cards, panels
+  --lab-radius-2xl:  16px;      // nested panels, popovers
+  --lab-radius-xl:   12px;      // dropdown items, small chips
+  --lab-radius-lg:   8px;       // canvas corners only (rare)
+
+  // Control heights — three tiers only, never mix
+  --lab-ctrl-h-sm: 32px;
+  --lab-ctrl-h-md: 36px;
+  --lab-ctrl-h-lg: 40px;
+
+  // Icon button size (square)
+  --lab-ctrl-icon: 36px;        // h-9 w-9
+
+  // Lime ball slot inside primary button
+  --lab-lime-ball: 28px;
+
+  // Spacing constants from design.md §3
+  --lab-space-page-x: 32px;     // px-8
+  --lab-space-page-x-lg: 40px;  // lg:px-10
+  --lab-space-page-t: 24px;     // pt-6
+  --lab-space-page-b: 32px;     // pb-8
+  --lab-space-card:   20px;     // p-5
+  --lab-space-row-x:  24px;     // px-6
+  --lab-space-row-y:  14px;     // py-3.5
+
+  // Topbar / sidebar / footer geometry
+  --lab-topbar-h:    64px;
+  --lab-sidebar-w:   240px;
+  --lab-footer-h:    36px;
+}

@@ -1,27 +1,22 @@
 <template>
   <el-drawer title="选择模型" :size="'70%'" v-model="dnnModelSelectorState.dialogVisible">
-    <div class="scrollbar-flex-content">
-      <el-tabs v-model="activeModelType" type="border-card">
-        <el-tab-pane label="模型(WebGPU)" name="builtin">
-          <OnnxWebModels></OnnxWebModels>
-        </el-tab-pane>
-        <el-tab-pane label="模型(官网服务器)" name="private">
-          <PrivateModels></PrivateModels>
-        </el-tab-pane>
-        <el-tab-pane label="模型(自有服务器)" name="my">
-          <el-button disabled>添加</el-button>
-        </el-tab-pane>
-      </el-tabs>
-    </div>
+      <div class="scrollbar-flex-content">
+        <el-tabs v-model="activeModelType" type="border-card">
+          <el-tab-pane label="模型(WebGPU)" name="builtin">
+            <OnnxWebModels></OnnxWebModels>
+          </el-tab-pane>
+          <el-tab-pane label="模型(官网服务器)" name="private">
+            <PrivateModels></PrivateModels>
+          </el-tab-pane>
+          <el-tab-pane label="模型(自有服务器)" name="my">
+            <el-button disabled>添加</el-button>
+          </el-tab-pane>
+        </el-tabs>
+      </div>
     <template #footer>
-      <div style="text-align: center">
-        <el-button
-          @click="ok()"
-          type="primary"
-          v-loading.fullscreen.lock="fullscreenLoading"
-          :element-loading-text="loadingLog"
-          >确定</el-button
-        >
+      <div style="text-align: center;">
+        <el-button @click="ok()" type="primary" v-loading.fullscreen.lock="fullscreenLoading"
+          :element-loading-text="loadingLog">确定</el-button>
         <el-button @click="cancel()">取消</el-button>
       </div>
     </template>
@@ -29,11 +24,14 @@
 </template>
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { ElButton, ElTabs, ElTabPane } from 'element-plus'
-import { dnnModelSelectorState } from './index'
+import {
+  ElDialog, ElButton, ElScrollbar,
+  ElTabs, 
+  ElTabPane,
+} from 'element-plus'
+import { dnnModelSelectorState } from './'
 import PrivateModels from './PrivateModels.vue'
 import OnnxWebModels from './OnnxWebModels.vue'
-
 import { get } from 'radash'
 import { messages } from '@/states'
 import { loadYoloV8Wasm } from '@/libs/plugin'
@@ -44,19 +42,12 @@ const activeModelType = ref('builtin')
 const loadingLog = ref('加载模型...')
 
 const loadOnnxWebModel = async () => {
+
   // const loadingInstance = ElLoading.service({ fullscreen: true, text: '加载模型...', lock: true })
   fullscreenLoading.value = true
   // const inferencers = await import("yinghuo-onnx-web-inferencer")
-  const CLS = get(
-    get(window, 'inferencers'),
-    dnnModelSelectorState.selectedApi?.serv_info.inferencer,
-    undefined
-  )
-  if (!CLS) {
-    fullscreenLoading.value = false
-    messages.lastException = '未找到模型加载器'
-    return
-  }
+  const CLS = get(get(window, 'inferencers'), dnnModelSelectorState.selectedApi?.serv_info.inferencer, undefined)
+  if (!CLS) return
   const infer = new CLS()
   const modelConf = {
     logger: (args: any) => {
@@ -80,22 +71,19 @@ const loadOnnxWebModel = async () => {
   // dnnModelSelectorState.selectedApi.model_args.onnx_url
   // dnnModelSelectorState.selectedApi.model_args.onnx_nms_url
 
-  infer
-    .initialize(modelConf)
-    .then(() => {
-      if (infer.pipeline) {
-        messages.lastSuccess = '模型加载成功'
-        dnnModelSelectorState.selectedApi.infer = infer
-        if (dnnModelSelectorState.onOk) {
-          dnnModelSelectorState.onOk()
-        }
-      } else {
-        messages.lastException = '模型加载失败'
+  infer.initialize(modelConf).then(() => {
+    if (infer.pipeline) {
+      messages.lastSuccess = "模型加载成功"
+      dnnModelSelectorState.selectedApi.infer = infer
+      if (dnnModelSelectorState.onOk) {
+        dnnModelSelectorState.onOk()
       }
-    })
-    .catch((err) => {
-      messages.lastException = `异常${err.message}`
-    })
+    } else {
+      messages.lastException = "模型加载失败"
+    }
+  }).catch((err) => {
+    messages.lastException = `异常${err.message}`
+  })
     .finally(() => {
       // loadingInstance.close()
       fullscreenLoading.value = false
@@ -111,7 +99,7 @@ const ok = () => {
     })
   } else {
     if (dnnModelSelectorState.onOk) {
-      dnnModelSelectorState.onOk()
+        dnnModelSelectorState.onOk()
     }
   }
 }
@@ -123,7 +111,8 @@ const cancel = () => {
   dnnModelSelectorState.dialogVisible = false
 }
 
-onMounted(() => {})
+onMounted(() => {
+})
 
 const open = () => {
   dnnModelSelectorState.dialogVisible = true
@@ -137,8 +126,8 @@ defineExpose({ open })
 
 .el-tabs__content {
   padding: 32px;
-  color: #6b778c;
+  color: var(--y-color-text-secondary);
   font-size: 32px;
-  font-weight: 600;
+  font-weight: var(--y-font-weight-semibold);
 }
 </style>

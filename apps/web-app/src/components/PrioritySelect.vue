@@ -14,9 +14,6 @@ export default {}
 <script setup>
 import { ref, computed } from 'vue'
 import { ElSelect, ElOption } from 'element-plus'
-import { useI18n } from 'vue-i18n'
-
-const { t } = useI18n()
 
 const props = defineProps({
   selectedValue: {
@@ -25,7 +22,7 @@ const props = defineProps({
   },
   placeholder: {
     type: String,
-    default: 'Please select priority'
+    default: '请选择'
   }
 })
 const emits = defineEmits(['update:selectedValue', 'onChangeSelect'])
@@ -41,23 +38,23 @@ const selectVal = computed({
 const selectOptions = ref([
   {
     value: 1,
-    label: t('components.prioritySelect.lowest')
+    label: "1-最低"
   },
   {
     value: 2,
-    label: '2'
+    label: "2"
   },
   {
     value: 3,
-    label: t('components.prioritySelect.medium')
+    label: "4-中等"
   },
   {
     value: 4,
-    label: '4'
+    label: "4"
   },
   {
     value: 5,
-    label: t('components.prioritySelect.highest')
+    label: "5-最高"
   }
 ])
 

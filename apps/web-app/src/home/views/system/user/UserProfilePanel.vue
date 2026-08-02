@@ -5,52 +5,31 @@
     </template>
     <template #default>
       <el-button-group>
-        <el-button
-          size="default"
-          @click="curTab = 'accountInfo'"
-          :type="curTab === 'accountInfo' ? 'success' : ''"
-          >我的账号</el-button
-        >
-        <el-button
-          size="default"
-          @click="curTab = 'userpass'"
-          :type="curTab === 'userpass' ? 'success' : ''"
-          >修改密码</el-button
-        >
+        <el-button size="default" @click="curTab = 'accountInfo'"
+          :type="curTab === 'accountInfo' ? 'success' : ''">我的账号</el-button>
+        <el-button size="default" @click="curTab = 'userpass'"
+          :type="curTab === 'userpass' ? 'success' : ''">修改密码</el-button>
       </el-button-group>
       <div v-show="curTab === 'userpass'">
         <UserPassword></UserPassword>
       </div>
       <div v-show="curTab === 'accountInfo'">
-        <el-form
-          ref="form1Ref"
-          :model="form1"
-          :rules="form1rules"
-          v-loading="form1Loading"
-          label-position="right"
-          label-width="auto"
-          style="width: 580px"
-        >
+        <el-form ref="form1Ref" :model="form1" :rules="form1rules" v-loading="form1Loading" label-position="right"
+          label-width="auto" style="width: 580px">
           <el-form-item label="手机号" prop="mobile_phone_no">
-            <el-input
-              v-model="form1.mobile_phone_no"
-              style="width: 100%"
-              placeholder="请输入手机号"
-            >
-              <template #prepend> +86 </template>
+            <el-input v-model="form1.mobile_phone_no" style="width: 100%"
+              placeholder="请输入手机号">
+              <template #prepend>
+                +86
+              </template>
             </el-input>
           </el-form-item>
           <el-form-item label="邮箱账号" prop="email">
-            <el-input
-              v-model="form1.email"
-              :readonly="form1.email !== ''"
-              maxlength="100"
-              style="width: 100%"
-              placeholder="登录账号"
-            />
+            <el-input v-model="form1.email" :readonly="form1.email !== ''" maxlength="100" style="width: 100%"
+              placeholder="登录账号" />
           </el-form-item>
           <el-form-item>
-            <el-row style="justify-content: center; align-items: center; width: 100%">
+            <el-row style="justify-content: center; align-items: center;width: 100%;">
               <el-button @click="submitForm1(form1Ref)" type="primary">确定</el-button>
             </el-row>
           </el-form-item>
@@ -74,38 +53,39 @@ const form1Ref = ref()
 
 const form1Default = {
   email: userAuth.value.user.email || '',
-  mobile_phone_no: userAuth.value.user.mobile_phone_no || ''
+  mobile_phone_no: userAuth.value.user.mobile_phone_no || '',
 }
 const form1 = reactive({ ...form1Default })
 
+
 const checkEmail = (rule: any, value: any, callback: any) => {
-  if (value === '') {
-    callback(new Error('请输入邮箱'))
+  if (value === "") {
+    callback(new Error("请输入邮箱"));
   } else if (!validateEmail(value)) {
-    callback(new Error('请输入正确的邮箱'))
+    callback(new Error("请输入正确的邮箱"));
   } else {
-    callback()
+    callback();
   }
 }
 
 const checkPhoneNo = (rule: any, value: any, callback: any) => {
-  if (value === '') {
-    callback(new Error('请输入手机号'))
+  if (value === "") {
+    callback(new Error("请输入手机号"));
   } else if (!validateMobilePhoneNo(value)) {
-    callback(new Error('请输入正确的手机号'))
+    callback(new Error("请输入正确的手机号"));
   } else {
-    callback()
+    callback();
   }
-}
+};
 const form1rules = reactive<FormRules>({
   email: [
-    { required: true, message: '请输入邮箱', trigger: 'blur' },
-    { validator: checkEmail, trigger: 'blur' }
+    { required: true, message: "请输入邮箱", trigger: "blur" },
+    { validator: checkEmail, trigger: "blur" },
   ],
   mobile_phone_no: [
     { required: true, message: '请输入手机号', trigger: 'blur' },
-    { validator: checkPhoneNo, trigger: 'blur' }
-  ]
+    { validator: checkPhoneNo, trigger: "blur" },
+  ],
 })
 
 const submitForm1 = async (formEl) => {
@@ -114,10 +94,9 @@ const submitForm1 = async (formEl) => {
     if (valid) {
       // 设置name
       form1Loading.value = true
-      systemApi
-        .update_account(form1)
+      systemApi.update_account(form1)
         .then((res) => {
-          ElMessage({ message: res.statusText || '操作成功', type: 'success' })
+          ElMessage({ message: res.statusText || "操作成功", type: 'success' })
           reloadUserInfo()
         })
         .finally(() => {

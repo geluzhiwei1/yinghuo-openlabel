@@ -1,16 +1,9 @@
 <template>
-  <el-tree-select
-    v-model="valueRef"
-    :data="data"
-    :render-after-expand="true"
-    show-checkbox
-    default-expand-all
-    node-key="key"
-  />
+  <el-tree-select v-model="valueRef" :data="data" :render-after-expand="true" show-checkbox default-expand-all node-key="key"/>
 </template>
 <script lang="tsx" setup>
 import { onMounted, ref, watch } from 'vue'
-import { userDeptsApi } from '@/api'
+import { userDeptsApi } from '@/api';
 
 const props = defineProps({
   modelValue: {

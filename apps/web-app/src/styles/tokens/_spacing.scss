@@ -1,0 +1,30 @@
+// Spacing tokens
+// 4-pixel baseline grid. Use as: var(--y-spacing-N)
+:root {
+  --y-spacing-0:  0;
+  --y-spacing-1:  4px;
+  --y-spacing-2:  8px;
+  --y-spacing-3:  12px;
+  --y-spacing-4:  16px;
+  --y-spacing-5:  20px;
+  --y-spacing-6:  24px;
+  --y-spacing-8:  32px;
+  --y-spacing-10: 40px;
+  --y-spacing-12: 48px;
+  --y-spacing-16: 64px;
+  --y-spacing-20: 80px;
+
+  // Layout sizes
+  --y-header-height: 48px;
+  --y-sidebar-width: 240px;
+  --y-sidebar-width-collapsed: 64px;
+  --y-tabs-height: 36px;
+  --y-bottom-info-height: 32px;
+
+  // Common gaps
+  --y-gap-xs: var(--y-spacing-1);
+  --y-gap-sm: var(--y-spacing-2);
+  --y-gap-md: var(--y-spacing-3);
+  --y-gap-lg: var(--y-spacing-4);
+  --y-gap-xl: var(--y-spacing-6);
+}

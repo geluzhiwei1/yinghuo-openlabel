@@ -10,7 +10,7 @@
       <div class="content">
         <router-view v-slot="{ Component }">
           <keep-alive :include="tabs.nameList">
-            <component :is="Component"></component>
+              <component :is="Component"></component>
           </keep-alive>
         </router-view>
       </div>
@@ -18,22 +18,6 @@
   </div>
 </template>
 <script setup lang="ts">
-/*
-Copyright (C) 2025 格律至微
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
 import { useSidebarStore } from '@/store/sidebar'
 import { useTabsStore } from '@/store/tabs'
 import vHeader from '@/components/header.vue'
@@ -51,23 +35,22 @@ const tabs = useTabsStore()
   height: 100vh;
   overflow: hidden;
 }
-
 .content-box {
   position: absolute;
-  left: 250px;
+  left: var(--y-sidebar-width);
   right: 0;
-  top: 40px;
+  top: var(--y-header-height);
   bottom: 0;
   padding-bottom: 30px;
-  -webkit-transition: left 0.3s ease-in-out;
-  transition: left 0.3s ease-in-out;
+  -webkit-transition: left var(--y-duration-base) var(--y-ease-in-out);
+  transition: left var(--y-duration-base) var(--y-ease-in-out);
   overflow: hidden;
 }
 
 .content {
   width: auto;
   height: 100%;
-  padding: 20px;
+  padding: var(--y-spacing-5);
   overflow-y: scroll;
   box-sizing: border-box;
 }
@@ -77,6 +60,6 @@ const tabs = useTabsStore()
 }
 
 .content-collapse {
-  left: 65px;
+  left: var(--y-sidebar-width-collapsed);
 }
 </style>

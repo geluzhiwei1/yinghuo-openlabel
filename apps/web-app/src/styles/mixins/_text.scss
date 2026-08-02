@@ -1,0 +1,26 @@
+// Text mixins
+
+@mixin truncate($lines: 1) {
+  @if $lines == 1 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  } @else {
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+@mixin text-muted {
+  color: var(--y-color-text-secondary);
+}
+
+@mixin text-eyebrow {
+  font-size: var(--y-font-size-xs);
+  font-weight: var(--y-font-weight-semibold);
+  color: var(--y-color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}

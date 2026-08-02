@@ -1,0 +1,77 @@
+// Global utility classes.
+// Import this once per entry (in main.ts) so the classes are available app-wide.
+//
+// Philosophy: NOT a full atomic CSS framework. Only high-frequency combos.
+// For everything else, use scoped <style lang="scss"> with mixins + tokens.
+
+@use './tokens/color';
+@use './tokens/spacing';
+
+// ---- Layout ----
+.y-flex-center { display: flex; align-items: center; justify-content: center; }
+.y-flex-between { display: flex; align-items: center; justify-content: space-between; }
+.y-flex-column  { display: flex; flex-direction: column; }
+
+// 全屏标注页(anno / pc / nrrd)用的 wrapper:把高度钉死成父级并裁掉溢出,
+// 配合 html, body { height: 100%; overflow: hidden } 形成不可滚动的全屏壳。
+// 项目没装 UnoCSS / Tailwind,这个 class 名必须显式定义。
+.overflow-hidden {
+  height: 100%;
+  overflow: hidden;
+}
+
+.y-gap-xs { gap: var(--y-spacing-1); }
+.y-gap-sm { gap: var(--y-spacing-2); }
+.y-gap-md { gap: var(--y-spacing-3); }
+.y-gap-lg { gap: var(--y-spacing-4); }
+.y-gap-xl { gap: var(--y-spacing-6); }
+
+// ---- Surfaces ----
+.y-card {
+  background: var(--y-color-bg-card);
+  border-radius: var(--y-radius-lg);
+  box-shadow: var(--y-shadow-2);
+  padding: var(--y-spacing-4);
+}
+
+.y-card-flat {
+  background: var(--y-color-bg-card);
+  border-radius: var(--y-radius-lg);
+  border: 1px solid var(--y-color-border-lighter);
+  padding: var(--y-spacing-4);
+}
+
+// ---- Text ----
+.y-truncate   { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.y-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.y-text-muted     { color: var(--y-color-text-secondary); }
+.y-text-primary   { color: var(--y-color-text-primary); }
+.y-text-inverse   { color: var(--y-color-text-inverse); }
+
+// ---- Spacing helpers (use sparingly, prefer component-scoped styles) ----
+.y-mt-0 { margin-top: 0; }
+.y-mt-sm { margin-top: var(--y-spacing-2); }
+.y-mt-md { margin-top: var(--y-spacing-3); }
+.y-mt-lg { margin-top: var(--y-spacing-4); }
+.y-mb-0 { margin-bottom: 0; }
+.y-mb-sm { margin-bottom: var(--y-spacing-2); }
+.y-mb-md { margin-bottom: var(--y-spacing-3); }
+.y-mb-lg { margin-bottom: var(--y-spacing-4); }
+
+.y-p-0 { padding: 0; }
+.y-p-sm { padding: var(--y-spacing-2); }
+.y-p-md { padding: var(--y-spacing-3); }
+.y-p-lg { padding: var(--y-spacing-4); }
+
+// ---- Visibility ----
+.y-hidden { display: none !important; }
+.y-invisible { visibility: hidden; }
+
+// ---- Cursor ----
+.y-pointer { cursor: pointer; }
+.y-not-allowed { cursor: not-allowed; }

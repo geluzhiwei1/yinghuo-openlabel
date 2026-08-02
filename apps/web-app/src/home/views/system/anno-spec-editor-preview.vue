@@ -4,7 +4,7 @@
       <el-button-group size="small">
         <el-dropdown @command="handleCommand">
           <el-button>
-            根据模板创建<el-icon class="el-icon--right"><arrow-down /></el-icon>
+            根据模板创建<Icon icon="lucide:arrow-down" class="el-icon--right" />
           </el-button>
           <template #dropdown>
             <el-dropdown-menu>
@@ -13,26 +13,23 @@
             </el-dropdown-menu>
           </template>
         </el-dropdown>
-        <AnnoSpecSelector
-          v-model:model-value="copyFromSpec"
-          :options="{ btnLabel: '从现有规范复制', inputVisible: false }"
-        />
+        <AnnoSpecSelector v-model:model-value="copyFromSpec" :options="{btnLabel: '从现有规范复制',inputVisible:false}"/>
       </el-button-group>
       <el-button-group size="small">
         <el-button @click="handleCommand('saveSpec')" type="primary">保存</el-button>
-        <el-button @click="handleCommand('reset')">重置</el-button>
+        <el-button  @click="handleCommand('reset')" >重置</el-button>
       </el-button-group>
     </el-col>
     <el-col :span="6">可视化预览</el-col>
   </el-row>
-  <el-row>
+  <el-row >
     <el-col :span="18">
       <el-form-item>
         <label for=""
           >规范内容<el-text type="danger" v-show="errorMsg">异常：{{ errorMsg }}</el-text></label
         >
         <JsonEditorVue
-          style="height: 600px; width: 100%"
+          style="height: 600px;width:100%"
           ref="jsonEditor"
           :currentMode="'code'"
           :modeList="['code', 'tree', 'text']"
@@ -47,6 +44,7 @@
     <el-col :span="6">
       <el-form-item>
         <label for="">请选择:</label>
+        <el-button @click="handleCommand('preview')">预览</el-button>
         <el-tree-select
           :data="dataTree"
           v-model="selectedClass"
@@ -55,7 +53,11 @@
           @node-click="nodeClick"
         ></el-tree-select>
       </el-form-item>
-      <VueForm style="margin-left: 20px" :schema="schema" :formFooter="{ show: false }"></VueForm>
+      <VueForm
+        style="margin-left: 20px;"
+        :schema="schema"
+        :formFooter="{ show: false }"
+      ></VueForm>
     </el-col>
   </el-row>
 </template>
@@ -64,11 +66,13 @@
 import { ref, watch, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { JsonEditorVue } from '@/components/JsonEditor'
-import { type ValidationError } from 'jsoneditor'
+import {type ValidationError} from 'jsoneditor'
 import VueForm from '@lljj/vue3-form-element'
 import { annoSpecApi, openlabelApi } from '@/api'
 import { annoSpecTemplates } from './anno-spec-template'
 import AnnoSpecSelector from '@/components/AnnoSpecSelector.vue'
+import { Icon } from '@iconify/vue'
+
 
 const jsonEditor = ref()
 
@@ -86,19 +90,17 @@ watch(copyFromSpec, (newVal, oldVal) => {
   const { key, type, name, domain } = newVal
   let jsonObj = undefined
   if (type === 'system') {
-    openlabelApi
-      .query({
-        taxonomy: key,
-        domain: domain
-      })
-      .then((res) => {
-        if (res && res.data) {
-          jsonObj = res.data[0]
-          specJson.value = jsonObj
-          updateTreeData(specJson.value)
-          ElMessage.success('操作成功')
-        }
-      })
+    openlabelApi.query({
+      taxonomy: key,
+      domain: domain
+    }).then((res) => {
+      if (res && res.data) {
+        jsonObj = res.data[0]
+        specJson.value = jsonObj
+        updateTreeData(specJson.value)
+        ElMessage.success('操作成功')
+      }
+    })
   } else if (type === 'user') {
     annoSpecApi.query({ _id: key }).then((res) => {
       if (res && res.data && res.data.length == 1) {
@@ -114,7 +116,7 @@ watch(copyFromSpec, (newVal, oldVal) => {
 })
 
 const jsonEditorOptions = {
-  search: true
+  search: true,
   // onValidate: function (json) {
   //     console.log('validating...')
   //     var errors = [];
@@ -151,8 +153,8 @@ const nodeClick = (data, node, instance, event) => {
   nodeChange(data.value)
 }
 function nodeChange(val: string) {
-  const properties = {}
-  const res = diGuiMergeProperties(specJson.value.openlabel.classes, val, properties)
+  let properties = {}
+  let res = diGuiMergeProperties(specJson.value.openlabel.classes, val, properties)
   // specJson.value.schema = {}
   // specJson.value.schema.properties = res
   schema.value.properties = res
@@ -180,30 +182,31 @@ function diGuiMergeProperties(arr: any, val: string, properties: Object) {
   return properties
 }
 
+
 const checkClassNameUnique = (children, classNameMap) => {
   if (!Array.isArray(children)) {
-    throw new Error('children不是一个数组')
+    throw new Error('children不是一个数组');
   }
   children.forEach((item) => {
     if (!item.name) {
-      throw new Error('item缺少name属性')
+        throw new Error('item缺少name属性');
     }
     if (classNameMap.has(item.name)) {
-      throw new Error('类别【' + item.name + '】已存在，name必须是唯一的')
+      throw new Error('类别【' + item.name + '】已存在，name必须是唯一的');
     }
-    classNameMap.set(item.name, item.properties)
+    classNameMap.set(item.name, item.properties);
 
     if (item.children && item.children.length > 0) {
-      checkClassNameUnique(item.children, classNameMap)
+      checkClassNameUnique(item.children, classNameMap);
     }
-  })
-}
+  });
+};
 const checkClassName = (spec) => {
   if (!spec || !spec.openlabel || !spec.openlabel.classes || spec.openlabel.classes.length === 0) {
-    throw new Error('无效的spec对象')
+    throw new Error('无效的spec对象');
   }
-  const classNameMap = new Map()
-  checkClassNameUnique(spec.openlabel.classes[0].children, classNameMap)
+  const classNameMap = new Map();
+  checkClassNameUnique(spec.openlabel.classes[0].children, classNameMap);
 }
 
 function findParentNodesByName(nodes, name, parents = []) {
@@ -285,6 +288,7 @@ const getJsonData = async (_id: string) => {
     .finally(() => {})
 }
 
+
 const handleCommand = (command: string) => {
   switch (command) {
     case 'spec-default':
@@ -310,25 +314,26 @@ const handleCommand = (command: string) => {
     case 'saveSpec':
       if (errorMsg.value !== undefined) return
       try {
-        checkClassName(specJson.value)
+        checkClassName(specJson.value);
       } catch (e) {
         ElMessage.error(e.message)
         errorMsg.value = e.message
         return
       }
-      annoSpecApi
-        .update({ _id: rowDataRef.value._id, spec: JSON.stringify(specJson.value) })
-        .then((res) => {
-          ElMessage.success('保存成功')
-        })
+      annoSpecApi.update({_id:rowDataRef.value._id, spec: JSON.stringify(specJson.value) }).then((res) => {
+        ElMessage.success('保存成功')
+      })
+      break;
+    case 'preview':
+      onJsonEditorBlur(jsonEditor.value.editor)
       break
     default:
       break
   }
 }
 
-const onSpecJsonValidationError = (editor: Editor, errors: ValidationError[]) => {
-  if (errors.length === 0) return
+const onSpecJsonValidationError = (editor:Editor, errors: ValidationError[]) => {
+  if (errors.length === 0) return;
   // console.error('onValidationError', errors);
 }
 const onSelectionChange = (editor, start, end) => {
@@ -338,7 +343,7 @@ const onSelectionChange = (editor, start, end) => {
 }
 const onJsonEditorBlur = async (editor) => {
   errorMsg.value = undefined
-  const res = await editor.validate()
+  const res = await editor.validate();
   if (res.length === 0) {
     specJson.value = JSON.parse(editor.getText())
     updateTreeData(specJson.value)
