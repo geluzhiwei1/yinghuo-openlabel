@@ -21,21 +21,43 @@ import vueJsx from '@vitejs/plugin-vue-jsx'
 import UnoCSS from 'unocss/vite'
 import { resolve } from 'path'
 import { viteCommonjs } from '@originjs/vite-plugin-commonjs'
+import { yinghuoIconifyBundler } from './build/iconify-bundler.mjs'
 import { version as pkgVersion } from './package.json'
 
 process.env.VITE_APP_VERSION = pkgVersion
 
-export default defineConfig(({ mode }) => {
+
+// YH_EDITION 控制入口:ce(社区版)只构建 9 个业务面;ee/saas 额外加 platform/tenant_admin。
+// 阶段 1 暂不拆 SaaS 专属前端入口(待 SaaS 新功能 view 实现后再分)。
+const EDITION = process.env.YH_EDITION ?? 'ce'
+
+export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
+  const eeInputs = EDITION !== 'ce' ? {
+    tenantAdmin: resolve(__dirname, 'ee/tenant_admin.html'),
+    platform: resolve(__dirname, 'ee/platform.html'),
+  } : {}
   return {
-    base: env.VITE_APP_BASE_URI,
-    plugins: [vue(), viteCommonjs(), vueJsx(), UnoCSS()],
+    // base 硬编码,%VITE_APP_BASE_URI% 仅用于 HTML 模板内联资源引用,
+    // 设为空避免 vite 再叠一层前缀(/guis/v0.3.4/guis/v0.3.4/...)
+    base: '/guis/v0.3.4',
+    plugins: [
+      vue(),
+      viteCommonjs(),
+      vueJsx(),
+      UnoCSS(),
+      yinghuoIconifyBundler({ srcDir: resolve(__dirname, 'src') }),
+    ],
 
     css: {
       preprocessorOptions: {
         less: {
           additionalData: '@import "./src/styles/variables.module.less";',
           javascriptEnabled: true
+        },
+        scss: {
+          api: 'modern-compiler',
+          quietDeps: true,
         }
       }
     },
@@ -44,15 +66,26 @@ export default defineConfig(({ mode }) => {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url)),
         'vue-i18n': 'vue-i18n/dist/vue-i18n.cjs.js',
-        'three/tsl': 'three/webgpu'
-      }
+        'three/tsl': 'three/webgpu',
+      },
+      // EE/SaaS 子目录是 symlink 指向外部的 git clone,默认 vite 会 follow symlink 到 clone 路径,
+      // 再从那往上找 node_modules。setup-edition.sh 会在 clone 内补一个 node_modules symlink
+      // 指回本仓库,让依赖解析能正常走 pnpm 的 .pnpm 结构。
     },
     build: {
+      // 多页面打包配置。CE 9 个入口;EE/SaaS 11 个入口(多 platform/tenant_admin)。
       rollupOptions: {
         input: {
-          login: resolve(__dirname, 'login.html'),
+          auth: resolve(__dirname, 'auth.html'),
           dashboard: resolve(__dirname, 'home.html'),
           anno: resolve(__dirname, 'anno.html'),
+          pc: resolve(__dirname, 'pc.html'),
+          nrrd: resolve(__dirname, 'nrrd.html'),
+          gaussian: resolve(__dirname, 'gaussian.html'),
+          qualityDashboard: resolve(__dirname, 'dashboard.html'),
+          reviewWorkbench: resolve(__dirname, 'review.html'),
+          qaWorkbench: resolve(__dirname, 'qa.html'),
+          ...eeInputs,
         }
       }
     },
@@ -62,8 +95,8 @@ export default defineConfig(({ mode }) => {
         '/webapps/': {
           target: env.VITE_APP_PLUGIN_BASE_URI,
           changeOrigin: true,
-          configure: (proxy, options) => {
-            proxy.on('proxyRes', (proxyRes, req, res) => {
+          configure: (proxy) => {
+            proxy.on('proxyRes', (proxyRes) => {
               proxyRes.headers['Access-Control-Allow-Origin'] = '*'
             })
           }
@@ -71,36 +104,34 @@ export default defineConfig(({ mode }) => {
         '/yh-web-yolo/v1.0/': {
           target: env.VITE_APP_WEBYOLO_BASE_URI,
           changeOrigin: true,
-          configure: (proxy, options) => {
-            proxy.on('error', (err, _req, _res) => {
-              console.log('proxy error', err)
+          configure: (proxy) => {
+            proxy.on('error', (err) => { console.log('proxy error', err) })
+            proxy.on('proxyReq', (proxyReq, req) => {
+              console.log('Sending Request to the Target:', env.VITE_APP_WEBYOLO_BASE_URI, req.method, req.url)
             })
-            proxy.on('proxyReq', (proxyReq, req, _res) => {
-              console.log('Sending Request to the Target:', env.VITE_APP_WEBYOLO_BASE_URI,req.method, req.url)
-            })
-            proxy.on('proxyRes', (proxyRes, req, _res) => {
+            proxy.on('proxyRes', (proxyRes, req) => {
               console.log('Received Response from the Target:', env.VITE_APP_WEBYOLO_BASE_URI, proxyRes.statusCode, req.url)
             })
           }
         },
+        // 阶段 5 联调:admin/captcha/platform 路由合并进主 app 后,
+        // /api/v1/a, /api/v1/c, /api/v1/p 不再 strip 前缀(后端路由自带这些前缀);
+        // 仅 /api/v1/b 仍 strip(主 app 业务路由注册在根)。
         '/api/v1/a': {
           target: env.API_URL_ADMIN,
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api\/v1\/a/, '')
         },
         '/api/v1/b': {
           target: env.API_URL_APP,
           changeOrigin: true,
           secure: false,
           ws: true,
-          configure: (proxy, _options) => {
-            proxy.on('error', (err, _req, _res) => {
-              console.log('proxy error', err)
-            })
-            proxy.on('proxyReq', (proxyReq, req, _res) => {
+          configure: (proxy) => {
+            proxy.on('error', (err) => { console.log('proxy error', err) })
+            proxy.on('proxyReq', (proxyReq, req) => {
               console.log('Sending Request to the Target:', req.method, req.url)
             })
-            proxy.on('proxyRes', (proxyRes, req, _res) => {
+            proxy.on('proxyRes', (proxyRes, req) => {
               console.log('Received Response from the Target:', proxyRes.statusCode, req.url)
             })
           },
@@ -111,18 +142,13 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false,
           ws: true,
-          configure: (proxy, _options) => {
-            proxy.on('error', (err, _req, _res) => {
-              console.log('proxy error', err)
-            })
-            proxy.on('proxyReq', (proxyReq, req, _res) => {
-              console.log('Sending Request to the Target:', req.method, req.url)
-            })
-            proxy.on('proxyRes', (proxyRes, req, _res) => {
-              console.log('Received Response from the Target:', proxyRes.statusCode, req.url)
-            })
+          configure: (proxy) => {
+            proxy.on('error', (err) => { console.log('proxy error', err) })
           },
-          rewrite: (path) => path.replace(/^\/api\/v1\/c/, '')
+        },
+        '/api/v1/p': {
+          target: env.API_URL_PLATFORM || env.API_URL_APP,
+          changeOrigin: true,
         }
       },
       hmr: {
@@ -135,9 +161,9 @@ export default defineConfig(({ mode }) => {
       esbuildOptions: {
         // Node.js global to browser globalThis
         define: {
-          global: 'globalThis'
-        }
-      }
+          global: 'globalThis',
+        },
+      },
     }
   }
 })
