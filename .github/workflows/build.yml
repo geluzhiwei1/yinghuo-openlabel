@@ -1,0 +1,157 @@
+name: build
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.edition }} build & test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        edition: [ce, ee, saas]
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: yh
+          POSTGRES_USER: yh
+          POSTGRES_DB: yh
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      YH_EDITION: ${{ matrix.edition }}
+      YH_CONFIG_FILE: services/web-api/config/yinghuo-ci.yaml
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: apps/web-app/pnpm-lock.yaml
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: apps/web-app
+
+      - name: Type-check frontend
+        run: pnpm type-check
+        working-directory: apps/web-app
+
+      - name: Build frontend (${{ matrix.edition }})
+        run: pnpm build
+        working-directory: apps/web-app
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install backend dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[test]
+        working-directory: services/web-api
+
+      - name: Verify backend assembles (${{ matrix.edition }})
+        run: |
+          python -c "from yinghuo_app.app import app; print('${{ matrix.edition }} app loaded, routes:', len(app.routes))"
+        working-directory: services/web-api
+
+      - name: Run tests (${{ matrix.edition }})
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          case "${{ matrix.edition }}" in
+            ce)
+              pytest -m "not ee and not saas" services/web-api/tests
+              ;;
+            ee)
+              pytest -m "not saas" services/web-api/tests
+              ;;
+            saas)
+              pytest services/web-api/tests
+              ;;
+          esac
+
+  ce-tarball:
+    name: CE source tarball sanity
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify EE/SaaS code is excluded from CE tarball
+        run: |
+          set -e
+          mkdir -p workdir
+          git archive --format=tar HEAD | tar -x -C workdir
+          rm -rf workdir/apps/web-app/ee \
+                 workdir/apps/web-app/src/ee \
+                 workdir/services/web-api/src/yinghuo_app/ee \
+                 workdir/services/web-api/src/yinghuo_app/saas
+          rm -f workdir/LICENSE.EE workdir/LICENSE.SAAS
+          tar -czf ce-check.tar.gz -C workdir .
+          LEAKS=$(tar tzf ce-check.tar.gz | grep -E "/ee/|/saas/|apps/web-app/ee/|src/ee/|yinghuo_app/ee/|yinghuo_app/saas/" || true)
+          if [ -n "$LEAKS" ]; then
+            echo "EE/SaaS leak detected:"; echo "$LEAKS"; exit 1
+          fi
+          if tar tzf ce-check.tar.gz | grep -qE "^LICENSE\.(EE|SAAS)$"; then
+            echo "commercial LICENSE leaked into CE"; exit 1
+          fi
+          echo "CE tarball sanity OK"
+
+  ee-tarball:
+    name: EE source tarball sanity
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify SaaS code is excluded from EE tarball
+        run: |
+          set -e
+          mkdir -p workdir
+          git archive --format=tar HEAD | tar -x -C workdir
+          rm -rf workdir/services/web-api/src/yinghuo_app/saas
+          rm -f workdir/LICENSE.SAAS
+          tar -czf ee-check.tar.gz -C workdir .
+          LEAKS=$(tar tzf ee-check.tar.gz | grep -E "/saas/|yinghuo_app/saas/" || true)
+          if [ -n "$LEAKS" ]; then
+            echo "SaaS leak detected into EE:"; echo "$LEAKS"; exit 1
+          fi
+          if tar tzf ee-check.tar.gz | grep -q "^LICENSE.SAAS$"; then
+            echo "LICENSE.SAAS leaked into EE"; exit 1
+          fi
+          # EE 必须仍包含 ee/ 和 LICENSE.EE
+          if ! tar tzf ee-check.tar.gz | grep -q "yinghuo_app/ee/platform/auth.py"; then
+            echo "EE tarball missing ee/platform/auth.py"; exit 1
+          fi
+          if ! tar tzf ee-check.tar.gz | grep -q "^LICENSE.EE$"; then
+            echo "EE tarball missing LICENSE.EE"; exit 1
+          fi
+          echo "EE tarball sanity OK"
