@@ -286,15 +286,6 @@ export const permissionsApi = {
   tree: () => reqJson({ uri: `${adminBaseURL}/permissions/tree`, method: 'GET' }),
 }
 
-// legacy 占位:个别老 view 仍 import resourceApi,保留空 stub 避免编译错
-export const resourceApi = {
-  create: () => Promise.reject(new Error('deprecated')),
-  delete: () => Promise.reject(new Error('deprecated')),
-  update: () => Promise.reject(new Error('deprecated')),
-  query: () => Promise.reject(new Error('deprecated')),
-  query_tree: () => permissionsApi.tree(),
-}
-
 export const teamApi = {
   create: (data) => {
     return reqJson({ uri: `${bizBaseURL}/team/create`, data, method: 'POST' })

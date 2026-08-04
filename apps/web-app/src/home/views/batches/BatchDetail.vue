@@ -124,6 +124,13 @@
                 <el-option label="进行中" value="in_progress" />
                 <el-option label="已完成" value="approved" />
               </el-select>
+              <el-checkbox
+                v-model="unitFilters.eligible_only"
+                @change="reloadUnits"
+                title="只显示当前用户角色有权认领的 unit(按 stage 角色过滤)"
+              >
+                只显示我能领的
+              </el-checkbox>
           </div>
           </div>
         </template>
@@ -202,6 +209,7 @@ const unitTotal = ref(0)
 const unitFilters = reactive({
   assignee_id: undefined as number | undefined,
   stage_status: undefined as string | undefined,
+  eligible_only: false,
 })
 
 const batchId = computed(() => Number(route.params.id))
@@ -233,6 +241,7 @@ const loadUnits = async () => {
       batch_id: batchId.value,
       assignee_id: unitFilters.assignee_id,
       stage_status: unitFilters.stage_status,
+      eligible_only: unitFilters.eligible_only ? true : undefined,
       page: unitPage.value,
       page_size: unitPageSize.value,
     })

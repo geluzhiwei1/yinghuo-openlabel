@@ -12,9 +12,6 @@
                     <el-tag type="success" v-if="rows.status">启用</el-tag>
                     <el-tag type="danger" v-else>禁用</el-tag>
                 </template>
-                <template #permissions="{ rows }">
-                    <el-button type="primary" size="small" plain @click="handlePermission(rows)" disabled>管理</el-button>
-                </template>
             </TableCustom>
         </div>
         <el-dialog :title="isEdit ? '编辑' : '新增'" v-model="visible" width="700px" destroy-on-close
@@ -29,9 +26,6 @@
                 </template>
             </TableDetail>
         </el-dialog>
-        <el-drawer title="权限管理" v-model="visible2" size="70%" destroy-on-close>
-            <RolePermission :permiss-options="permissOptions" />
-        </el-drawer>
     </div>
 </template>
 
@@ -45,7 +39,6 @@ import TableCustom from '@/components/table-custom.vue'
 import TableDetail from '@/components/table-detail.vue'
 import TableSearch from '@/components/table-search.vue'
 import TableEdit from '@/components/table-edit.vue'
-import RolePermission from './role-permission.vue'
 import { type FormOption, type FormOptionList } from '@/types/form-option';
 import { roleApi } from '@/api'
 import { isEmpty } from 'radash'
@@ -76,7 +69,6 @@ let columns = ref([
     { prop: 'is_system', label: '默认角色' },
     { prop: 'updated_time', label: '更新时间' },
     // { prop: 'status', label: '启用/禁用' },
-    { prop: 'permissions', label: '功能' },
     { prop: 'operator', label: '操作', width: 250 },
 ])
 const pager = reactive({
@@ -202,23 +194,6 @@ const deleteRow = (data) => {
 }
 const handleDelete = (row: Role) => {
     deleteRow({ _id: row._id })
-}
-
-// 权限管理弹窗相关
-const visible2 = ref(false);
-const permissOptions = ref({})
-const handlePermission = (row: Role) => {
-    // console.log(row.authority.owners);
-    // console.log(permiss.key);
-    visible2.value = true;
-    // permissOptions.value = {
-    //     id: row._id,
-    //     permiss: row.authority.owners
-    // };
-    // permissOptions.value = {
-    //     id: row._id,
-    //     permiss: permiss.key
-    // };
 }
 
 

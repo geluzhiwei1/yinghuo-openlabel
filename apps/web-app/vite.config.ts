@@ -48,6 +48,26 @@ export default defineConfig(({ command, mode }) => {
       vueJsx(),
       UnoCSS(),
       yinghuoIconifyBundler({ srcDir: resolve(__dirname, 'src') }),
+      // dev 信息面板作为默认入口:访问根路径或 base 路径时重定向到 dev.html。
+      // 仅 dev server 生效,不影响 build。
+      {
+        name: 'yinghuo-dev-index-redirect',
+        apply: 'serve',
+        configureServer(server) {
+          const base = '/guis/v0.3.4'
+          server.middlewares.use((req, res, next) => {
+            const url = req.url ?? ''
+            const path = url.split('?')[0]
+            if (path === '/' || path === base || path === base + '/') {
+              res.statusCode = 302
+              res.setHeader('Location', base + '/dev.html')
+              res.end()
+              return
+            }
+            next()
+          })
+        },
+      },
     ],
 
     css: {
@@ -92,6 +112,9 @@ export default defineConfig(({ command, mode }) => {
     },
     server: {
       port: Number(env.SERVER_PORT),
+      // pnpm dev 启动时打开 dev 信息面板(端口、连接串、API 入口、默认账号)。
+      // 不是真正的应用入口,只是开发参考;真正的业务入口在面板里点。
+      open: '/guis/v0.3.4/dev.html',
       proxy: {
         '/webapps/': {
           target: env.VITE_APP_PLUGIN_BASE_URI,

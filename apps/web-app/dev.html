@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>开发信息 · Yinghuo OpenLabel</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: #f5f7fa;
+      color: #1f2937;
+      line-height: 1.55;
+    }
+    header {
+      background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+      color: white;
+      padding: 20px 32px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    header .subtitle {
+      font-size: 13px;
+      opacity: 0.85;
+    }
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: white;
+      padding: 4px;
+      border-radius: 8px;
+    }
+    .tabs button {
+      border: 0;
+      background: transparent;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 6px;
+      color: #4b5563;
+      transition: all 0.15s;
+    }
+    .tabs button.active {
+      background: #2563eb;
+      color: white;
+    }
+    .tabs button:not(.active):hover {
+      background: #f3f4f6;
+    }
+    main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px 32px;
+    }
+    .edition {
+      display: none;
+    }
+    .edition.active {
+      display: block;
+    }
+    .edition-meta {
+      background: white;
+      border-left: 4px solid #2563eb;
+      padding: 12px 16px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: #4b5563;
+    }
+    .edition-meta strong { color: #1f2937; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 16px;
+    }
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 16px 18px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      border: 1px solid #e5e7eb;
+    }
+    .card h2 {
+      margin: 0 0 12px 0;
+      font-size: 13px;
+      font-weight: 600;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card h2 .icon {
+      width: 16px;
+      height: 16px;
+      display: inline-block;
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      border-bottom: 1px solid #f3f4f6;
+      font-size: 13px;
+    }
+    .row:last-child { border-bottom: 0; }
+    .row .key {
+      color: #6b7280;
+      font-weight: 500;
+    }
+    .row .val {
+      color: #111827;
+      font-family: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+      font-size: 12.5px;
+    }
+    .row .val a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+    .row .val a:hover { text-decoration: underline; }
+    .pill {
+      display: inline-block;
+      padding: 1px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 500;
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    .pill.warn { background: #fef3c7; color: #92400e; }
+    .pill.ok { background: #d1fae5; color: #065f46; }
+    .pill.danger { background: #fee2e2; color: #991b1b; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+    table th, table td {
+      text-align: left;
+      padding: 6px 8px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    table th {
+      font-weight: 600;
+      color: #6b7280;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    table td code {
+      font-family: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+      background: #f3f4f6;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 12px;
+    }
+    .hint {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 8px;
+      padding: 8px 10px;
+      background: #fffbeb;
+      border-left: 3px solid #f59e0b;
+      border-radius: 3px;
+    }
+    .links-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 13px;
+    }
+    .links-list a {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 8px;
+      border-radius: 4px;
+      text-decoration: none;
+      color: #1f2937;
+    }
+    .links-list a:hover { background: #f3f4f6; }
+    .links-list a code {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      color: #2563eb;
+    }
+    footer {
+      text-align: center;
+      padding: 24px;
+      color: #9ca3af;
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div>
+      <h1>Yinghuo OpenLabel · 开发信息面板</h1>
+      <div class="subtitle">本地开发环境的服务端口、连接串、API 入口与默认账号</div>
+    </div>
+    <div class="tabs">
+      <button data-edition="ce" class="active">CE 社区版</button>
+      <button data-edition="ee">EE 企业版</button>
+      <button data-edition="saas">SaaS 版</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ====================== CE ====================== -->
+    <section class="edition active" data-edition="ce">
+      <div class="edition-meta">
+        <strong>CE 社区版</strong> · <code>YH_EDITION</code> 默认或 <code>=ce</code> · 三版分层 CE ⊂ EE ⊂ SaaS。
+        纯 CE 用法只挂载业务面 9 个入口,<code>/api/v1/p/*</code> 平台面路由不存在。
+      </div>
+      <div class="grid">
+
+        <div class="card" style="grid-column: 1 / -1;">
+          <h2>默认测试账号 (密码均为 yinghuo)</h2>
+          <table>
+            <thead><tr><th>邮箱</th><th>作用域</th><th>角色</th><th>可登录面板</th></tr></thead>
+            <tbody>
+              <tr><td><code>prod@geluzhiwei.com</code></td><td>test 租户</td><td><span class="pill">tenant-admin</span></td><td>标注工作台</td></tr>
+              <tr><td><code>test-tenant-admin@geluzhiwei.com</code></td><td>test 租户</td><td><span class="pill">tenant-admin</span></td><td>标注工作台</td></tr>
+              <tr><td><code>test-annotator@geluzhiwei.com</code></td><td>test 租户</td><td><span class="pill">annotator</span></td><td>标注工作台</td></tr>
+              <tr><td><code>test-reviewer@geluzhiwei.com</code></td><td>test 租户</td><td><span class="pill">reviewer</span></td><td>标注工作台</td></tr>
+            </tbody>
+          </table>
+          <div class="hint">CE <strong>不建</strong> <code>platform@geluzhiwei.com</code> superuser——平台运营面是 EE/SAAS 才挂载的。账号由 <code>biz/dev_seed.seed_dev_data()</code> 在 lifespan 启动期幂等创建,配置源在 <code>config/yinghuo.yaml</code>。</div>
+        </div>
+
+
+        <div class="card">
+          <h2>前端面板与登录页</h2>
+          <div class="row"><span class="key">Vite dev server</span><span class="val">http://127.0.0.1:8400</span></div>
+          <div class="row"><span class="key">base 路径</span><span class="val">/guis/v0.3.4</span></div>
+          <table>
+            <thead><tr><th>面板</th><th>入口 URL</th><th>登录页</th></tr></thead>
+            <tbody>
+              <tr><td>标注工作台</td><td><a href="./home.html" target="_blank"><code>/home.html</code></a></td><td><code>/auth.html</code></td></tr>
+            </tbody>
+          </table>
+          <div class="hint">CE 只有一个登录页 <code>/auth.html</code>。<code>tenant_admin.html</code> 与 <code>platform.html</code> 在 CE 模式下不存在(由 EE/SAAS 通过 setup-edition.sh 挂载),访问会 404。</div>
+        </div>
+
+
+        <div class="card">
+          <h2>登录 token 流</h2>
+          <div class="row"><span class="key">token 类型</span><span class="val"><span class="pill">access</span> 业务面单 token</span></div>
+          <div class="row"><span class="key">登录端点</span><span class="val">POST <code>/u/a/noau/token</code></span></div>
+          <div class="row"><span class="key">header 必带</span><span class="val">X-Captcha-Id: &lt;captcha-id&gt;</span></div>
+          <div class="row"><span class="key">token 用法</span><span class="val">Authorization: Bearer &lt;access_token&gt;</span></div>
+          <div class="hint"><strong>完整 captcha 流:</strong> ① POST <code>/api/v1/c/captcha/generate/</code> 拿 captcha-id → ② 用户输入文字 POST <code>/api/v1/c/captcha/validate/</code>(后端写 Redis <code>user:capt:{id}</code>) → ③ 调 <code>/u/a/noau/token</code> 时 header 必带 <code>X-Captcha-Id</code>。</div>
+        </div>
+
+
+        <div class="card">
+          <h2>后端 API 服务</h2>
+          <div class="row"><span class="key">服务进程</span><span class="val">uvicorn yinghuo_app.app:app</span></div>
+          <div class="row"><span class="key">监听端口</span><span class="val">127.0.0.1:8423</span></div>
+          <div class="row"><span class="key">业务面</span><span class="val">/seq /file /projects /me ...<span class="pill">无统一前缀</span></span></div>
+          <div class="row"><span class="key">管理面</span><span class="val"><a href="http://127.0.0.1:8423/api/v1/a/" target="_blank">/api/v1/a/*</a></span></div>
+          <div class="row"><span class="key">验证码</span><span class="val"><a href="http://127.0.0.1:8423/api/v1/c/captcha/generate/" target="_blank">/api/v1/c/*</a></span></div>
+        </div>
+
+
+        <div class="card">
+          <h2>后端文档 (OpenAPI)</h2>
+          <div class="row"><span class="key">Swagger UI</span><span class="val"><a href="http://127.0.0.1:8423/docs" target="_blank">/docs</a> <span class="pill danger">401</span></span></div>
+          <div class="row"><span class="key">OpenAPI JSON</span><span class="val"><a href="http://127.0.0.1:8423/openapi.json" target="_blank">/openapi.json</a> <span class="pill danger">401</span></span></div>
+          <div class="hint">auth 中间件对未带 Bearer token 的请求拒掉,只放行 <code>/api/v1/c/*</code> 与 <code>/u/a/noau/{token,register,reset-password}</code>。本地调试 OpenAPI 要临时在 <code>app.py</code> 中间件里加 <code>or path.startswith("/docs") or path.startswith("/openapi.json")</code>。</div>
+        </div>
+
+
+        <div class="card">
+          <h2>存储 (PostgreSQL)</h2>
+          <div class="row"><span class="key">容器</span><span class="val">yh-dev-postgres</span></div>
+          <div class="row"><span class="key">端口</span><span class="val">127.0.0.1:15432 → 5432</span></div>
+          <div class="row"><span class="key">用户/密码</span><span class="val">dev / dev</span></div>
+          <div class="row"><span class="key">数据库</span><span class="val">yinghuo-dev</span></div>
+          <div class="row"><span class="key">Tortoise</span><span class="val">asyncpg://dev:dev@127.0.0.1:15432/yinghuo-dev</span></div>
+        </div>
+
+
+        <div class="card">
+          <h2>存储 (Mongo / FerretDB)</h2>
+          <div class="row"><span class="key">容器</span><span class="val">yh-dev-mongo (FerretDB)</span></div>
+          <div class="row"><span class="key">端口</span><span class="val">127.0.0.1:27017</span></div>
+          <div class="row"><span class="key">URI</span><span class="val">mongodb://dev:dev@127.0.0.1:27017/?authMechanism=PLAIN</span></div>
+          <div class="row"><span class="key">数据库</span><span class="val">qianmo-dev</span></div>
+          <div class="hint">必须带 <code>authMechanism=PLAIN</code>,FerretDB 走 postgres 透传 auth。</div>
+        </div>
+
+
+        <div class="card">
+          <h2>缓存 (Redis)</h2>
+          <div class="row"><span class="key">容器</span><span class="val">yh-dev-redis</span></div>
+          <div class="row"><span class="key">端口</span><span class="val">127.0.0.1:6301 → 6379</span></div>
+          <div class="row"><span class="key">URI</span><span class="val">redis://127.0.0.1:6301</span></div>
+          <div class="row"><span class="key">验证码</span><span class="val">user:capt:{id}</span></div>
+          <div class="row"><span class="key">登录失败计数</span><span class="val">login:fail:ip:{ip}</span></div>
+          <div class="row"><span class="key">JWT 黑名单</span><span class="val">{JWT_REDIS_PREFIX}:{jti}</span></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ====================== EE ====================== -->
+    <section class="edition" data-edition="ee">
+      <div class="edition-meta">
+        <strong>EE 企业版</strong> · <code>YH_EDITION=ee</code> · 在 CE 基础上加 SSO(OIDC/LDAP)、平台审计中间件、Prometheus 监控、平台 backup CLI、<code>tenant_admin.html</code> 与 <code>platform.html</code> 两个前端面板。代码由独立仓库 <code>yinghuo-openlabel-ee</code> 提供。
+      </div>
+      <div class="grid">
+
+        <div class="card" style="grid-column: 1 / -1;">
+          <h2>默认测试账号 (密码均为 yinghuo)</h2>
+          <table>
+            <thead><tr><th>邮箱</th><th>作用域</th><th>角色</th><th>可登录面板</th></tr></thead>
+            <tbody>
+              <tr><td><code>prod@geluzhiwei.com</code></td><td>test 租户</td><td><span class="pill">tenant-admin</span></td><td>标注工作台 <span class="pill ok">+ 租户管理 EE+</span></td></tr>
+              <tr><td><code>test-tenant-admin@geluzhiwei.com</code></td><td>test 租户</td><td><span class="pill">tenant-admin</span></td><td>标注工作台 <span class="pill ok">+ 租户管理 EE+</span></td></tr>
+              <tr><td><code>test-annotator@geluzhiwei.com</code></td><td>test 租户</td><td><span class="pill">annotator</span></td><td>标注工作台</td></tr>
+              <tr><td><code>test-reviewer@geluzhiwei.com</code></td><td>test 租户</td><td><span class="pill">reviewer</span></td><td>标注工作台</td></tr>
+            </tbody>
+          </table>
+          <div class="hint">EE <strong>不建</strong> superuser,平台面入口存在但默认无账号能登入。需手动 SQL <code>UPDATE "user" SET is_superuser = TRUE WHERE email = 'prod@geluzhiwei.com';</code> 或配 SSO。Seed 行为同 CE,仍走 <code>biz/dev_seed.seed_dev_data</code>。<br><span class="pill ok">EE+</span> 标记的是相对 CE 多出来的能力。</div>
+        </div>
+
+
+        <div class="card">
+          <h2>前端面板与登录页</h2>
+          <div class="row"><span class="key">Vite dev server</span><span class="val">http://127.0.0.1:8400</span></div>
+          <div class="row"><span class="key">base 路径</span><span class="val">/guis/v0.3.4</span></div>
+          <table>
+            <thead><tr><th>面板</th><th>入口 URL</th><th>登录页</th></tr></thead>
+            <tbody>
+              <tr><td>标注工作台</td><td><a href="./home.html" target="_blank"><code>/home.html</code></a></td><td><code>/auth.html</code></td></tr>
+              <tr><td>租户管理 <span class="pill ok">EE+</span></td><td><a href="./ee/tenant_admin.html" target="_blank"><code>/tenant_admin.html</code></a></td><td><code>/auth.html</code>(同业务)</td></tr>
+              <tr><td>平台运营 <span class="pill ok">EE+</span></td><td><a href="./ee/platform.html" target="_blank"><code>/platform.html</code></a></td><td><code>/platform.html#/login</code>(独立)</td></tr>
+            </tbody>
+          </table>
+          <div class="hint">业务登录(<code>auth.html</code>)与平台登录(<code>platform.html#/login</code>)是<strong>两套独立 token</strong>:<code>access</code> vs <code>platform_access</code>。</div>
+        </div>
+
+
+        <div class="card">
+          <h2>登录 token 流(双 token)</h2>
+          <div class="row"><span class="key">业务 token</span><span class="val"><span class="pill">access</span> 同 CE 流程(captcha + X-Captcha-Id)</span></div>
+          <div class="row"><span class="key">平台登录</span><span class="val">POST <code>/api/v1/p/auth/login</code> <span class="pill ok">EE+</span></span></div>
+          <div class="row"><span class="key">平台 token</span><span class="val"><span class="pill ok">platform_access</span> claim 内含 <code>token_type=platform_access</code></span></div>
+          <div class="row"><span class="key">平台 API 用法</span><span class="val">Header <code>Authorization: Bearer &lt;platform_access&gt;</code></span></div>
+          <div class="hint">中间件对 <code>/api/v1/p/*</code> 跳过业务 token 校验,鉴权完全交给 router 的 dependency。业务 <code>access</code> 调 <code>/api/v1/p/*</code> 会被拒(Wrong token type),反之亦然。</div>
+        </div>
+
+
+        <div class="card">
+          <h2>外部入口 <span class="pill ok">EE+</span></h2>
+          <div class="row"><span class="key">OIDC 登录</span><span class="val"><a href="http://127.0.0.1:8423/api/v1/p/sso/oidc/login" target="_blank">/api/v1/p/sso/oidc/login</a></span></div>
+          <div class="row"><span class="key">OIDC 回调</span><span class="val">/api/v1/p/sso/oidc/callback</span></div>
+          <div class="row"><span class="key">LDAP 登录</span><span class="val"><a href="http://127.0.0.1:8423/api/v1/p/sso/ldap/login" target="_blank">/api/v1/p/sso/ldap/login</a></span></div>
+          <div class="row"><span class="key">配置段</span><span class="val">sso.oidc / sso.ldap (yinghuo.yaml)</span></div>
+          <div class="row"><span class="key">敏感字段</span><span class="val">YH_OIDC_CLIENT_SECRET / YH_LDAP_BIND_PASSWORD</span></div>
+          <div class="hint">SSO 登录成功后产 <code>platform_access</code> token,与平台 token 流汇合。</div>
+        </div>
+
+
+        <div class="card">
+          <h2>后端 API 服务</h2>
+          <div class="row"><span class="key">服务进程</span><span class="val">uvicorn yinghuo_app.app:app</span></div>
+          <div class="row"><span class="key">监听端口</span><span class="val">127.0.0.1:8423</span></div>
+          <div class="row"><span class="key">业务面</span><span class="val">/seq /file /projects ...<span class="pill">无统一前缀</span></span></div>
+          <div class="row"><span class="key">管理面</span><span class="val"><a href="http://127.0.0.1:8423/api/v1/a/" target="_blank">/api/v1/a/*</a></span></div>
+          <div class="row"><span class="key">验证码</span><span class="val"><a href="http://127.0.0.1:8423/api/v1/c/captcha/generate/" target="_blank">/api/v1/c/*</a></span></div>
+          <div class="row"><span class="key">平台面</span><span class="val"><a href="http://127.0.0.1:8423/api/v1/p/" target="_blank">/api/v1/p/*</a> <span class="pill ok">EE+</span></span></div>
+          <div class="row"><span class="key">Prometheus</span><span class="val"><a href="http://127.0.0.1:8423/metrics" target="_blank">/metrics</a> <span class="pill ok">EE+</span></span></div>
+        </div>
+
+
+        <div class="card">
+          <h2>平台面路由 (/api/v1/p/*) <span class="pill ok">EE 增量</span></h2>
+          <div class="links-list">
+            <a><span>平台 token 流</span><code>/api/v1/p/auth/*</code></a>
+            <a><span>平台审计日志</span><code>/api/v1/p/audit/*</code></a>
+            <a><span>OIDC 登录回调</span><code>/api/v1/p/sso/oidc/*</code></a>
+            <a><span>LDAP 登录</span><code>/api/v1/p/sso/ldap/*</code></a>
+            <a><span>备份触发/查询</span><code>/api/v1/p/backup/*</code></a>
+          </div>
+          <div class="hint">平台 token 流:登录 <code>/api/v1/p/auth/login</code> 成功 → 拿 <code>platform_access</code> token → 调 <code>/api/v1/p/*</code> 时 header 带 <code>Authorization: Bearer &lt;platform_access&gt;</code>。<code>access</code> 与 <code>platform_access</code> <strong>不互通</strong>。</div>
+        </div>
+
+
+        <div class="card">
+          <h2>后端文档 (OpenAPI)</h2>
+          <div class="row"><span class="key">Swagger UI</span><span class="val"><a href="http://127.0.0.1:8423/docs" target="_blank">/docs</a> <span class="pill danger">401</span></span></div>
+          <div class="row"><span class="key">OpenAPI JSON</span><span class="val"><a href="http://127.0.0.1:8423/openapi.json" target="_blank">/openapi.json</a> <span class="pill danger">401</span></span></div>
+          <div class="hint">同 CE:auth 中间件对未带 Bearer token 的请求拒掉。本地调试需临时改 <code>app.py</code>。</div>
+        </div>
+
+
+        <div class="card">
+          <h2>存储 (PostgreSQL)</h2>
+          <div class="row"><span class="key">容器</span><span class="val">yh-dev-postgres</span></div>
+          <div class="row"><span class="key">端口</span><span class="val">127.0.0.1:15432</span></div>
+          <div class="row"><span class="key">用户/密码</span><span class="val">dev / dev</span></div>
+          <div class="row"><span class="key">数据库</span><span class="val">yinghuo-dev</span></div>
+          <div class="row"><span class="key">EE 增量表</span><span class="val">platform_audit_log</span></div>
+        </div>
+
+
+        <div class="card">
+          <h2>存储 (Mongo / FerretDB)</h2>
+          <div class="row"><span class="key">容器</span><span class="val">yh-dev-mongo</span></div>
+          <div class="row"><span class="key">端口</span><span class="val">127.0.0.1:27017</span></div>
+          <div class="row"><span class="key">URI</span><span class="val">mongodb://dev:dev@127.0.0.1:27017/?authMechanism=PLAIN</span></div>
+          <div class="row"><span class="key">数据库</span><span class="val">qianmo-dev</span></div>
+        </div>
+
+
+        <div class="card">
+          <h2>缓存 (Redis)</h2>
+          <div class="row"><span class="key">容器</span><span class="val">yh-dev-redis</span></div>
+          <div class="row"><span class="key">端口</span><span class="val">127.0.0.1:6301</span></div>
+          <div class="row"><span class="key">SSO state</span><span class="val">sso:state:* <span class="pill ok">EE+</span></span></div>
+          <div class="row"><span class="key">其他 key</span><span class="val">同 CE</span></div>
+        </div>
+
+
+        <div class="card">
+          <h2>备份目录 <span class="pill ok">EE+</span></h2>
+          <div class="row"><span class="key">target_dir</span><span class="val">/var/backups/yinghuo</span></div>
+          <div class="row"><span class="key">CLI</span><span class="val">python -m yinghuo_cmd.backup {run,list}</span></div>
+          <div class="row"><span class="key">产物</span><span class="val">pg_dump + mongodump</span></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ====================== SAAS ====================== -->
+    <section class="edition" data-edition="saas">
+      <div class="edition-meta">
+        <strong>SaaS 版</strong> · <code>YH_EDITION=saas</code> · 在 EE 基础上加多租户 CRUD、Stripe 计费、API 配额中间件、租户自助注册、运维看板。代码由独立仓库 <code>yinghuo-openlabel-saas</code> 提供,<strong>必须同时挂载 EE</strong>(SaaS 跨包引用 EE 的审计/鉴权基础)。
+      </div>
+      <div class="grid">
+
+        <div class="card" style="grid-column: 1 / -1;">
+          <h2>默认测试账号 (密码均为 yinghuo)</h2>
+          <table>
+            <thead><tr><th>邮箱</th><th>作用域</th><th>角色</th><th>可登录面板</th></tr></thead>
+            <tbody>
+              <tr style="background: #ecfdf5;"><td><code>platform@geluzhiwei.com</code> <span class="pill ok">SAAS 独有</span></td><td>平台</td><td><span class="pill ok">platform-admin (superuser)</span></td><td>全部三个</td></tr>
+              <tr><td><code>prod@geluzhiwei.com</code></td><td>test 租户</td><td><span class="pill">tenant-admin</span></td><td>标注工作台 <span class="pill ok">+ 租户管理 EE+</span></td></tr>
+              <tr><td><code>test-tenant-admin@geluzhiwei.com</code></td><td>test 租户</td><td><span class="pill">tenant-admin</span></td><td>标注工作台 <span class="pill ok">+ 租户管理 EE+</span></td></tr>
+              <tr><td><code>test-annotator@geluzhiwei.com</code></td><td>test 租户</td><td><span class="pill">annotator</span></td><td>标注工作台</td></tr>
+              <tr><td><code>test-reviewer@geluzhiwei.com</code></td><td>test 租户</td><td><span class="pill">reviewer</span></td><td>标注工作台</td></tr>
+            </tbody>
+          </table>
+          <div class="hint">
+            <span class="pill ok">SAAS 独有</span> 行:SAAS 启动 seed 自动建,CE/EE 不建。<span class="pill ok">EE+</span> 列:相对 CE 多出来的能力。<br>
+            <strong>注意:</strong> <code>platform@geluzhiwei.com</code> 是独立 superuser 账号,与 <code>prod@geluzhiwei.com</code>(租户管理员)是两个不同用户。前者只能从 <code>platform.html#/login</code> 登,后者从 <code>auth.html</code> 登。<br>
+            SaaS 启动 seed 走 <code>saas/platform/seed.py::seed_platform_data</code>(<code>HAS_SAAS=True</code>),会做 <code>default → test</code> 租户迁移,但仅清 <code>PlatformTenant / Role / UserRole</code> 三张表,其他表的 <code>tenant_id='default'</code> 行需手动 UPDATE。
+          </div>
+        </div>
+
+
+        <div class="card">
+          <h2>前端面板与登录页</h2>
+          <div class="row"><span class="key">Vite dev server</span><span class="val">http://127.0.0.1:8400</span></div>
+          <div class="row"><span class="key">base 路径</span><span class="val">/guis/v0.3.4</span></div>
+          <table>
+            <thead><tr><th>面板</th><th>入口 URL</th><th>登录页</th></tr></thead>
+            <tbody>
+              <tr><td>标注工作台</td><td><a href="./home.html" target="_blank"><code>/home.html</code></a></td><td><code>/auth.html</code></td></tr>
+              <tr><td>租户管理</td><td><a href="./ee/tenant_admin.html" target="_blank"><code>/tenant_admin.html</code></a></td><td><code>/auth.html</code>(同业务)</td></tr>
+              <tr><td>平台运营 <span class="pill ok">SAAS 覆盖</span></td><td><a href="./saas/platform.html" target="_blank"><code>/platform.html</code></a></td><td><code>/platform.html#/login</code>(独立)</td></tr>
+            </tbody>
+          </table>
+          <div class="hint">SaaS 的 <code>platform.html</code> 由 <code>apps/web-app/saas/platform.html</code> 提供,覆盖 EE 同名文件。三 panel 与 EE 一致,差异仅在 platform 视图(SaaS 加多租户/计费/配额)。</div>
+        </div>
+
+
+        <div class="card">
+          <h2>登录 token 流(双 token)</h2>
+          <div class="row"><span class="key">业务 token</span><span class="val"><span class="pill">access</span> 同 CE/EE 流程</span></div>
+          <div class="row"><span class="key">平台 token</span><span class="val"><span class="pill ok">platform_access</span> 同 EE 流程</span></div>
+          <div class="row"><span class="key">自助注册</span><span class="val">POST <code>/api/v1/p/signup/*</code> <span class="pill ok">SAAS+</span></span></div>
+          <div class="row"><span class="key">配额拦截</span><span class="val">QuotaMiddleware 限业务 API <span class="pill ok">SAAS+</span></span></div>
+          <div class="hint">SaaS 平台 token 流继承自 EE,<code>platform@geluzhiwei.com</code> superuser 登录后可访问全部三 panel。</div>
+        </div>
+
+
+        <div class="card">
+          <h2>外部入口</h2>
+          <div class="row"><span class="key">SSO OIDC</span><span class="val">/api/v1/p/sso/oidc/* <span class="pill ok">继承 EE</span></span></div>
+          <div class="row"><span class="key">SSO LDAP</span><span class="val">/api/v1/p/sso/ldap/* <span class="pill ok">继承 EE</span></span></div>
+          <div class="row"><span class="key">Stripe Customer Portal</span><span class="val">/api/v1/p/billing/* <span class="pill ok">SAAS+</span></span></div>
+          <div class="row"><span class="key">Stripe webhook</span><span class="val"><a href="http://127.0.0.1:8423/_stripe/webhook" target="_blank">/_stripe/webhook</a> <span class="pill ok">SAAS+</span></span></div>
+          <div class="row"><span class="key">运维看板</span><span class="val">/api/v1/p/ops_dashboard/* <span class="pill ok">SAAS+</span></span></div>
+          <div class="hint">Stripe 本地 dev 默认 <code>enabled: false</code>。生产 webhook secret 用 <code>YH_STRIPE_WEBHOOK_SECRET</code> 注入,前端走 Customer Portal 而非直连 Stripe。</div>
+        </div>
+
+
+        <div class="card">
+          <h2>后端 API 服务</h2>
+          <div class="row"><span class="key">服务进程</span><span class="val">uvicorn yinghuo_app.app:app</span></div>
+          <div class="row"><span class="key">监听端口</span><span class="val">127.0.0.1:8423</span></div>
+          <div class="row"><span class="key">业务面</span><span class="val">/seq /file /projects ...<span class="pill">无统一前缀</span></span></div>
+          <div class="row"><span class="key">管理面</span><span class="val">/api/v1/a/*</span></div>
+          <div class="row"><span class="key">验证码</span><span class="val">/api/v1/c/*</span></div>
+          <div class="row"><span class="key">平台面</span><span class="val">/api/v1/p/* <span class="pill ok">SAAS+</span></span></div>
+          <div class="row"><span class="key">Stripe webhook</span><span class="val">/_stripe/webhook <span class="pill ok">SAAS+</span></span></div>
+          <div class="row"><span class="key">配额中间件</span><span class="val">QuotaMiddleware <span class="pill ok">SAAS+</span></span></div>
+        </div>
+
+
+        <div class="card">
+          <h2>平台面增量路由 (/api/v1/p/*) <span class="pill ok">SAAS 增量</span></h2>
+          <div class="links-list">
+            <a><span>多租户 CRUD</span><code>/api/v1/p/tenants/*</code></a>
+            <a><span>跨租户用户管理</span><code>/api/v1/p/users/*</code></a>
+            <a><span>特性开关</span><code>/api/v1/p/feature-flags/*</code></a>
+            <a><span>共享推理流水线</span><code>/api/v1/p/flows/*</code></a>
+            <a><span>共享 DNN 函数</span><code>/api/v1/p/funcs/*</code></a>
+            <a><span>共享模型清单</span><code>/api/v1/p/models/*</code></a>
+            <a><span>Stripe Customer Portal</span><code>/api/v1/p/billing/*</code></a>
+            <a><span>租户自助注册</span><code>/api/v1/p/signup/*</code></a>
+            <a><span>运维看板</span><code>/api/v1/p/ops_dashboard/*</code></a>
+          </div>
+        </div>
+
+
+        <div class="card">
+          <h2>后端文档 (OpenAPI)</h2>
+          <div class="row"><span class="key">Swagger UI</span><span class="val"><a href="http://127.0.0.1:8423/docs" target="_blank">/docs</a> <span class="pill danger">401</span></span></div>
+          <div class="row"><span class="key">OpenAPI JSON</span><span class="val"><a href="http://127.0.0.1:8423/openapi.json" target="_blank">/openapi.json</a> <span class="pill danger">401</span></span></div>
+          <div class="hint">同 CE/EE:auth 中间件对未带 Bearer token 的请求拒掉。</div>
+        </div>
+
+
+        <div class="card">
+          <h2>存储 (PostgreSQL)</h2>
+          <div class="row"><span class="key">容器</span><span class="val">yh-dev-postgres</span></div>
+          <div class="row"><span class="key">端口</span><span class="val">127.0.0.1:15432</span></div>
+          <div class="row"><span class="key">用户/密码</span><span class="val">dev / dev</span></div>
+          <div class="row"><span class="key">数据库</span><span class="val">yinghuo-dev</span></div>
+          <div class="row"><span class="key">SAAS 增量表</span><span class="val">platform_tenant / platform_quota / platform_feature_flag</span></div>
+        </div>
+
+
+        <div class="card">
+          <h2>存储 (Mongo / FerretDB)</h2>
+          <div class="row"><span class="key">容器</span><span class="val">yh-dev-mongo</span></div>
+          <div class="row"><span class="key">端口</span><span class="val">127.0.0.1:27017</span></div>
+          <div class="row"><span class="key">URI</span><span class="val">mongodb://dev:dev@127.0.0.1:27017/?authMechanism=PLAIN</span></div>
+          <div class="row"><span class="key">数据库</span><span class="val">qianmo-dev</span></div>
+        </div>
+
+
+        <div class="card">
+          <h2>缓存 (Redis)</h2>
+          <div class="row"><span class="key">容器</span><span class="val">yh-dev-redis</span></div>
+          <div class="row"><span class="key">端口</span><span class="val">127.0.0.1:6301</span></div>
+          <div class="row"><span class="key">Stripe events</span><span class="val">stripe:event:* <span class="pill ok">SAAS+</span></span></div>
+          <div class="row"><span class="key">配额计数</span><span class="val">quota:*:{tenant_id} <span class="pill ok">SAAS+</span></span></div>
+          <div class="row"><span class="key">其他 key</span><span class="val">同 EE</span></div>
+        </div>
+
+
+        <div class="card">
+          <h2>Stripe <span class="pill ok">SAAS+</span></h2>
+          <div class="row"><span class="key">配置段</span><span class="val">saas.billing.stripe (yinghuo.yaml)</span></div>
+          <div class="row"><span class="key">webhook secret</span><span class="val">YH_STRIPE_WEBHOOK_SECRET</span></div>
+          <div class="row"><span class="key">api key</span><span class="val">YH_STRIPE_API_KEY</span></div>
+          <div class="row"><span class="key">本地 dev</span><span class="val"><span class="pill warn">enabled: false</span> 默认跳过</span></div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    Yinghuo OpenLabel · dev 信息面板 · 切换上方 tab 查看不同版本 · 详见 <code>docs/dev/start-{ce,ee,saas}.md</code>
+  </footer>
+
+  <script>
+    const buttons = document.querySelectorAll('.tabs button');
+    const sections = document.querySelectorAll('.edition');
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const edition = btn.dataset.edition;
+        buttons.forEach(b => b.classList.toggle('active', b === btn));
+        sections.forEach(s => s.classList.toggle('active', s.dataset.edition === edition));
+        try { localStorage.setItem('dev-page-edition', edition); } catch (e) {}
+      });
+    });
+    try {
+      const saved = localStorage.getItem('dev-page-edition');
+      if (saved) document.querySelector(`.tabs button[data-edition="${saved}"]`)?.click();
+    } catch (e) {}
+  </script>
+</body>
+
+</html>
