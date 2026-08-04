@@ -9,6 +9,7 @@
 `Yinghuo-OpenLabel` 是一个专业的、开源的数据标注平台，专为自动驾驶、机器人和计算机视觉领域设计。它提供了一套完整的工具链，用于处理和标注复杂的传感器数据（如 2D 图像、视频和 3D 点云），并深度集成了 AI 辅助标注功能以显著提升标注效率。
 
 本项目参考 **OpenLABEL** 国际标准，确保了数据的互操作性、规范性和可扩展性。
+![alt text](docs/asserts/3d/3d-box.gif)
 ![alt text](docs/asserts/640.gif)
 ![alt text](docs/asserts/641.gif)
 

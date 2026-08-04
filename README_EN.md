@@ -6,6 +6,9 @@
 # Yinghuo-OpenLabel: A Professional Data Annotation Platform
 
 Yinghuo-OpenLabel is a professional, open-source data annotation platform designed for autonomous driving, robotics, and computer vision. It provides a complete toolchain for processing and annotating complex sensor data, including 2D images, videos, and 3D point clouds. The platform supports AI-assisted annotation features to enhance efficiency and strictly adheres to the **OpenLABEL** international standard, ensuring data interoperability and standardization.
+![alt text](docs/asserts/3d/3d-box.gif)
+![alt text](docs/asserts/640.gif)
+![alt text](docs/asserts/641.gif)
 
 ## Core Features
 
