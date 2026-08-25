@@ -35,7 +35,7 @@ class PLYLoader extends Loader {
 	parse( data ) {
 		const helper = getRustHelper();
 		if ( ! helper?.pc_parse_ply ) {
-			throw new Error( 'PLY 解析需要 rust_wasm,请确认 /webapps/rust_wasm/ 已部署且 loadRustWasm() 已调用' );
+			throw new Error( 'PLY 解析需要 rust_wasm 的 pc_parse_ply,请确认 /webapps/rust_wasm/ 已部署最新版本' );
 		}
 
 		const out = helper.pc_parse_ply( new Uint8Array( data ) );

@@ -80,17 +80,22 @@ const PLUGIN_BASE = import.meta.env.DEV
 //
 // Module wire-up mirrors rust_wasm.js:
 //   1. Import rust_wasm_bg.js (exports __wbg_* functions + __wbg_set_wasm)
-//   2. Instantiate the wasm with { './rust_wasm_bg.js': bg } as imports
+//   2. Instantiate the wasm with { wbg: bg } as imports (wasm-bindgen >= 0.2.93
+//      把 import 模块名从 './rust_wasm_bg.js' 改成了 'wbg')
 //   3. Inject wasm exports back into bg via __wbg_set_wasm
 //   4. Call __wbindgen_start if present
+// 服务器对 /webapps/ 静态资源返回 cache-control: immutable (一年),
+// 重新部署 wasm 后必须 bump 这个版本号,否则浏览器不会重新拉取。
+const RUST_WASM_VERSION = 'v20260825'
+
 export const loadRustWasm = async () => {
   const base = PLUGIN_BASE + '/webapps/rust_wasm/'
-  const bgUrl = base + 'rust_wasm_bg.js'
-  const wasmUrl = base + 'rust_wasm_bg.wasm'
+  const bgUrl = `${base}rust_wasm_bg.js?${RUST_WASM_VERSION}`
+  const wasmUrl = `${base}rust_wasm_bg.wasm?${RUST_WASM_VERSION}`
 
   const bg = await import(/* @vite-ignore */ bgUrl) as Record<string, any>
 
-  const imports = { './rust_wasm_bg.js': bg }
+  const imports = { wbg: bg }
   const { instance } = await WebAssembly.instantiateStreaming(
     fetch(wasmUrl),
     imports,
@@ -102,6 +107,22 @@ export const loadRustWasm = async () => {
 
   ;(window as any).labelHelper = bg
   return bg
+}
+
+let rustWasmPromise: Promise<Record<string, any>> | null = null
+
+/**
+ * memoized loadRustWasm:多处调用只实例化一次;失败时清空,下次调用可重试。
+ * las/laz/ply 解析只有 wasm 路径,加载点云前必须 await 这个。
+ */
+export const ensureRustWasm = () => {
+  if (!rustWasmPromise) {
+    rustWasmPromise = loadRustWasm().catch((err) => {
+      rustWasmPromise = null
+      throw err
+    })
+  }
+  return rustWasmPromise
 }
 
 export const onnxModelApisURI = PLUGIN_BASE + '/webapps/web-onnx-yolov8/v1/onnxModelApis.json'
