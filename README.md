@@ -40,6 +40,8 @@ Demo accounts (password `yinghuo` for all):
 *   **Data & project management**: Data package import/export, plus systematic management of annotation tasks, label batches, and datasets.
 *   **Standardization**: Follows the `OpenLABEL` specification with a clear data format and taxonomy.
 
+📄 See [docs/comparison.md](docs/comparison.md) for a factual comparison with Label Studio / CVAT / Supervisely.
+
 ## 🧭 Roadmap
 
 Legend: `[√]` done · `[-]` in progress · `[ ]` planned

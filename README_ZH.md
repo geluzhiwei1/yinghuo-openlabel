@@ -40,6 +40,8 @@
 *   **数据与项目管理**:数据包导入导出、标注任务、标签批次和数据集的系统化管理。
 *   **标准化与规范**:深度参考 `OpenLABEL` 规范,定义清晰的数据格式和分类体系(Taxonomy)。
 
+📄 与 Label Studio / CVAT / Supervisely 的功能对比见 [docs/comparison.md](docs/comparison.md)(英文)。
+
 ## 🧭 功能路线图
 
 图例:`[√]` 已实现 · `[-]` 进行中 · `[ ]` 规划中
