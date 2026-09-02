@@ -35,7 +35,10 @@ jobs:
 
     env:
       YH_EDITION: ce
-      YH_CONFIG_FILE: services/web-api/config/yinghuo-ci.yaml
+      # Steps 的 working-directory 是 services/web-api,相对路径会解析不到,必须绝对路径
+      YH_CONFIG_FILE: ${{ github.workspace }}/services/web-api/config/yinghuo-ci.yaml
+      # 仅 CI 用;Settings.JWT_SECRET 必填且 >= 32 字符
+      YH_JWT_SECRET: ci-only-not-a-secret-0123456789abcdef012345
 
     steps:
       - uses: actions/checkout@v4

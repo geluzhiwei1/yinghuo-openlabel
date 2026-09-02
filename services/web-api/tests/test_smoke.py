@@ -7,13 +7,21 @@ import pytest
 
 def _route_paths(app) -> set:
     paths = set()
-    for r in app.routes:
-        if hasattr(r, "path"):
-            paths.add(r.path)
-        if hasattr(r, "routes"):
-            for sub in r.routes:
-                if hasattr(sub, "path"):
-                    paths.add(sub.path)
+
+    def collect(routes):
+        for r in routes:
+            # fastapi>=0.141 include_router 包装成 _IncludedRouter(无 .path/.routes),
+            # 真实路径在 effective_candidates() 里(带 include prefix)
+            if hasattr(r, "effective_candidates"):
+                collect(r.effective_candidates())
+            elif hasattr(r, "original_router"):
+                collect(r.original_router.routes)
+            elif hasattr(r, "routes"):
+                collect(r.routes)
+            if getattr(r, "path", ""):
+                paths.add(r.path)
+
+    collect(app.routes)
     return paths
 
 
