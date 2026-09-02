@@ -3,6 +3,8 @@ ARG PYTHON_VERSION=3.12
 # 国内工作站用默认清华源;GitHub Actions 等海外环境 --build-arg 传官方源
 ARG PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
 FROM python:${PYTHON_VERSION}-slim AS builder
+# FROM 前的全局 ARG 不会进 stage,stage 内必须重新声明
+ARG PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
 
 WORKDIR /app
 

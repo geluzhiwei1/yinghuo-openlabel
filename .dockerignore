@@ -43,6 +43,9 @@ Dockerfile*
 # Node modules (in case they exist in root)
 node_modules/
 
+# Python virtualenvs
+.venv/
+
 # Build artifacts
 dist/
 build/
