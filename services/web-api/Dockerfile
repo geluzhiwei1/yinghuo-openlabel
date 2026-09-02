@@ -1,5 +1,7 @@
 # Stage 1: Build dependencies
 ARG PYTHON_VERSION=3.12
+# 国内工作站用默认清华源;GitHub Actions 等海外环境 --build-arg 传官方源
+ARG PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
 FROM python:${PYTHON_VERSION}-slim AS builder
 
 WORKDIR /app
@@ -8,10 +10,17 @@ COPY services/web-api/pyproject.toml ./
 COPY services/web-api/src/.keep ./src/.keep
 
 # Install production dependencies using pip
-RUN pip install . -i https://pypi.tuna.tsinghua.edu.cn/simple
+RUN pip install . -i ${PIP_INDEX_URL}
 
 # Stage 2: Production environment
 FROM python:${PYTHON_VERSION}-slim AS production
+
+# 版本元数据(构建时注入,/version 端点上报)
+ARG APP_VERSION=dev
+ARG GIT_SHA=unknown
+ARG CHANNEL=dev
+ARG PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
+ENV YH_VERSION=${APP_VERSION} YH_GIT_SHA=${GIT_SHA} YH_CHANNEL=${CHANNEL}
 
 WORKDIR /app
 
@@ -42,7 +51,7 @@ COPY services/web-api/src/yinghuo_app/captcha/font/ /root/.local/lib/python3.12/
 # openlabel.JSON_PATHS 的第三项解析到 site-packages/,这里 COPY 到该位置才能被找到
 COPY services/web-api/src/openlabel-specs/ /root/.local/lib/python3.12/site-packages/openlabel-specs/
 
-RUN pip install . --user -i https://pypi.tuna.tsinghua.edu.cn/simple
+RUN pip install . --user -i ${PIP_INDEX_URL}
 
 EXPOSE 8423
 

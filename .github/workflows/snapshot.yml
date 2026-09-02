@@ -1,0 +1,129 @@
+name: snapshot
+
+# master 每次推送构建 snapshot 镜像:
+#   - 不可变 tag: <下一版本>-snapshot.<yyyymmdd>.<sha>-ce
+#   - 移动指针:   snapshot-ce(每次覆盖)
+#   - 绝不碰 latest-*:latest 只属于 tag 触发的正式发布(release.yml)
+on:
+  push:
+    branches: [master]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - '.github/ISSUE_TEMPLATE/**'
+  workflow_dispatch:
+
+concurrency:
+  group: snapshot-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  YH_EDITION: ce
+
+jobs:
+  images:
+    name: Build & push snapshot images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # git describe 需要 tag 历史来推算下一版本号
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: apps/web-app/pnpm-lock.yaml
+
+      - name: Compute snapshot version
+        id: ver
+        run: |
+          set -eu
+          # 只认完整 semver 形态的正式 tag(v0.3 这类历史短 tag 不算),按版本倒序取最新
+          LATEST=$(git tag -l --sort=-v:refname \
+            | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9._]+)?$' \
+            | head -1 || true)
+          if [ -z "$LATEST" ]; then
+            # 还没有正式 tag 时退回 package.json 版本
+            PKG=$(grep -m1 '"version"' apps/web-app/package.json | sed 's/.*: *"\(.*\)".*/\1/')
+            LATEST="v${PKG}"
+          fi
+          BASE=${LATEST#v}
+          MAJOR=${BASE%%.*}; REST=${BASE#*.}; MINOR=${REST%%.*}; PATCH=${REST##*.}
+          NEXT="${MAJOR}.${MINOR}.$((PATCH+1))"
+          SHA=${GITHUB_SHA:0:7}
+          STAMP=$(date -u +%Y%m%d)
+          {
+            echo "version=${NEXT}-snapshot.${STAMP}.${SHA}-ce"
+            echo "sha=${SHA}"
+            echo "created=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: apps/web-app
+
+      - name: Build frontend (stamp version)
+        run: |
+          pnpm pkg set version "${{ steps.ver.outputs.version }}"
+          pnpm build
+        working-directory: apps/web-app
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/web-app/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ghcr.io/geluzhiwei1/yinghuo-frontend-ce:${{ steps.ver.outputs.version }}
+            ghcr.io/geluzhiwei1/yinghuo-frontend-ce:snapshot-ce
+          labels: |
+            org.opencontainers.image.title=yinghuo-frontend-ce
+            org.opencontainers.image.description=Yinghuo OpenLabel CE frontend (snapshot)
+            org.opencontainers.image.source=https://github.com/geluzhiwei1/yinghuo-openlabel
+            org.opencontainers.image.version=${{ steps.ver.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.created=${{ steps.ver.outputs.created }}
+            io.yinghuo.channel=snapshot
+            io.yinghuo.edition=ce
+
+      - name: Build & push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: services/web-api/Dockerfile
+          platforms: linux/amd64
+          push: true
+          build-args: |
+            APP_VERSION=${{ steps.ver.outputs.version }}
+            GIT_SHA=${{ steps.ver.outputs.sha }}
+            CHANNEL=snapshot
+            PIP_INDEX_URL=https://pypi.org/simple
+          tags: |
+            ghcr.io/geluzhiwei1/yinghuo-backend-ce:${{ steps.ver.outputs.version }}
+            ghcr.io/geluzhiwei1/yinghuo-backend-ce:snapshot-ce
+          labels: |
+            org.opencontainers.image.title=yinghuo-backend-ce
+            org.opencontainers.image.description=Yinghuo OpenLabel CE backend (snapshot)
+            org.opencontainers.image.source=https://github.com/geluzhiwei1/yinghuo-openlabel
+            org.opencontainers.image.version=${{ steps.ver.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.created=${{ steps.ver.outputs.created }}
+            io.yinghuo.channel=snapshot
+            io.yinghuo.edition=ce

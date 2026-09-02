@@ -4,6 +4,7 @@ role rest api
 __author__ = "Zhang Lizhi"
 __date__ = "2023-08-31"
 
+import os
 import time
 import jwt
 from contextlib import asynccontextmanager
@@ -79,6 +80,17 @@ if HAS_EE:
     # EE 增量:Prometheus 指标,GET /metrics
     setup_metrics(app)
 
+
+@app.get("/version", summary="运行版本信息", tags=["meta"])
+async def version_info():
+    """公开端点:镜像 retag 后仍可准确报出自己的构建版本。"""
+    return {
+        "version": settings.VERSION,
+        "git_sha": settings.GIT_SHA,
+        "edition": os.environ.get("YH_EDITION", "ce"),
+        "channel": settings.CHANNEL,
+    }
+
 @app.middleware("http")
 async def request_middleware(request, call_next): # , cur_user: User=Depends(current_user), user_manager: UserManager = Depends(get_user_manager)
     
@@ -127,7 +139,11 @@ async def request_middleware(request, call_next): # , cur_user: User=Depends(cur
     # 所以整段跳过,把鉴权完全交给 platform router 的 dependency。
     if request.url.path.startswith("/api/v1/p/"):
         return await call_next_and_log()
-        
+
+    # 版本探活:公开,只暴露构建元数据
+    if request.url.path == '/version':
+        return await call_next_and_log()
+
     # 其他接口，需要验证token
     bearer_token = None
     header_token = request.headers.get('Authorization')

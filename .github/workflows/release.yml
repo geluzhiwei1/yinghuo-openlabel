@@ -1,0 +1,168 @@
+name: release
+
+# 推 v* tag 触发正式发布:
+#   - 纯 semver(如 v0.4.1)        → <ver>-ce / <ver>-ce-production / latest-ce / latest-ce-production + GitHub Release
+#   - 预发布(v0.5.0-rc.1 等)      → 只打 <ver>-ce / <ver>-ce-production,不移动 latest,Release 标记 prerelease
+# tag 是唯一正式版来源;latest 永远不被 snapshot/master 直推覆盖(见 snapshot.yml)
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  release:
+    name: Release CE images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # 创建 GitHub Release
+      packages: write   # 推 ghcr
+    env:
+      YH_EDITION: ce
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parse version from tag
+        id: ver
+        run: |
+          set -eu
+          TAG="${GITHUB_REF_NAME}"
+          VERSION="${TAG#v}"
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9._]+)?$ ]]; then
+            echo "::error::tag 必须形如 v0.4.1 或 v0.5.0-rc.1,当前: ${TAG}"
+            exit 1
+          fi
+          if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            STABLE=true
+          else
+            STABLE=false
+          fi
+          {
+            echo "version=${VERSION}"
+            echo "stable=${STABLE}"
+            echo "sha=${GITHUB_SHA:0:7}"
+            echo "created=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Compute image tags
+        id: tags
+        run: |
+          set -eu
+          VER="${{ steps.ver.outputs.version }}"
+          FE=ghcr.io/geluzhiwei1/yinghuo-frontend-ce
+          BE=ghcr.io/geluzhiwei1/yinghuo-backend-ce
+          {
+            echo "frontend<<EOF"
+            echo "${FE}:${VER}-ce"
+            echo "${FE}:${VER}-ce-production"
+            if [ "${{ steps.ver.outputs.stable }}" = "true" ]; then
+              echo "${FE}:latest-ce"
+              echo "${FE}:latest-ce-production"
+            fi
+            echo "EOF"
+            echo "backend<<EOF"
+            echo "${BE}:${VER}-ce"
+            echo "${BE}:${VER}-ce-production"
+            if [ "${{ steps.ver.outputs.stable }}" = "true" ]; then
+              echo "${BE}:latest-ce"
+              echo "${BE}:latest-ce-production"
+            fi
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: apps/web-app/pnpm-lock.yaml
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: apps/web-app
+
+      - name: Build frontend (stamp version)
+        run: |
+          pnpm pkg set version "${{ steps.ver.outputs.version }}"
+          pnpm build
+        working-directory: apps/web-app
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install backend dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e . -i https://pypi.org/simple
+        working-directory: services/web-api
+
+      - name: Verify backend assembles
+        run: python -c "from yinghuo_app.app import app; print('CE app loaded, routes:', len(app.routes))"
+        working-directory: services/web-api
+        env:
+          YH_CONFIG_FILE: ${{ github.workspace }}/services/web-api/config/yinghuo-ci.yaml
+          YH_JWT_SECRET: ci-only-not-a-secret-0123456789abcdef012345
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/web-app/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.tags.outputs.frontend }}
+          labels: |
+            org.opencontainers.image.title=yinghuo-frontend-ce
+            org.opencontainers.image.description=Yinghuo OpenLabel CE frontend
+            org.opencontainers.image.source=https://github.com/geluzhiwei1/yinghuo-openlabel
+            org.opencontainers.image.version=${{ steps.ver.outputs.version }}-ce
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.created=${{ steps.ver.outputs.created }}
+            io.yinghuo.channel=stable
+            io.yinghuo.edition=ce
+
+      - name: Build & push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: services/web-api/Dockerfile
+          platforms: linux/amd64
+          push: true
+          build-args: |
+            APP_VERSION=${{ steps.ver.outputs.version }}-ce
+            GIT_SHA=${{ steps.ver.outputs.sha }}
+            CHANNEL=stable
+            PIP_INDEX_URL=https://pypi.org/simple
+          tags: ${{ steps.tags.outputs.backend }}
+          labels: |
+            org.opencontainers.image.title=yinghuo-backend-ce
+            org.opencontainers.image.description=Yinghuo OpenLabel CE backend
+            org.opencontainers.image.source=https://github.com/geluzhiwei1/yinghuo-openlabel
+            org.opencontainers.image.version=${{ steps.ver.outputs.version }}-ce
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.created=${{ steps.ver.outputs.created }}
+            io.yinghuo.channel=stable
+            io.yinghuo.edition=ce
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          EXTRA=""
+          if [ "${{ steps.ver.outputs.stable }}" != "true" ]; then EXTRA="--prerelease"; fi
+          gh release create "${GITHUB_REF_NAME}" \
+            --title "${GITHUB_REF_NAME}" \
+            --notes "- 镜像: \`ghcr.io/geluzhiwei1/yinghuo-frontend-ce:${{ steps.ver.outputs.version }}-ce\` / \`yinghuo-backend-ce\` 同 tag
+          - revision: \`${{ github.sha }}\`
+          - snapshot 与正式版的区分规则见 \`.github/workflows/release.yml\` 头部注释" \
+            $EXTRA

@@ -107,7 +107,9 @@ class Settings(BaseSettings):
         case_sensitive=False,
     )
 
-    VERSION: str = "0.1.0"
+    VERSION: str = "dev"
+    GIT_SHA: str = ""
+    CHANNEL: str = "dev"
     APP_TITLE: str = "Yinghuo Label Platform"
     PROJECT_NAME: str = "Yinghuo"
     APP_DESCRIPTION: str = "Data annotation platform"
