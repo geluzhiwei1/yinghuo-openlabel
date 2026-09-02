@@ -72,7 +72,7 @@ jobs:
 
       - name: Build frontend (stamp version)
         run: |
-          pnpm pkg set version "${{ steps.ver.outputs.version }}"
+          node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json','utf8'));p.version='${{ steps.ver.outputs.version }}';fs.writeFileSync('package.json',JSON.stringify(p,null,2)+'\n')"
           pnpm build
         working-directory: apps/web-app
 
