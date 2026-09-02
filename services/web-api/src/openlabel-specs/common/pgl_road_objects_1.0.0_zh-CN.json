@@ -1,0 +1,487 @@
+{
+    "openlabel": {
+        "meta": {
+            "name": "道路目标分类",
+            "description": "日常驾驶中常见的目标分类，参考《道路交通管理 机动车类型（GA802-2019）》、《汽车、挂车及汽车列车的术语和定义（GB/T 3730.1-2022）》",
+            "url": "http://openlabel.gerwee.com/"
+        },
+        "ontologies": {
+            "0": "http://ontology.asam.net/ontologies/Domain"
+        },
+        "classes": [
+            {
+                "name": "道路目标",
+                "definition": {
+                    "ontology_uid": 0,
+                    "color": "#000000"
+                },
+                "properties": {
+                    "visibility": {
+                        "type": "string",
+                        "title": "可见性",
+                        "description": "目标物体的可见程度",
+                        "enum": [
+                            "<40%",
+                            "<60%",
+                            "<80%",
+                            "<=100%"
+                        ],
+                        "default": "unlabeled",
+                        "ui:widget": "RadioWidget"
+                    },
+                    "tags": {
+                        "type": "string",
+                        "title": "标签",
+                        "default": "",
+                        "maxLength": 1024
+                    },
+                    "annotation": {
+                        "type": "string",
+                        "default": "",
+                        "title": "描述",
+                        "maxLength": 1024
+                    }
+                },
+                "children": [
+                    {
+                        "name": "机动车",
+                        "definition": {
+                            "description": "由动力装置驱动或者牵引，上道路行驶的供人员乘用或者用于运送物品以及进行工程专项作业的轮式车辆，包括汽车及汽车列车、摩托车、轮式专用机械车、挂车、有轨电车、特型机动车和上道路行驶的拖拉机，不包括虽有动力装置但最大设计车速、整备质量、外廓尺寸等指标符合有关国家标准的残疾人机动轮椅车和电动自行车。",
+                            "color": "#000000"
+                        },
+                        "properties": {
+                            "driving_status": {
+                                "type": "string",
+                                "title": "行驶状态",
+                                "description": "车辆的行驶状态",
+                                "enum": [
+                                    "行驶",
+                                    "泊车",
+                                    "临停"
+                                ],
+                                "minLength": 1,
+                                "default": "unlabeled",
+                                "ui:widget": "RadioWidget"
+                            },
+                            "vehicle_light": {
+                                "type": "array",
+                                "uniqueItems": true,
+                                "title": "车灯",
+                                "description": "车辆的灯光状态",
+                                "items": {
+                                    "type": "string",
+                                    "enum": [
+                                        "左转向灯",
+                                        "右转向灯",
+                                        "刹车灯",
+                                        "危险报警闪光灯"
+                                    ],
+                                    "enumNames": [
+                                        "左转向灯",
+                                        "右转向灯",
+                                        "刹车灯",
+                                        "危险报警闪光灯"
+                                    ]
+                                  },
+                                "default": [],
+                                "ui:widget": "CheckboxesWidget"
+                            },
+                            "door_status": {
+                                "type": "array",
+                                "title": "车门状态",
+                                "description": "车门/后备箱/火车后门开启情况",
+                                "items": {
+                                    "type": "string",
+                                    "enum": [
+                                        "关闭",
+                                        "左侧门开",
+                                        "右侧门开",
+                                        "后门开",
+                                        "后备箱开"
+                                    ],
+                                    "enumNames": [
+                                        "关闭",
+                                        "左侧门开",
+                                        "右侧门开",
+                                        "后门开",
+                                        "后备箱开"
+                                    ]
+                                  },
+                                "default": [],
+                                "uniqueItems": true,
+                                "ui:widget": "CheckboxesWidget"
+                            },
+                            "speed": {
+                                "type": "number",
+                                "title": "速度",
+                                "description": "车辆行驶速度",
+                                "default": -1,
+                                "multipleOf": 0,
+                                "minimum": -1,
+                                "maximum": 300,
+                                "ui:options": {
+                                    "precision": 3
+                                }
+                            },
+                            "priority": {
+                                "type": "array",
+                                "title": "优先级",
+                                "description": "车辆的通行优先权、危机程度。危险车辆：化学品，液化气，油罐车。紧急车：救护车，消防车，警车。",
+                                "items": {
+                                    "type": "string",
+                                    "enum": [
+                                        "危险车",
+                                        "紧急车"
+                                    ],
+                                    "enumNames": [
+                                        "危险车",
+                                        "紧急车"
+                                    ]
+                                  },
+                                "default": [],
+                                "uniqueItems": true,
+                                "ui:widget": "CheckboxesWidget"
+                            }
+                        },
+                        "children": [
+                            {
+                                "name": "载客汽车",
+                                "definition": {
+                                    "description":""
+                                },
+                                "properties": {},
+                                "children": [
+                                    {
+                                        "name": "轿车",
+                                        "definition": {
+                                            "description": "车身结构为两厢式且乘坐人数小于或等于5人，或者车身结构为三厢式且乘坐人数小于或等于9人，安装座椅的载客汽车。（越野客车、SUV、MPV）"
+                                        }
+                                    },
+                                    {
+                                        "name": "面包车",
+                                        "definition": {
+                                            "description": "平头或短头车身结构，单层地板，发动机中置（指发动机缸体整体位于汽车前后轴之间的布置形式），宽高比（指整车车宽与车高的比值）小于或等于0.90，乘坐人数小于或等于9人，安装座椅的载客汽车"
+                                        }
+                                    },
+                                    {
+                                        "name": "城市客车",
+                                        "definition": {
+                                            "description": "city bus/urban bus设有座椅及乘客站立区，并有足够的空间供频繁停站时乘客上下车走动，有固定的公交营运线路和车站，主要在城市建成区运营的客车；也包括无轨电车。"
+                                        }
+                                    },
+                                    {
+                                        "name": "长途客车",
+                                        "definition": {
+                                            "description": "road coach/long distance coach/interurban coach专门为运输长途旅客设计和制造、未设置乘客站立区的客车；也包括卧铺客车。包括：普通客车、双层客车、卧铺客车、铰接客车、旅游客车、团体客车。"
+                                        }
+                                    },
+                                    {
+                                        "name": "旅居车",
+                                        "definition": {
+                                            "description": "装备有睡具（可由桌椅转换而来）及其他必要的生活设施、用于旅行宿营的汽车"
+                                        }
+                                    },
+                                    {
+                                        "name": "专用校车",
+                                        "definition": {
+                                            "description": "school bus设计和制造上专门用于运送3周岁以上学龄前幼儿或义务教育阶段学生的载客汽车"
+                                        }
+                                    },
+                                    {
+                                        "name": "有轨电车",
+                                        "definition": {
+                                            "description": "tram 以电机驱动，架线供电、有轨道承载的机动车。"
+                                        }
+                                    },
+                                    {
+                                        "name": "其他载客车",
+                                        "definition": {
+                                            "description": "其他有机动车牌照，但不在以上分类中的载客车辆"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "载货汽车",
+                                "definition": {
+                                    "description":""
+                                },
+                                "properties": {},
+                                "children": [
+                                    {
+                                        "name": "挂车",
+                                        "definition": {
+                                            "description": "包括半挂车，全挂车。牵引车和挂车不是一体，通过挂钩链接，转弯时挂车会滞后。"
+                                        }
+                                    },
+                                    {
+                                        "name": "轻型货车",
+                                        "definition": {
+                                            "description": "车长小于6000mm 且总质量小于4500kg的载货汽车，但不包括三轮汽车）"
+                                        }
+                                    },
+                                    {
+                                        "name": "微型货车",
+                                        "definition": {
+                                            "description": "车长小于或等于 3500mm 且总质量小于或等于 1800kg 的载货汽车，但不包括低速汽车；包括皮卡车"
+                                        }
+                                    },
+                                    {
+                                        "name": "中大型货车",
+                                        "definition": {
+                                            "description": "车长大于或等于6000mm 的载货汽车，或者总质量大于或等于4500kg的载货汽车；包括重型载货汽车和低速货车"
+                                        }
+                                    },
+                                    {
+                                        "name": "三轮汽车",
+                                        "definition": {
+                                            "description": "以柴油机为动力，最大设计车速小于或等于50km/h，总质量小于或等于2000kg，长小于或等于4600mm，宽小于或等于1600mm，高小于或等于2000mm，具有三个车轮的货车。"
+                                        }
+                                    },
+                                    {
+                                        "name": "中置轴轿运车",
+                                        "definition": {
+                                            "description": "载货部位经过特殊设计和制造，专门用于运输商品车的载货汽车。车宽限值2.55米，长度限值22米，可装载8至10辆乘用车"
+                                        }
+                                    },
+                                    {
+                                        "name": "其他货车",
+                                        "definition": {
+                                            "description": "其他有机动车牌照，但不在以上分类中的载货车辆"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "专项作业车",
+                                "definition": {
+                                    "description":"装置有专用设备或器具，在设计和制造上用于工程专项（包括卫生医疗）作业的汽车"
+                                },
+                                "properties": {},
+                                "children": [
+                                    {
+                                        "name": "消防车",
+                                        "definition": {
+                                            "description": ""
+                                        }
+                                    },
+                                    {
+                                        "name": "救护车",
+                                        "definition": {
+                                            "description": ""
+                                        }
+                                    },
+                                    {
+                                        "name": "工程车",
+                                        "definition": {
+                                            "description": "汽车起重机、混凝土泵车、高空作业车、铲车、清障车、道路维修车等"
+                                        }
+                                    },
+                                    {
+                                        "name": "市政环卫车",
+                                        "definition": {
+                                            "description": "扫路车、洒水车、吸污车、监测车、安保车等"
+                                        }
+                                    },
+                                    {
+                                        "name": "其他作业车",
+                                        "definition": {
+                                            "description": "采血车、医疗车、体检医疗车、电源车、通信车、电视车等"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "摩托车",
+                                "definition": {
+                                    "description":"设计车速可大于50km/h"
+                                },
+                                "properties": {}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "非机动车",
+                        "definition": {},
+                        "properties": {},
+                        "children": [
+                            {
+                                "name": "自行车",
+                                "definition": {"description":"无人，单辆车；包括电动自行车（具备脚踏骑行能力，最高时速不超过25km/h，整车质量不超过55kg）"}
+                            },
+                            {
+                                "name": "自行车组",
+                                "definition": {"description":"无人，两辆或以上靠近停在一起，常见共享自行车停车区；包括电动自行车（具备脚踏骑行能力，最高时速不超过25km/h，整车质量不超过55kg）"}
+                            },
+                            {
+                                "name": "三轮车",
+                                "definition": {"description":""}
+                            },
+                            {
+                                "name": "骑行者",
+                                "definition": {"description":"人骑车或推车；包括电动车、三轮车"}
+                            },
+                            {
+                                "name": "便携式车",
+                                "definition": {"description":"segway、滑板车、平衡车"}
+                            },
+                            {
+                                "name": "其他非机动车",
+                                "definition": {
+                                    "description":""
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "行人",
+                        "definition": {
+                            "description": "Pedestrian步行的人，包括推婴儿车、拉行李箱、推轮椅等"
+                        },
+                        "properties": {
+                            "driving_status": {
+                                "type": "string",
+                                "title": "状态",
+                                "description": "状态",
+                                "enum": [
+                                    "静止",
+                                    "运动"
+                                ],
+                                "minLength": 1,
+                                "default": "unlabeled",
+                                "ui:widget": "RadioWidget"
+                            }
+                        }
+                    },
+                    {
+                        "name": "动物",
+                        "definition": {
+                            "description": "牛马羊猫狗等各类动物"
+                        },
+                        "children": [
+                            {
+                                "name": "大动物",
+                                "definition": {"description":"类似牛马驴"}
+                            },
+                            {
+                                "name": "中动物",
+                                "definition": {"description":"类似羊猪"}
+                            },
+                            {
+                                "name": "小动物",
+                                "definition": {"description":"类似猫狗"}
+                            },
+                            {
+                                "name": "其他动物",
+                                "definition": {"description":"没有明确分类的"}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "可移动交通设施",
+                        "definition": {
+                            "description": "临时或者短期放置"
+                        },
+                        "children": [
+                            {
+                                "name": "锥桶",
+                                "definition": {"description":"锥桶"}
+                            },
+                            {
+                                "name": "停车标志牌",
+                                "definition": {"description":"停车标志牌"}
+                            },
+                            {
+                                "name": "水马",
+                                "definition": {"description":"水马"}
+                            },
+                            {
+                                "name": "临时施工标志",
+                                "definition": {"description":"临时施工标志"}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "静态交通设施",
+                        "definition": {
+                            "description": "固定设施"
+                        },
+                        "children": [
+                            {
+                                "name": "道闸",
+                                "definition": {"description":""}
+                            },
+                            {
+                                "name": "栏杆",
+                                "definition": {"description":"高速路收费站栏杆"}
+                            },
+                            {
+                                "name": "防撞桶"
+                            },
+                            {
+                                "name": "路桩"
+                            },
+                            {
+                                "name": "绿化带"
+                            },
+                            {
+                                "name": "隔离栅",
+                                "definition": {"description":"使高速公路全封闭得以实现，并阻止人畜进入高速公路，可分为金属网、钢板网、刺铁丝和常青绿篱几大类"}
+                            },
+                            {
+                                "name": "安全护栏",
+                                "definition": {"description":"阻止车辆越出路外，防止车辆穿越中央分隔带闯入对向车道;同时还要能诱导驾驶员的视线。可分为路侧护栏、中央隔离带护栏和特殊地点护栏"}
+                            },
+                            {
+                                "name": "防眩设施",
+                                "definition": {"description":"遮挡对向车前照灯的眩光，分防眩网和防眩板两种"}
+                            },
+                            {
+                                "name": "其他静态交通设施",
+                                "definition": {"description":"没有明确分类的静态交通设施"}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "建筑物",
+                        "definition": {
+                            "description": ""
+                        },
+                        "children": [
+                            {
+                                "name": "隧道"
+                            },
+                            {
+                                "name": "桥梁"
+                            },
+                            {
+                                "name": "人行天桥"
+                            },
+                            {
+                                "name": "收费站"
+                            },
+                            {
+                                "name": "其他建筑物",
+                                "definition": {"description":"没有明确分类的"}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "杂物",
+                        "definition": {
+                            "definition": {"description":"道路上影响行驶的树枝、箱子、石块等"}
+                        }
+                    },
+                    {
+                        "name": "坑洞",
+                        "definition": {"description":"道路上影响行驶的坑洞"}
+                    },
+                    {
+                        "name": "其他道路物体",
+                        "definition": {"description":"道路上其他影响行驶的东西"}
+                    }
+                ]
+            }
+        ]
+    }
+}

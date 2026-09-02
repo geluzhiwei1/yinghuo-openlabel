@@ -73,7 +73,7 @@ const searchOpt = ref<FormOptionList[]>([
         label: "用户注册：",
         prop: "is_registered",
         opts: [
-            { label: "所有", value: undefined },
+            { label: "所有", value: "" },
             { label: "已注册", value: true },
             { label: "未注册", value: false },
         ],
@@ -83,7 +83,7 @@ const searchOpt = ref<FormOptionList[]>([
         label: "用户加入：",
         prop: "is_signed",
         opts: [
-            { label: "所有", value: undefined },
+            { label: "所有", value: "" },
             { label: "已加入", value: true },
             { label: "未加入", value: false },
         ],

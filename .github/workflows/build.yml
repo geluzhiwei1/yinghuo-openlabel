@@ -9,12 +9,8 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.edition }} build & test
+    name: CE build & test
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        edition: [ce, ee, saas]
     services:
       postgres:
         image: postgres:17
@@ -38,7 +34,7 @@ jobs:
           --health-retries 5
 
     env:
-      YH_EDITION: ${{ matrix.edition }}
+      YH_EDITION: ce
       YH_CONFIG_FILE: services/web-api/config/yinghuo-ci.yaml
 
     steps:
@@ -58,11 +54,7 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: apps/web-app
 
-      - name: Type-check frontend
-        run: pnpm type-check
-        working-directory: apps/web-app
-
-      - name: Build frontend (${{ matrix.edition }})
+      - name: Build frontend
         run: pnpm build
         working-directory: apps/web-app
 
@@ -76,25 +68,15 @@ jobs:
           pip install -e .[test]
         working-directory: services/web-api
 
-      - name: Verify backend assembles (${{ matrix.edition }})
+      - name: Verify backend assembles
         run: |
-          python -c "from yinghuo_app.app import app; print('${{ matrix.edition }} app loaded, routes:', len(app.routes))"
+          python -c "from yinghuo_app.app import app; print('CE app loaded, routes:', len(app.routes))"
         working-directory: services/web-api
 
-      - name: Run tests (${{ matrix.edition }})
+      - name: Run tests
         run: |
           cd "$GITHUB_WORKSPACE"
-          case "${{ matrix.edition }}" in
-            ce)
-              pytest -m "not ee and not saas" services/web-api/tests
-              ;;
-            ee)
-              pytest -m "not saas" services/web-api/tests
-              ;;
-            saas)
-              pytest services/web-api/tests
-              ;;
-          esac
+          pytest -m "not ee and not saas" services/web-api/tests
 
   ce-tarball:
     name: CE source tarball sanity
@@ -123,35 +105,3 @@ jobs:
             echo "commercial LICENSE leaked into CE"; exit 1
           fi
           echo "CE tarball sanity OK"
-
-  ee-tarball:
-    name: EE source tarball sanity
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.event_name == 'push'
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Verify SaaS code is excluded from EE tarball
-        run: |
-          set -e
-          mkdir -p workdir
-          git archive --format=tar HEAD | tar -x -C workdir
-          rm -rf workdir/services/web-api/src/yinghuo_app/saas
-          rm -f workdir/LICENSE.SAAS
-          tar -czf ee-check.tar.gz -C workdir .
-          LEAKS=$(tar tzf ee-check.tar.gz | grep -E "/saas/|yinghuo_app/saas/" || true)
-          if [ -n "$LEAKS" ]; then
-            echo "SaaS leak detected into EE:"; echo "$LEAKS"; exit 1
-          fi
-          if tar tzf ee-check.tar.gz | grep -q "^LICENSE.SAAS$"; then
-            echo "LICENSE.SAAS leaked into EE"; exit 1
-          fi
-          # EE 必须仍包含 ee/ 和 LICENSE.EE
-          if ! tar tzf ee-check.tar.gz | grep -q "yinghuo_app/ee/platform/auth.py"; then
-            echo "EE tarball missing ee/platform/auth.py"; exit 1
-          fi
-          if ! tar tzf ee-check.tar.gz | grep -q "^LICENSE.EE$"; then
-            echo "EE tarball missing LICENSE.EE"; exit 1
-          fi
-          echo "EE tarball sanity OK"

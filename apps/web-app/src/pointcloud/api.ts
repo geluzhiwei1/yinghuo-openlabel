@@ -14,6 +14,8 @@ import { userAuth } from '@/states/UserState'
 import { ElLoading, ElMessage, ElMessageBox } from 'element-plus'
 import { pathBlobMap } from '@/states/LocalFiles'
 import { fileAPi } from '@/api'
+import { ensureRustWasm } from '@/libs/plugin'
+import { sanitizePointcloud } from './utils/sanitize'
 
 export const loadSeqMeta = async (seqId:string) => {
     const seq_id = seqId
@@ -93,9 +95,26 @@ export const pySeqData = {
         else if (ext === 'laz')   loader = new LASLoader(undefined, 'laz')
         else throw new Error(`不支持的点云格式: .${ext}(支持 pcd/ply/las/laz)`)
 
+        // pcd 有 JS fallback 可以不依赖 wasm;ply/las/laz 只有 wasm 解析路径
+        if (ext !== 'pcd') {
+            await ensureRustWasm().catch((err) => {
+                loading.close()
+                throw err
+            })
+        }
+
         return new Promise<PCDFormat>((resolve, reject) => {
             loader.load(uri_full, (pointsObject: PCDFormat) => {
-                resolve(pointsObject)
+                const { pc, dropped } = sanitizePointcloud(pointsObject)
+                if (dropped > 0) {
+                    console.warn(`[loadPointCloud] 剔除 ${dropped} 个无效点(NaN/Inf坐标), 剩余 ${pc.position.length / 3} 个点`)
+                    if (pc.position.length === 0) {
+                        ElMessage.error('点云文件所有点均为无效坐标(NaN), 无法渲染')
+                    } else {
+                        ElMessage.warning(`点云含 ${dropped} 个无效点(NaN/Inf), 已剔除`)
+                    }
+                }
+                resolve(pc)
                 loading.close()
             }, ( xhr )=>{console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );},
             (error) => {

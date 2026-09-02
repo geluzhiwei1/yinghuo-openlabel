@@ -3,11 +3,11 @@
 #
 # 新拓扑(2026-07-30 仓库拆分后):
 #   CE = yinghuo-openlabel 主仓库(本仓库)的内容,不含 ee/ saas/ 挂载点。
-#   ee/ 与 saas/ 路径即使被 setup-edition.sh 挂上了 symlink,本脚本也会校验它们不存在
-#   或主动 teardown,确保发布物纯 CE。
+#   ee/ 与 saas/ 路径即使被 yinghuo-openlabel-ee/saas 私有仓的 setup-edition.sh
+#   挂上了 symlink,本脚本也会校验它们不存在,确保发布物纯 CE。
 #
 # 校验逻辑:
-#   1. 必须没有 ee/saas 挂载(若有,提示先跑 setup-edition.sh ce)
+#   1. 必须没有 ee/saas 挂载(若有,到私有仓跑 setup-edition.sh teardown)
 #   2. YH_EDITION=ce 后端装配通过
 #   3. 前端 YH_EDITION=ce 构建通过
 #   4. tarball 不含 ee/ saas/ LICENSE.EE LICENSE.SAAS
@@ -32,7 +32,7 @@ for p in \
   apps/web-app/saas apps/web-app/src/saas; do
   if [[ -e "$p" || -L "$p" ]]; then
     echo "ERROR: $p 存在,CE 构建必须先卸载 EE/SaaS 挂载" >&2
-    echo "  运行: scripts/setup-edition.sh ce" >&2
+    echo "  到 yinghuo-openlabel-ee 或 yinghuo-openlabel-saas 私有仓运行 CE_ROOT=$ROOT_DIR scripts/setup-edition.sh teardown" >&2
     exit 1
   fi
 done

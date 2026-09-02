@@ -69,7 +69,7 @@
       </header>
       <div ref="stageChartEl" class="chart-canvas"></div>
       <div v-if="!loading && (data?.by_stage ?? []).length === 0" class="stage-empty">
-        <Icon icon="lucide:chart-bar-horizontal" :width="32" />
+        <Icon icon="lucide:chart-column" :width="32" />
         <p>暂无阶段投票数据</p>
       </div>
     </article>

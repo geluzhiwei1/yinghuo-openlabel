@@ -14,6 +14,7 @@ export const menuData: Menus[] = [
         icon: 'material-symbols:draw-outline',
         index: '/annojob-v2',
         role: 'annojob-v2',
+        showAlways: true,
     },
     {
         id: '4',
@@ -26,7 +27,7 @@ export const menuData: Menus[] = [
                 pid: '1',
                 index: '/my-job',
                 role: 'my-job',
-                title: '我的任务'
+                title: '任务管理'
             },
             {
                 id: '43',
@@ -34,20 +35,6 @@ export const menuData: Menus[] = [
                 index: '/anno-specification',
                 role: 'anno-specification',
                 title: '标注规范'
-            },
-            {
-                id: '42',
-                pid: '1',
-                index: '/data-package-manager',
-                role: 'data-package-manager',
-                title: '数据包管理'
-            },
-            {
-                id: '45',
-                pid: '1',
-                index: '/label-batch',
-                role: 'label-batch',
-                title: '标注批次'
             },
             {
                 // Stage 9.6: workflow 驱动的批次管理
@@ -103,6 +90,7 @@ export const menuData: Menus[] = [
                 index: '/system-dept',
                 role: 'system-dept',
                 title: '部门管理',
+                permiss: 'business:team:write',
             },
             {
                 id: '12',
@@ -110,15 +98,9 @@ export const menuData: Menus[] = [
                 index: '/system-role',
                 role: 'system-role',
                 title: '角色管理',
+                permiss: 'admin:role:write',
             },
-            {
-                id: '14',
-                pid: '1',
-                index: '/system-data',
-                role: 'system-data',
-                title: '我的数据',
-            },
-        ]
+            ]
     },
     {
         id: '1',
@@ -132,12 +114,6 @@ export const menuData: Menus[] = [
                 index: '/user-info',
                 role: 'user-info',
                 title: '我的信息',
-            },
-            {
-                id: '13',
-                pid: '1',
-                index: '/system-menu',
-                title: '菜单管理',
             },
         ],
     },

@@ -1,0 +1,395 @@
+{
+    "openlabel": {
+        "meta": {
+            "name": "Image 2D Object Taxonomy",
+            "description": "",
+            "url": ""
+        },
+        "ontologies": {
+            "0": "http://ontology.asam.net/ontologies/Domain"
+        },
+        "definitions": {
+            "vehicle_status": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "title": "状态",
+                        "enum": [
+                            "泊车",
+                            "行驶",
+                            "停车"
+                        ],
+                        "minLength": 1,
+                        "default": "unlabeled",
+                        "ui:widget": "RadioWidget"
+                    }
+                }
+            },
+            "vehicle_door": {
+                "type": "object",
+                "properties": {
+                    "door": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "关闭",
+                                "左门开",
+                                "右门开"
+                            ]
+                        },
+                        "uniqueItems": true,
+                        "ui:widget": "CheckboxesWidget"
+                    }
+                }
+            },
+            "vehicle_license_plate": {
+                "type": "object",
+                "properties": {
+                    "license_plate": {
+                        "type": "string",
+                        "default": "unlabelled",
+                        "pattern": "^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-Z0-9]{4}[A-Z0-9挂学警港澳]{1}$",
+                        "minLength": 1,
+                        "maxLength": 50
+                    }
+                }
+            },
+            "tags": {
+                "type": "object",
+                "properties": {
+                    "tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "classes": [
+            {
+                "name": "TrafficParticipantByParticipantType",
+                "definition": {
+                    "ontology_uid": 0,
+                    "ontology_type": "#TrafficParticipantByParticipantType",
+                    "color": "#000000"
+                },
+                "properties": {
+                    "visibility": {
+                        "type": "string",
+                        "title": "可见性",
+                        "description": "目标物体的可见程度",
+                        "enum": [
+                            "<40%",
+                            "<60%",
+                            "<80%",
+                            "<=100%"
+                        ],
+                        "default": "unlabeled",
+                        "ui:widget": "RadioWidget"
+                    },
+                    "tags": {
+                        "type": "string",
+                        "title": "标签",
+                        "default": "",
+                        "maxLength": 1024
+                    },
+                    "annotation": {
+                        "type": "string",
+                        "default": "",
+                        "title": "描述",
+                        "maxLength": 1024
+                    }
+                },
+                "children": [
+                    {
+                        "name": "Animal",
+                        "definition": {
+                            "ontology_uid": 0,
+                            "ontology_type": "#Animal",
+                            "color": "#000000"
+                        },
+                        "properties": {}
+                    },
+                    {
+                        "name": "Human",
+                        "definition": {
+                            "ontology_uid": 0,
+                            "ontology_type": "#Human",
+                            "color": "#000000"
+                        },
+                        "properties": {
+                            "human_status": {
+                                "type": "string",
+                                "title": "状态",
+                                "description": "人的状态",
+                                "enum": [
+                                    "Sitting or Lying Down",
+                                    "Standing",
+                                    "Moving"
+                                ],
+                                "default": "unlabeled",
+                                "ui:widget": "RadioWidget"
+                            }
+                        },
+                        "children": [
+                            {
+                                "name": "Driver",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#Driver",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "Pedestrian",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#Pedestrian",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "Rider",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#Rider",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Vehicle",
+                        "definition": {
+                            "ontology_uid": 0,
+                            "ontology_type": "#Vehicle",
+                            "color": "#000000"
+                        },
+                        "properties": {
+                            "driving_status": {
+                                "type": "string",
+                                "title": "行驶状态",
+                                "description": "车辆的行驶状态",
+                                "enum": [
+                                    "泊车",
+                                    "行驶",
+                                    "停车"
+                                ],
+                                "minLength": 1,
+                                "default": "unlabeled",
+                                "ui:widget": "RadioWidget"
+                            },
+                            "vehicle_light": {
+                                "type": "array",
+                                "uniqueItems": true,
+                                "title": "车灯",
+                                "description": "车辆的灯光状态",
+                                "items": {
+                                    "type": "string",
+                                    "enum": [
+                                        "左转向灯",
+                                        "右转向灯",
+                                        "刹车灯",
+                                        "警告灯"
+                                    ],
+                                    "enumNames": [
+                                        "左转向灯",
+                                        "右转向灯",
+                                        "刹车灯",
+                                        "警告灯"
+                                    ]
+                                  },
+                                "default": [],
+                                "ui:widget": "CheckboxesWidget"
+                            },
+                            "door_status": {
+                                "type": "array",
+                                "title": "车门状态",
+                                "description": "车门关闭情况",
+                                "items": {
+                                    "type": "string",
+                                    "enum": [
+                                        "关闭",
+                                        "左侧门开",
+                                        "右侧门开"
+                                    ],
+                                    "enumNames": [
+                                        "关闭",
+                                        "左侧门开",
+                                        "右侧门开"
+                                    ]
+                                  },
+                                "default": [],
+                                "uniqueItems": true,
+                                "ui:widget": "CheckboxesWidget"
+                            },
+                            "speed": {
+                                "type": "number",
+                                "title": "速度",
+                                "description": "车辆行驶速度",
+                                "default": -1,
+                                "multipleOf": 0,
+                                "minimum": -1,
+                                "maximum": 300,
+                                "ui:options": {
+                                    "precision": 3
+                                }
+                            }
+                        },
+                        "children": [
+                            {
+                                "name": "AgricultureVehicle",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#AgricultureVehicle",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "ConstructionVehicle",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#ConstructionVehicle",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "GoodsVehicle",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#GoodsVehicle",
+                                    "color": "#000000"
+                                },
+                                "properties": {},
+                                "children": [
+                                    {
+                                        "name": "Truck",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#Truck",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "Van",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#Van",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "OfficialVehicle",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#OfficialVehicle",
+                                    "color": "#000000"
+                                },
+                                "properties": {},
+                                "children": [
+                                    {
+                                        "name": "EmergencyVehicle",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#EmergencyVehicle",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "PrivateVehicle",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#PrivateVehicle",
+                                    "color": "#000000"
+                                },
+                                "properties": {},
+                                "children": [
+                                    {
+                                        "name": "Bicycle",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#Bicycle",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "Car",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#Car",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "Motorcycle",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#Motorcycle",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "Trailer",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#Trailer",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "Wheelchair",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#Wheelchair",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "PublicTransportationVehicle",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#PublicTransportationVehicle",
+                                    "color": "#000000"
+                                },
+                                "properties": {},
+                                "children": [
+                                    {
+                                        "name": "Bus",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#Bus",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

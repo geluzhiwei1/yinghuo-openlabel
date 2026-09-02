@@ -15,9 +15,11 @@ from .config import Conf, gConf
 
 from yinghuo_app.apps.ctx import CTX_USER_ID,CTX_USER_FRESHNESS,CTX_TENANT_ID
 from tortoise import Tortoise
-from .biz.init_app import init_mongo_indexes, init_user_admin
+from .biz.init_app import init_mongo_indexes, init_mongo_collections, init_user_admin
 from .biz.rbac.seed import seed_rbac
 from .biz.workflow.seed import seed_builtin_workflows
+from .biz.dev_seed import seed_dev_data
+from .biz.data_migrations import apply_data_migrations
 from yinghuo_app.config import settings
 from .log import logger
 from .apps.init_app import register_exceptions, register_routers
@@ -46,6 +48,7 @@ async def _init_captcha_sqlite() -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    await init_mongo_collections()
     await init_mongo_indexes()
     await Tortoise.init(config=settings.TORTOISE_ORM, _enable_global_fallback=True)
     await Tortoise.generate_schemas()
@@ -54,6 +57,9 @@ async def lifespan(app: FastAPI):
     await seed_builtin_workflows()
     if HAS_SAAS:
         await seed_platform_data()
+    else:
+        await seed_dev_data()
+    await apply_data_migrations()
     await _init_captcha_sqlite()
     global redis_pool
     redis_pool = aioredis.from_url(f"{gConf['global']['redis']['uri']}", encoding="utf-8", decode_responses=True)

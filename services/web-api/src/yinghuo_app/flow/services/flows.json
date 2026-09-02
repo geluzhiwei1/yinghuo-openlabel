@@ -1,0 +1,32 @@
+{
+    "flows": [
+        {
+            "_id": "cam2d-lane",
+            "name": "Don Quixote",
+            "description": "Miguel de Cervantes",
+            "version": "2023.10.13.0",
+            "stages": [
+                {
+                    "_id": "cam2d-lane-stage-1",
+                    "name": "Camera 2D",
+                    "description": "Camera 2D",
+                    "funcs": [
+                        {
+                            "_id": "lane-det.mono.2d_LaneDet"
+                        }
+                    ]
+                },
+                {
+                    "_id": "cam2d-lane-stage-1",
+                    "name": "Camera 2D",
+                    "description": "Camera 2D",
+                    "funcs": [
+                        {
+                            "_id": "lane-det.mono.2d_LaneDet"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -1,5 +1,5 @@
 <template>
-  <el-form ref="formRef" :model="form" :rules="rules" :label-width="options.labelWidth">
+  <el-form ref="formRef" :model="form" :rules="rules" :label-width="options.labelWidth || '100px'">
     <el-row>
       <el-col :span="options.span" v-for="item in options.list" :key="item.prop">
         <el-form-item :label="item.label" :prop="item.prop">

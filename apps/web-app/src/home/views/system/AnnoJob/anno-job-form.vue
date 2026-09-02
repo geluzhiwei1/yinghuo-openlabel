@@ -5,7 +5,7 @@
     </template>
     <template #default>
       <el-form ref="formRef" :model="form" :rules="rules" v-loading="formLoading" label-position="right"
-        label-width="auto" style="max-width: 600px">
+        label-width="100px" style="max-width: 600px">
         <el-form-item label="数据源">
           <el-row>
             <el-radio-group v-model="form.label_spec.data.dataSource" @change="handleDataSourceChange"
@@ -35,10 +35,27 @@
         </el-form-item>
         <el-form-item label="选择数据" v-if="form.label_spec.data.dataSource === 'serverLocalDir'" prop="serverLocalDir">
           <el-row style="width: 100%">
+            <el-col :span="6">数据格式：</el-col>
+            <el-col :span="18">
+              <el-select v-model="form.label_spec.data.format" placeholder="数据格式" @change="handleFormatChange">
+                <el-option v-for="item in dataFormats" :key="item.value" :label="item.label" :value="item.value"/>
+              </el-select>
+            </el-col>
+          </el-row>
+          <el-row style="width: 100%">
+            <el-col :span="6"></el-col>
+            <el-col :span="18">
+              <el-text type="info">{{ dataFormatDesc }}</el-text>
+            </el-col>
+          </el-row>
+          <el-row style="width: 100%">
             <el-col :span="6">数据根目录：</el-col>
             <el-col :span="18">
-              <el-tree-select v-model="form.label_spec.data.seq" :data="dataClipIds" :render-after-expand="false"
-                check-strictly show-checkbox @change="handleSeqTreeSelectChange" />
+              <el-tree-select v-model="form.label_spec.data.seq" lazy :load="loadSeqNode"
+                :cache-data="seqCacheData" node-key="value" check-strictly show-checkbox
+                :props="treeProps" :render-content="renderSeqNode"
+                @node-click="onSeqNodeClick"
+                @change="handleSeqTreeSelectChange" />
             </el-col>
           </el-row>
           <el-row style="width: 100%">
@@ -47,14 +64,6 @@
               <el-select v-model="form.label_spec.data.streams" multiple collapse-tags collapse-tags-tooltip
                 placeholder="Select">
                 <el-option v-for="item in seqStreams" :key="item.value" :label="item.label" :value="item.value" />
-              </el-select>
-            </el-col>
-          </el-row>
-          <el-row style="width: 100%">
-            <el-col :span="6">数据格式：</el-col>
-            <el-col :span="18">
-              <el-select v-model="form.label_spec.data.format" placeholder="数据格式">
-                <el-option v-for="item in dataFormats" :key="item.value" :label="item.label" :value="item.value"/>
               </el-select>
             </el-col>
           </el-row>
@@ -145,7 +154,8 @@
   </el-drawer>
 </template>
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch, computed, h } from 'vue'
+import { ElMessage, ElTag, ElTooltip } from 'element-plus'
 import { annoJobPerformApi, dataSeqApi, openlabelApi } from '@/api'
 import TaxonomySelectTable from '@/components/AnnoSpecSelector.vue'
 import PrioritySelect from '@/components/PrioritySelect.vue'
@@ -154,7 +164,6 @@ import { AnnoMissons, Mission } from '@/constants'
 import { isEmpty, isObject, clone } from 'radash'
 import { messages } from '@/states'
 import { fileTypes, openFilesFromDir } from '@/states/LocalFiles'
-import { ElMessage } from 'element-plus'
 import { cloneDeep } from 'lodash'
 
 const dialogVisible = ref(false) // 弹窗的是否展示
@@ -165,7 +174,7 @@ const formRef = ref() // 表单 Ref
 const saveButtonEnable = ref(true) // 保存按钮是否可用
 
 const seqStreams = ref<any[]>([])
-const dataClipIds = ref<any[]>([])
+const seqCacheData = ref<any[]>([])
 const domains = ref<any[]>([])
 const missions = AnnoMissons
 
@@ -175,15 +184,116 @@ const tempForm = ref({
 })
 
 const dataFormats = [
-  {label: 'directory', value: 'simple-directory'},
-  {label: 'openlabel', value: 'openlabel'},
+  {label: 'directory', value: 'simple-directory', desc: '简单的目录结构：每个非空子文件夹视为一个数据流（stream），无需 meta.json。'},
+  {label: 'openlabel', value: 'openlabel', desc: 'OpenLabel 格式：目录下需要 meta.json，按 OpenLabel 规范描述数据集与帧元信息。'},
 ]
+
+const dataFormatDesc = computed(() => {
+  const item = dataFormats.find((it) => it.value === form.value.label_spec.data.format)
+  return item ? item.desc : ''
+})
+
+// 切换 format(目录 vs openlabel)时,旧路径可能不再合法,强制用户重新选目录与数据流
+// 用 @change 显式触发(而非 watch)— 避免 watch 链式触发 form.streams 的下游更新
+const handleFormatChange = (newFmt: string) => {
+  form.value.label_spec.data.seq = ''
+  form.value.label_spec.data.streams = []
+  seqStreams.value = []
+}
 
 const handleSeqTreeSelectChange = (value, selectedData, selectedNodes) => {
   // console.log(value)
   // // 设置 format 格式
   // form.value.label_spec.data.format = 'openlabel'
   // seqStreams.value = ['b','a']
+}
+
+// el-tree-select 在 checkStrictly=true 时把 expandOnClickNode 强制改回 false,
+// 点击只选中不展开。这里直接调 node.expand() 让点击同时展开节点。
+// node 是 el-tree 的内部 Node 实例(node.mjs:212),expand 内部判断 isLeaf / loaded。
+// 注意:禁用态不能拦截展开,否则用户看不到深层 openlabel 子目录。isSeqDisabled 只负责
+// 视觉 + checkbox 选中拦截,展开要让用户能下钻到带 meta.json 的叶子节点。
+const onSeqNodeClick = (data, node) => {
+  if (!node || node.isLeaf || node.expanded) return
+  node.expand()
+}
+
+// 给 el-tree-select 的内部 el-tree 提供 props.class,带 seq_meta 的节点加 .is-openlabel
+// format=openlabel 时,把没有 seq_meta 的节点禁用——避免选到非 openlabel 目录
+// el-tree 内部用 :disabled 函数判定 node.disabled(aria-disabled 走这个),
+// 但节点只在创建时计算 disabled,format 变化不会重渲,需要 :key 强制重挂载
+const isSeqDisabled = (data: any) =>
+  form.value.label_spec.data.format === 'openlabel' && !data?.seq_meta
+const treeProps = computed(() => ({
+  class: (data: any) => (data?.seq_meta ? 'is-openlabel' : ''),
+  disabled: isSeqDisabled,
+}))
+
+// 从后端塞进节点的 seq_meta (openlabel meta.json 解析结果) 抽出摘要用于 tooltip
+const summarizeSeqMeta = (seqMeta: any) => {
+  const ol = seqMeta?.openlabel ?? {}
+  const streams: string[] = Object.keys(ol.streams ?? {})
+  const frameCount = ol.frames ? Object.keys(ol.frames).length : 0
+  const schemaVersion: string = ol.metadata?.schema_version ?? '-'
+  return { streams, frameCount, schemaVersion }
+}
+
+// el-tree-select 自定义节点必须用 render-content (默认插槽会被 TreeSelectOption/el-option 吞掉)
+// openlabel 节点在 label 后追加绿色 ElTag,并在右侧放一个 ⓘ 按钮;hover 显示 streams/帧数/schema。
+// 非 openlabel 节点在 format=openlabel 时显示为禁用态(灰显 + 锁图标)
+const renderSeqNode = (h, { data }: any) => {
+  const isOpenlabel = !!data?.seq_meta
+  const disabled = isSeqDisabled(data)
+  const labelClass = ['seq-node__label', disabled ? 'seq-node__label--disabled' : '']
+  const children: any[] = [h('span', { class: labelClass, title: disabled ? '该目录不是 openlabel 格式,无法在 openlabel 模式下选中' : '' }, data.label)]
+  if (disabled) {
+    children.push(h('span', { class: 'seq-node__lock' }, '🔒'))
+  }
+  if (!isOpenlabel) {
+    return h('span', { class: 'seq-node' }, children)
+  }
+  const { streams, frameCount, schemaVersion } = summarizeSeqMeta(data.seq_meta)
+  children.push(
+    h(ElTag, { type: 'success', size: 'small', effect: 'light', class: 'seq-tag' }, () => 'openlabel'),
+  )
+  // el-tooltip 用作 hover popper;内容是 streams 列表 + 帧数 + schema version
+  const tooltipContent = h('div', { class: 'seq-meta-pop' }, [
+    h('div', { class: 'seq-meta-pop__row' }, [
+      h('span', { class: 'seq-meta-pop__k' }, '数据流:'),
+      h('span', { class: 'seq-meta-pop__v' }, streams.length ? streams.join(', ') : '(无)'),
+    ]),
+    h('div', { class: 'seq-meta-pop__row' }, [
+      h('span', { class: 'seq-meta-pop__k' }, '帧数:'),
+      h('span', { class: 'seq-meta-pop__v' }, String(frameCount)),
+    ]),
+    h('div', { class: 'seq-meta-pop__row' }, [
+      h('span', { class: 'seq-meta-pop__k' }, 'schema:'),
+      h('span', { class: 'seq-meta-pop__v' }, schemaVersion),
+    ]),
+  ])
+  children.push(
+    h(
+      ElTooltip,
+      {
+        placement: 'right-start',
+        effect: 'light',
+        // tooltip 默认 append 到 body,在 tree dropdown 上层不会被遮挡
+        showAfter: 200,
+      },
+      {
+        default: () => [
+          h(
+            'span',
+            { class: 'seq-node__info', title: `${streams.length} streams · ${frameCount} frames` },
+            'ⓘ',
+          ),
+        ],
+        // 丰富内容走 #content 插槽(默认插槽给 trigger)
+        content: () => tooltipContent,
+      },
+    ),
+  )
+  return h('span', { class: 'seq-node seq-node--openlabel' }, children)
 }
 
 const rules = ref({
@@ -341,6 +451,8 @@ const open = async (type: string, params) => {
         form.value = res.data[0]
         tempForm.value.imageURLs = form.value.label_spec.data.imageURLs.join('\n')
         tempForm.value.streams = form.value.label_spec.data.streams[0]
+        const seq = form.value.label_spec.data.seq
+        seqCacheData.value = seq ? [{ value: seq, label: seq.split('/').pop() }] : []
       } else {
         ElMessage.error('查询数据失败')
       }
@@ -435,15 +547,15 @@ const resetForm = (formEl: FormInstance | undefined) => {
   }
 }
 
-const loadDataClipIds = async () => {
-  formLoading.value = true
-  saveButtonEnable.value = false
-  const res = await dataSeqApi.queryDataSeq()
-  if (res && res.data.length > 0) {
-    dataClipIds.value = res.data
-    saveButtonEnable.value = true
+const loadSeqNode = async (node, resolve) => {
+  const path = node.level === 0 ? '' : node.data.value
+  try {
+    const res = await dataSeqApi.queryDataSeq({ path })
+    resolve(res?.data || [])
+  } catch (err) {
+    ElMessage.error('加载数据目录失败：' + err)
+    resolve([])
   }
-  formLoading.value = false
 }
 
 const loadDomains = async () => {
@@ -490,12 +602,7 @@ watch(
 )
 
 const handleDataSourceChange = (val) => {
-  if (val === 'serverLocalDir') {
-    loadDataClipIds()
-  }
-  else {
-    saveButtonEnable.value = true
-  }
+  saveButtonEnable.value = true
 }
 
 const loadData = () => {
@@ -510,3 +617,75 @@ onMounted(() => {
 
 defineExpose({ open })
 </script>
+
+<style scoped>
+.seq-node {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+.seq-tag {
+  margin-left: auto;
+}
+/* 这两个类挂在 tree dropdown 内部(被 Teleport 到 body),
+   scoped style 在 :deep() 里不会命中 — 用不带 scope 的全局规则 */
+</style>
+<style>
+.seq-node__label--disabled {
+  /* 用 --el-text-color-disabled(#D0D0CC / #484F58)而非 --el-color-info —
+     info 色在当前主题下是 #6B7280/#8B949E,与正文对比度太小看不出禁用态 */
+  color: var(--el-text-color-disabled);
+  cursor: not-allowed;
+}
+.seq-node__lock {
+  font-size: 12px;
+  color: var(--el-text-color-disabled);
+}
+/* format=openlabel 时,非 openlabel 节点被 disabled —
+   el-tree 没有内置 is-disabled 视觉态,这里手动灰显 */
+:deep(.el-tree-node__content[aria-disabled="true"]) {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+:deep(.el-tree-node__content[aria-disabled="true"]):hover {
+  background-color: transparent;
+}
+:deep(.el-tree-node__content[aria-disabled="true"] .el-checkbox__input.is-disabled .el-checkbox__inner) {
+  background-color: var(--el-checkbox-disabled-bg-color);
+}
+.seq-node__info {
+  margin-left: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  font-size: 12px;
+  color: var(--el-color-info);
+  cursor: help;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.seq-node__info:hover {
+  color: var(--el-color-primary);
+  background: var(--el-color-primary-light-9);
+}
+.seq-meta-pop {
+  font-size: 12px;
+  line-height: 1.6;
+  max-width: 360px;
+  word-break: break-all;
+}
+.seq-meta-pop__row {
+  display: flex;
+  gap: 6px;
+}
+.seq-meta-pop__k {
+  color: var(--el-text-color-secondary);
+  flex-shrink: 0;
+}
+.seq-meta-pop__v {
+  color: var(--el-text-color-primary);
+}
+</style>

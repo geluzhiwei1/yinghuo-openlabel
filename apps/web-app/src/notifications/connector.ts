@@ -8,6 +8,7 @@
  *
  * 自动重连:断开后 5s 重连一次;最大重连次数 10(失败后停,等用户刷新页面)。
  */
+import { watch } from 'vue'
 import { userAuth } from '@/states/UserState'
 import { NOTIFICATION_STREAM_URL } from '@/api'
 
@@ -146,6 +147,23 @@ export function startNotificationStream(): void {
   if (es && activeToken === t) return
   retryCount = 0
   connect()
+}
+
+// token 刷新(主动/被动)后 EventSource 里的旧 URL token 已失效,
+// scheduleReconnect 遇到 token 变化会直接放弃;这里监听变化负责重启,
+// 同时覆盖多标签页场景(useLocalStorage 会跨标签同步 token)。
+if (typeof window !== 'undefined') {
+  watch(
+    () => userAuth.value.access_token,
+    (t) => {
+      if (!t) {
+        stopNotificationStream()
+        return
+      }
+      if (es && activeToken === t) return
+      startNotificationStream()
+    },
+  )
 }
 
 export function stopNotificationStream(): void {

@@ -1,0 +1,33 @@
+# CI 环境用的最小配置。所有外部服务地址来自 .github/workflows/build.yml
+# 里定义的 services(postgres、redis)。MongoDB/FerretDB 在 CI 中暂未起,
+# 涉及 Mongo 的测试应用 @pytest.mark.ee 或 mock。
+admin:
+  user: 'ci@yinghuo.local'
+  password: 'ci'
+global:
+  mode: 'test'
+  log:
+    level: warning
+    root_dir: 'logs'
+  weights:
+    root_dir: 'weights'
+    http_server: 'http://localhost:8401/qm-weight/'
+  datas:
+    root_dir: '/tmp/funcs-tmp'
+    http_server: 'http://localhost:7020'
+    YH_USER_DATA_ROOT: '/tmp/yh_user_datas/'
+  redis:
+    host: '127.0.0.1'
+    port: 6379
+    uri: 'redis://127.0.0.1:6379'
+  mongodb:
+    uri: 'mongodb://127.0.0.1:27017/'
+    db: 'yinghuo-ci'
+  postgres:
+    host: '127.0.0.1'
+    port: 5432
+    username: 'yh'
+    password: 'yh'
+    database: 'yh'
+    uri: 'postgresql+asyncpg://yh:yh@127.0.0.1:5432/yh'
+    tortoise_uri: 'asyncpg://yh:yh@127.0.0.1:5432/yh'

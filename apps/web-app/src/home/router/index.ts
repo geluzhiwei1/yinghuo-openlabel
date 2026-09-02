@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import Home from '../views/home.vue';
 import { userAuth } from '@/states/UserState'
+import { usePermission } from '@/states/usePermission'
 
 const router = createRouter({
   history: createWebHashHistory(),
@@ -16,6 +17,12 @@ const router = createRouter({
       component: Home,
       redirect: "/dashboard-v2",
       children: [
+        {
+          path: '/about',
+          name: 'about',
+          meta: { title: '关于', requireAuth: false, closable: true },
+          component: () => import('../views/AboutView.vue')
+        },
         {
           path: '/annojob-v2',
           name: 'annojob-v2',
@@ -44,6 +51,7 @@ const router = createRouter({
           meta: {
             title: '部门管理',
             // role: 'system-dept',
+            permiss: 'business:team:write',
             requireAuth: true,
             closable: true,
           },
@@ -59,28 +67,6 @@ const router = createRouter({
             closable: true,
           },
           component: () => import(/* webpackChunkName: "system-role" */ '../views/system/role.vue'),
-        },
-        {
-          path: '/system-data',
-          name: 'system-data',
-          meta: {
-            title: '我的数据',
-            // role: 'system-data',
-            requireAuth: true,
-            closable: true,
-          },
-          component: () => import('../views/system/datas.vue'),
-        },
-        {
-          path: '/system-menu',
-          name: 'system-menu',
-          meta: {
-            title: '菜单管理',
-            // role: 'system-menu',
-            requireAuth: true,
-            closable: true,
-          },
-          component: () => import(/* webpackChunkName: "system-menu" */ '../views/system/menu.vue'),
         },
         {
           path: '/anno-specification',
@@ -119,7 +105,7 @@ const router = createRouter({
           path: '/my-job',
           name: 'my-job',
           meta: {
-            title: '我的任务',
+            title: '任务管理',
             requireAuth: true,
             // role: 'my-job',
             closable: true,
@@ -136,27 +122,6 @@ const router = createRouter({
             closable: true,
           },
           component: () => import(/* webpackChunkName: "user-info" */ '../views/system/user-info.vue'),
-        },
-        {
-          path: '/data-package-manager',
-          name: 'data-package-manager',
-          meta: {
-            title: '数据包管理',
-            requireAuth: true,
-            closable: true,
-          },
-          component: () => import(/* webpackChunkName: "data-package-manager" */ '../views/dataPackageManager/index.vue'),
-        },
-        {
-          path: '/label-batch',
-          name: 'label-batch',
-          meta: {
-            title: '标注批次',
-            // role: 'label-batch',
-            requireAuth: true,
-            closable: true,
-          },
-          component: () => import(/* webpackChunkName: "label-batch" */ '../views/labelBatch/index.vue'),
         },
         {
           // Stage 9.6: workflow 驱动的批次管理
@@ -202,11 +167,6 @@ const router = createRouter({
         },
       ],
     },
-    {
-      path: '/about',
-      name: 'about',
-      component: () => import('../views/AboutView.vue')
-    },
   ]
 })
 
@@ -215,6 +175,17 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   if (to.meta.requireAuth) {
     if (userAuth.value.isLogin) {
+      // 路由级 RBAC:meta.permiss 是权限 key 或 key 数组。
+      // 没有 key 直接放行;有则用 usePermission 校验,失败跳 403。
+      const required = to.meta.permiss
+      if (required) {
+        const { canAny } = usePermission()
+        const keys = Array.isArray(required) ? required : [required]
+        if (!canAny(keys.map(String))) {
+          next('/403')
+          return
+        }
+      }
       if (to.meta.role) {
         if (userAuth.value.roles.includes(to.meta.role)) {
           next()

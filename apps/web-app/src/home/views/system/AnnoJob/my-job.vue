@@ -106,11 +106,9 @@
             </el-tooltip>
             <el-popover :width="420" trigger="click" placement="left-end">
               <template #reference>
-                <el-tooltip effect="dark" content="任务状态" placement="top">
-                  <button class="icon-action">
-                    <Icon icon="lucide:refresh-cw" :width="15" />
-                  </button>
-                </el-tooltip>
+                <button class="icon-action" title="任务状态">
+                  <Icon icon="lucide:refresh-cw" :width="15" />
+                </button>
               </template>
               <div class="status-update">
                 <div class="status-update__title">更新任务状态</div>
@@ -301,8 +299,6 @@ type StatusKey = 'pending' | 'progress' | 'review' | 'fix' | 'done' | 'cancelled
 const VIEW_MODE_KEY = 'my-job:view-mode'
 
 const tableLoading = ref(false)
-const collaboratorsRef = ref()
-const dataExportRef = ref()
 const multipleSelection = ref<JobPerform[]>([])
 
 const viewMode = ref<ViewMode>((localStorage.getItem(VIEW_MODE_KEY) as ViewMode) || 'table')
@@ -351,8 +347,8 @@ const confirmStatusDialog = () => {
 const handleCardCommand = (cmd: string, row: JobPerform) => {
   if (cmd === 'view') handleView(row)
   else if (cmd === 'edit') handleEdit(row)
-  else if (cmd === 'collaborator') collaboratorsRef.value?.open(row)
-  else if (cmd === 'export') dataExportRef.value?.open(row)
+  else if (cmd === 'collaborator') collaboratorsRef.open(row)
+  else if (cmd === 'export') dataExportRef.open(row)
   else if (cmd === 'status') openStatusDialog(row)
   else if (cmd === 'delete') handleDelete(row)
 }
@@ -379,7 +375,7 @@ const searchOpt = ref<FormOptionList[]>([
     label: '状态：',
     prop: 'job_status',
     opts: [
-      { label: '所有', value: undefined },
+      { label: '所有', value: '' },
       { label: '待标注', value: '待标注' },
       { label: '标注中', value: '标注中' },
       { label: '待审核', value: '待审核' },
@@ -436,6 +432,9 @@ const loadData = () => {
 }
 
 const formRef = ref()
+const collaboratorsRef = ref()
+const dataExportRef = ref()
+
 const openFormCreate = () => {
   formRef.value.open('create', { id: 0 })
 }

@@ -1,29 +1,32 @@
 services:
   frontend:
     image_name: "yinghuo-frontend"
+    # 最终镜像名 = image_name + "-" + edition(脚本在 build_service 中追加)
+    # 即 CE → yinghuo-frontend-ce,EE → yinghuo-frontend-ee,SaaS → yinghuo-frontend-saas
     dockerfile: "apps/web-app/Dockerfile"
     context: "."
     build_args:
       NODE_VERSION: "22"
       PNPM_VERSION: "10.12.1"
     tags:
-      - "{version}"
-      - "{version}-{environment}"
-      - "latest-{environment}"
-      - "latest"
-    
+      - "{version}-{edition}"
+      - "{version}-{edition}-{environment}"
+      - "latest-{edition}-{environment}"
+      - "latest-{edition}"
+
   backend:
     image_name: "yinghuo-backend"
+    # 最终镜像名 = image_name + "-" + edition(脚本在 build_service 中追加)
     dockerfile: "services/web-api/Dockerfile"
     context: "."
     build_args:
       PYTHON_VERSION: "3.12"
       PDM_VERSION: "2.25"
     tags:
-      - "{version}"
-      - "{version}-{environment}"
-      - "latest-{environment}"
-      - "latest"
+      - "{version}-{edition}"
+      - "{version}-{edition}-{environment}"
+      - "latest-{edition}-{environment}"
+      - "latest-{edition}"
 
 environments:
   development:
@@ -31,24 +34,48 @@ environments:
       BUILD_ENVIRONMENT: "development"
       DEBUG: "true"
     tags:
-      - "{version}-dev"
-      - "latest-dev"
-      
+      - "{version}-{edition}-dev"
+      - "latest-{edition}-dev"
+
   staging:
     build_args:
       BUILD_ENVIRONMENT: "staging"
       DEBUG: "false"
     tags:
-      - "{version}-staging"
-      - "latest-staging"
-      
+      - "{version}-{edition}-staging"
+      - "latest-{edition}-staging"
+
   production:
     build_args:
       BUILD_ENVIRONMENT: "production"
       DEBUG: "false"
     tags:
-      - "{version}"
-      - "latest"
+      - "{version}-{edition}"
+      - "latest-{edition}"
+
+# edition 校验规则(脚本 validate_edition_mounts 引用)
+# CE:  ee 与 saas 都不挂;EE: ee 挂, saas 不挂;SaaS: ee 与 saas 都挂
+edition_mounts:
+  ce:
+    require: []
+    forbid:
+      - "services/web-api/src/yinghuo_app/ee"
+      - "services/web-api/src/yinghuo_app/saas"
+      - "apps/web-app/ee"
+      - "apps/web-app/src/ee"
+      - "apps/web-app/saas"
+      - "apps/web-app/src/saas"
+  ee:
+    require:
+      - "services/web-api/src/yinghuo_app/ee"
+    forbid:
+      - "services/web-api/src/yinghuo_app/saas"
+      - "apps/web-app/saas"
+      - "apps/web-app/src/saas"
+  saas:
+    require:
+      - "services/web-api/src/yinghuo_app/ee"
+      - "services/web-api/src/yinghuo_app/saas"
 
 registry:
   url: "ghcr.io"

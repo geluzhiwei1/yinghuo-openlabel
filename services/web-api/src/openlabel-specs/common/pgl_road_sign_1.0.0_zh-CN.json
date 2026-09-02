@@ -1,0 +1,183 @@
+{
+    "openlabel": {
+        "meta": {
+            "name": "道路标志分类",
+            "description": "日常驾驶中常见的道路标志分类，参考《道路交通标志和标线（GB-5768-2022）》",
+            "version": "1.0.0",
+            "license": "CCBY-SA 4.0",
+            "copyright": "Copyright © 2024 openlabel.gerwee.com",
+            "authors": [
+                {"name": "Zhang Lizhi", "email": "gerwee@qq.com"}
+            ],
+            "contributors": [
+            ]
+        },
+        "ontologies": {
+            "0": "http://openlabel.gerwee.com/taxonomy/road_sign_1.0.0_zh-CN"
+        },
+        "classes": [
+            {
+                "name": "道路标志",
+                "definition": {
+                    "description": ""
+                },
+                "properties": {
+                    "style": {
+                        "type": "string",
+                        "title": "形状",
+                        "description": "标志牌的形状",
+                        "enum": [
+                            "矩形",
+                            "圆形",
+                            "正等边三角形",
+                            "倒等边三角形",
+                            "正八边形"
+                        ],
+                        "minLength": 1,
+                        "default": "unlabeled",
+                        "ui:widget": "RadioWidget"
+                    },
+                    "text": {
+                        "type": "string",
+                        "title": "字符",
+                        "default": "",
+                        "maxLength": 1024
+                    },
+                    "visibility": {
+                        "type": "string",
+                        "title": "可见性",
+                        "description": "目标物体的可见程度",
+                        "enum": [
+                            "<40%",
+                            "<60%",
+                            "<80%",
+                            "<=100%"
+                        ],
+                        "default": "unlabeled",
+                        "ui:widget": "RadioWidget"
+                    },
+                    "tags": {
+                        "type": "string",
+                        "title": "标签",
+                        "default": "",
+                        "maxLength": 1024
+                    },
+                    "annotation": {
+                        "type": "string",
+                        "default": "",
+                        "title": "描述",
+                        "maxLength": 1024
+                    }
+                },
+                "children": [
+                    {
+                        "name": "禁令标志",
+                        "definition": {
+                            "description": "禁令标志表示禁止、限制及相应解除的含义，道路使用者应严格遵守"
+                        },
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "title": "分类",
+                                "description": "禁令标志细分",
+                                "enum": [
+                                    "纵向减速标线",
+                                    "横向减速标线",
+                                    "路面（车行道）宽度渐变标线",
+                                    "接近障碍物标线",
+                                    "铁路平交道口标线",
+                                    "立面标记"
+                                ],
+                                "enumNames": [
+                                    "停车让行标志",
+                                    "减速让行标志",
+                                    "会车让行标志",
+                                    "禁止通行标志",
+                                    "禁止驶入标志",
+                                    "禁止机动车驶入标志"
+                                ],
+                                "minLength": 1,
+                                "default": "unlabeled",
+                                "ui:widget": "RadioWidget"
+                            }
+                        }
+                    },
+                    {
+                        "name": "指示标志",
+                        "definition": {
+                            "description": ""
+                        },
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "title": "分类",
+                                "description": "指示标志细分",
+                                "enum": [
+                                    "直行标志",
+                                    "向左转弯标志",
+                                    "向右转弯标志"
+                                ],
+                                "minLength": 1,
+                                "default": "unlabeled",
+                                "ui:widget": "RadioWidget"
+                            }
+                        }
+                    },
+                    {
+                        "name": "警告标志",
+                        "definition": {
+                            "description": ""
+                        },
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "title": "分类",
+                                "description": "警告标志细分",
+                                "enum": [
+                                    "交叉路口标志",
+                                    "停止线",
+                                    "急弯路标志",
+                                    "反向弯路标志",
+                                    "连续弯路标志"
+                                ],
+                                "minLength": 1,
+                                "default": "unlabeled",
+                                "ui:widget": "RadioWidget"
+                            }
+                        }
+                    },
+                    {
+                        "name": "一般道路指路标志",
+                        "definition": {
+                            "description": "指路标志表示道路信息的指引，为驾驶人提供去往目的地所经过的道路、沿途相关城镇、重要公共设施、服务设施、地点、距离和行车方向等信息。包括路径、地点、道路沿线设施、里程碑、界碑等。如交叉路口预告标志、地名标志、观景台标志、绕行标志"
+                        }
+                    },
+                    {
+                        "name": "高速公路、城市快速路指路标志",
+                        "definition": {
+                            "description": "分为路径指引标志、沿线信息指引标志、沿线设施指引标志。如道路出入口、服务区预告、ETC指引"
+                        }
+                    },
+                    {
+                        "name": "旅游区标志",
+                        "definition": {
+                            "description": "用以指引人们前往邻近的旅游区，识别通往旅游区的方向和距离，了解旅游项目的类别，分为旅游指引标志和旅游符号标志两类"
+                        }
+                    },
+                    {
+                        "name": "告示标志",
+                        "definition": {
+                            "description": "用以解释道路设施、指引路外设施或告示有关道路交通安全法规及交通管理安全行车的提醒等内容。如区间测速提示、违法抓拍提示"
+                        }
+                    },
+                    {
+                        "name": "辅助标志",
+                        "definition": {
+                            "description": "辅助标志应安装在主标志下面，紧靠主标志下缘。如时间限制、距离提示等"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

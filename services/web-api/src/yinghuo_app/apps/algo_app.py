@@ -20,7 +20,7 @@ from ..algos import ALGOS
 from ..config import Conf
 from .dependency import permission_required
 
-app = APIRouter(dependencies=[permission_required("admin:flow:write")])
+app = APIRouter(dependencies=[permission_required("business:algo:write")])
 
 
 # class RoundingFloat(float):

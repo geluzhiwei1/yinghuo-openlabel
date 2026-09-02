@@ -1,0 +1,12 @@
+{
+    "funcs": [
+        {
+            "_id": "lane-det.mono.2d_LaneDet",
+            "name": "Don Quixote",
+            "description": "Miguel de Cervantes",
+            "app_service_name": "lane-det.mono.2d",
+            "app_module_name": "LaneDet",
+            "version": "2023.10.13.0"
+        }
+    ]
+}

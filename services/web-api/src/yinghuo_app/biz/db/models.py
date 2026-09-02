@@ -336,7 +336,11 @@ class Batch(BaseModel, TimestampMixin):
     """批次:Project 下的批量任务容器,绑定数据序列与标注员池,定义分派策略。
     status: pending / active / done / cancelled
     assignee_strategy: manual(认领)/ round_robin(轮转)/ load_aware(Redis ZSET 取最闲)
-    reviewers / qa_pool 暂存,Stage 5 工作流引擎尚未按 pool 自动分派 reviewer。
+    reviewers / qa_pool:角色级 claim/list 过滤已生效(claim_unit 校验 stage
+    assignee_source 与 actor 角色;list_units?eligible_only=true 按角色过滤);
+    engine._enter_stage 在 stage 切换时按 stage 角色 pool + 策略自动派单(load_aware
+    才真正自动派;round_robin 在 stage 切换场景缺轮转索引,降级 manual;manual 不派),
+    池空时也降级 manual claim。
     """
     tenant_id = fields.CharField(max_length=64, index=True)
     project_id = fields.BigIntField(index=True)

@@ -11,6 +11,7 @@
 import { defineStore } from 'pinia'
 import { ElNotification } from 'element-plus'
 import { notificationApi } from '@/api'
+import { startTokenAutoRefresh } from '@/api/req'
 import {
   startNotificationStream,
   stopNotificationStream,
@@ -51,6 +52,8 @@ export const useNotificationStore = defineStore('notifications', {
     async start() {
       if (started) return
       started = true
+      // 页面就绪:顺带启动 access_token 主动刷新(过期前 2 分钟换新,避免 401 报错/SSE 掉线)
+      startTokenAutoRefresh()
       // 拉历史(必须先 await,否则 SSE 连上时历史 flush 与 items 竞争,去重失效会狂弹 toast)
       await this.loadInitial()
       // 订阅 SSE

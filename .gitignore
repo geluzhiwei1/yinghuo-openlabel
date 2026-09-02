@@ -23,8 +23,30 @@ tmp.*
 *.un~
 *.so
 build
+# apps/web-app/build/ 是构建脚本目录(iconify-bundler.mjs 被 vite.config.ts import),不是产物
+!apps/web-app/build/
 dist
+# 各服务目录下的本地 .env(含真实密钥);模板用 .env.example 跟踪
 .env
+**/.env
+**/.env.local
+.venv/
+
+# 本地部署 env(含真实密钥;模板在 docker-production/env-templates/)
+docker-production/.env.*
+
+# 本地开发数据(容器卷),勿入库
+docker/postgres-data/
+docker/redis-data/
+
+# 本地便捷脚本
+push-to-pro.bash
+
+# EE/SaaS 本地开发文档与脚本(引用私有仓库,不进 CE 库)
+docs/dev/start-ee.md
+docs/dev/start-saas.md
+scripts/dev/start-ee.bash
+scripts/dev/start-saas.bash
 
 # EE/SaaS 私有仓库挂载点(scripts/setup-edition.sh 克隆进来)。
 # 这些目录由独立 git 仓库提供,主仓库不应跟踪。

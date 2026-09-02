@@ -8,7 +8,7 @@
 //   toast.success('保存成功')
 //   toast.error('上传失败')
 
-import { createApp, h, ref, onMounted, defineComponent } from 'vue'
+import { createApp, h, ref, defineComponent } from 'vue'
 import { Icon } from '@iconify/vue'
 
 type ToastKind = 'success' | 'error' | 'warning' | 'info'
@@ -114,7 +114,5 @@ if (typeof document !== 'undefined' && !document.getElementById(STYLE_ID)) {
 
 // Mount lazily on first call (browser only)
 if (typeof window !== 'undefined') {
-  onMounted(() => mountPaperToast())
-  // Also try immediately for non-component contexts
   mountPaperToast()
 }

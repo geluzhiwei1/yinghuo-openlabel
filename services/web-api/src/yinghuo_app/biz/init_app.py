@@ -22,12 +22,52 @@ async def init_user_admin():
     new_usser = await user_service.create_user(UserCreate(
         email=admin_user,
         password=admin_passwd,
-        # 不再是平台超级用户;只作为 default 租户的 tenant-admin。
-        # 实际的角色绑定与 superuser 降级由 platform.seed.seed_platform_data 负责。
+        # 普通用户,角色绑定由 dev_seed.seed_dev_data(CE)或
+        # saas.platform.seed.seed_platform_data(SAAS)负责。
         is_superuser=False,
     ))
     logger.info("create admin user")
     print(new_usser)
+
+async def init_mongo_collections():
+    """显式建集合。
+
+    FerretDB (postgres-documentdb) 对「不存在的集合」做 count_documents / find /
+    aggregate 时会报 `cache lookup failed for type 0`(documentdb_api 内部 tupdesc
+    没物化),而原版 MongoDB 是惰性建集合,这就导致冷启动后第一个访问
+    MG_ANNO_JOB_PERFORM / MG_COUNTER 等接口的请求全部 500。
+
+    启动期主动 create_collection,触发 documentdb_api 物化底表,
+    后续 read 走空集合路径也安全。
+    """
+    logger.info("init mongo collections")
+    db = Conf.MG_ANNO_JOB_PERFORM.database
+    existing = set(db.list_collection_names())
+
+    wanted = set()
+    for attr in dir(Conf):
+        if not attr.startswith("MG_"):
+            continue
+        coll = getattr(Conf, attr)
+        # MG_COLLECTION 是 dict[name, Collection];其他 MG_* 是单个 Collection
+        if hasattr(coll, "name"):
+            wanted.add(coll.name)
+        elif isinstance(coll, dict):
+            wanted.update(c.name for c in coll.values() if hasattr(c, "name"))
+
+    created = 0
+    for name in sorted(wanted):
+        if name in existing:
+            continue
+        try:
+            db.create_collection(name)
+            logger.info(f"  created mongo collection: {name}")
+            created += 1
+        except Exception as e:
+            # 兼容并发启动场景:可能另一进程已经建好
+            logger.warning(f"  create_collection({name}) failed: {e!r}")
+    logger.info(f"init mongo collections done ({created} new)")
+
 
 async def init_mongo_indexes():
     logger.info("init mongo indexes")

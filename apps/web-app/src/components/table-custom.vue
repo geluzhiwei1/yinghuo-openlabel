@@ -17,16 +17,18 @@
                 </el-tooltip>
                 <el-divider direction="vertical" />
                 <el-tooltip effect="dark" content="列设置" placement="top">
-                    <el-dropdown :hide-on-click="false" size="small" trigger="click">
-                        <Icon icon="lucide:settings" class="columns-setting-icon" />
-                        <template #dropdown>
-                            <el-dropdown-menu>
-                                <el-dropdown-item v-for="c in columns">
-                                    <el-checkbox v-model="c.visible" :label="c.label" />
-                                </el-dropdown-item>
-                            </el-dropdown-menu>
-                        </template>
-                    </el-dropdown>
+                    <span class="columns-setting-trigger">
+                        <el-dropdown :hide-on-click="false" size="small" trigger="click">
+                            <Icon icon="lucide:settings" class="columns-setting-icon" />
+                            <template #dropdown>
+                                <el-dropdown-menu>
+                                    <el-dropdown-item v-for="c in columns">
+                                        <el-checkbox v-model="c.visible" :label="c.label" />
+                                    </el-dropdown-item>
+                                </el-dropdown-menu>
+                            </template>
+                        </el-dropdown>
+                    </span>
                 </el-tooltip>
             </div>
         </div>

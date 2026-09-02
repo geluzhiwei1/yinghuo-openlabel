@@ -1,45 +1,21 @@
 # dev setup
 
-## 启动开发环境
+本地开发环境搭建见 [start-ce.md](./start-ce.md)。
 
-### 1. 启动数据库服务
-
-我们使用 Docker Compose 来管理后端服务，包括 PostgreSQL、FerretDB 和 Redis。
+## 一键启动
 
 ```bash
-docker compose -f docker/docker-compose-dev.yaml up -d
-# create database yinghuo-dev
-docker exec -it yh-dev-postgres psql -U dev -d postgres -c "CREATE DATABASE \"yinghuo-dev\";"
-# 列出表
-docker exec -it yh-dev-postgres psql -U dev -d yinghuo-dev -c "\dt"
-
+./scripts/dev/start-ce.bash     # 数据库 + 后端 + 前端 三窗口 tmux(session: yh-ce-dev)
 ```
 
-### 2. 启动 Web API 服务
+脚本支持 `-d`(后台)/ `stop` / `status` 子命令,Python 环境自动探测(优先 `.venv`,详见 start-ce.md §0)。
 
-后端服务是一个 Python 项目，位于 `services/web-api` 目录下。
+## 端口 / 账号 / 路由一览
 
-```bash
-conda create -n yinghuo-dev python=3.12
-conda activate yinghuo-dev
+启动前端后访问 [dev 信息面板](../../apps/web-app/dev.html)(或 `http://localhost:8400/guis/yinghuo/dev.html`),包含:
 
-cd services/web-api
-pip install -e .
-python -m uvicorn yinghuo_app.app:app --port 8423 --reload
-
-```
-
-### 3. 启动前端
-
-前端项目位于 `apps/web-app` 目录下。
-
-首先，安装依赖：
-
-```bash
-cd  apps/web-app
-pnpm install
-
-pnpm run dev
-```
-
-现在，你可以通过浏览器访问[app](http://localhost:8400/guis/v0.3.4/home.html)，使用账号prod@geluzhiwei.com密码yinghuo登录。
+- 后端 API 端口、路由前缀、`/docs` 鉴权状态
+- 前端面板入口与登录页
+- PostgreSQL / Mongo / Redis 连接串
+- 业务 `access` token 流程
+- 默认测试账号表

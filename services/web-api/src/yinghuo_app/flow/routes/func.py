@@ -1,0 +1,45 @@
+"""
+func rest api 
+"""
+__author__ = "Zhang Lizhi"
+__date__ = "2023-10-18"
+
+
+from fastapi import APIRouter, Body, Request, Response, HTTPException, status
+from fastapi.encoders import jsonable_encoder
+from typing import List
+
+from ..models.func import Func
+from yinghuo_conf.api_util.utils import wrap_json, mongo_json_encoder
+from ...config import Conf, gConf
+from ...apps.dependency import permission_required
+
+router = APIRouter(dependencies=[permission_required("admin:flow:read")])
+
+
+@router.get("/", response_description="List all")
+def list_all(request: Request):
+    objects = list(Conf.MG_COLLECTION["funcs"].find())
+    return wrap_json(mongo_json_encoder(objects))
+
+@router.get("/{id}", response_description="Get a single one by id")
+def find_by_id(id: str, request: Request):
+    if (obj := Conf.MG_COLLECTION["funcs"].find_one({"_id": id})) is not None:
+        return wrap_json(obj)
+
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                        detail=f"id {id} not found")
+    
+@router.get("/find", response_description="Find by fields")
+def find(id: str, app_service_name: str, app_module_name: str, version: str, request: Request):
+    condition = {}
+    if id is not None:
+        condition["_id"] = id
+    if app_service_name is not None:
+        condition["app_service_name"] = app_service_name
+    if app_module_name is not None:
+        condition["app_module_name"] = app_module_name
+    if version is not None:
+        condition["version"] = version
+    objects = list(Conf.MG_COLLECTION["funcs"].find(condition))
+    return wrap_json(objects)

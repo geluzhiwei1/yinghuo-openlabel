@@ -22,7 +22,7 @@ from ..log import logger
 from .dependency import permission_required
 
 # app = FastAPI()
-app = APIRouter(dependencies=[permission_required("admin:flow:write")])
+app = APIRouter(dependencies=[permission_required("business:dnn:write")])
 HTTP_Clients = {}
 
 def get_client(api_name: str):

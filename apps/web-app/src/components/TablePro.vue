@@ -28,11 +28,13 @@
         </el-tooltip>
         <el-popover v-if="showSettings" trigger="click" placement="bottom-end" :width="220">
           <template #reference>
-            <el-tooltip :content="t('table.columns')" placement="top">
-              <el-button circle size="default">
-                <Icon icon="lucide:settings" />
-              </el-button>
-            </el-tooltip>
+            <div class="y-table-pro__settings-trigger">
+              <el-tooltip :content="t('table.columns')" placement="top">
+                <el-button circle size="default">
+                  <Icon icon="lucide:settings" />
+                </el-button>
+              </el-tooltip>
+            </div>
           </template>
           <div class="y-table-pro__column-settings">
             <div class="y-table-pro__column-settings-title">
@@ -40,7 +42,11 @@
               <el-button link size="small" @click="resetColumns">{{ t('action.reset') }}</el-button>
             </div>
             <el-checkbox-group v-model="hiddenProps" class="y-table-pro__column-list">
-              <div v-for="col in allColumns" :key="col.prop" class="y-table-pro__column-item">
+              <div
+                v-for="col in allColumns.filter((c) => Boolean(c.prop))"
+                :key="col.prop"
+                class="y-table-pro__column-item"
+              >
                 <el-checkbox :value="col.prop" :disabled="col.required">
                   {{ col.label || col.prop }}
                 </el-checkbox>
@@ -272,6 +278,12 @@ const densityIcon = computed(() => {
   color: var(--lab-ink) !important;
   background: var(--lab-cream) !important;
   transform: translateY(-1px);
+}
+
+.y-table-pro__settings-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .y-table-pro__column-settings {

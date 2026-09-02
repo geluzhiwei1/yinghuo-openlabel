@@ -12,7 +12,10 @@ global:
   datas:
     root_dir: '/tmp/funcs-tmp'
     http_server: 'http://localhost:7020'
-    YH_USER_DATA_ROOT: '/home/work/yh_user_datas/'
+    YH_USER_DATA_ROOT: '/data1/prods/yh-users'
+  # 演示任务(migrations/data/1_20260825_seed_demo_jobs.py)引用的静态数据
+  # 前缀:apps/web-app/public/demo-data 经 vite/nginx 暴露的 HTTP 地址。
+  demo_data_base_url: 'http://localhost:8400/guis/yinghuo/demo-data'
   redis:
     host: '127.0.0.1'
     port: 6301

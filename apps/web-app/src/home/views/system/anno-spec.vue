@@ -40,7 +40,7 @@
             <h4>编辑标注规范</h4>
         </template>
         <template #default>
-            <AnnoSpecEditorPreview :rowData="rowData"></AnnoSpecEditorPreview>
+            <component :is="AnnoSpecEditorPreviewComp" :rowData="rowData"></component>
         </template>
     </el-drawer>
   </div>
@@ -48,15 +48,14 @@
 
 <script setup lang="ts" name="anno-specification">
 import { Icon } from "@iconify/vue"
-import { ref, reactive, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ref, reactive, onMounted, shallowRef, nextTick } from 'vue'
+import { ElMessage, ElLoading } from 'element-plus'
 import { type AnnoSpec } from '@/types/annoSpec'
 import { annoSpecApi } from '@/api'
 import TableCustom from '@/components/table-custom.vue'
 import TableDetail from '@/components/table-detail.vue'
 import TableSearch from '@/components/table-search.vue'
 import TableEdit from '@/components/table-edit.vue'
-import AnnoSpecEditorPreview from './anno-spec-editor-preview.vue'
 import { type FormOption, type FormOptionList } from '@/types/form-option'
 import { isEmpty } from 'radash'
 import { messages } from '@/states'
@@ -240,11 +239,26 @@ const handleDelete = (row: AnnoSpec) => {
 
 /**
  * 表单编辑
+ *
+ * anno-spec-editor-preview 内部 import 了 JsonEditor (~1MB) 与 vue3-form-element (~200KB),
+ * 同步挂载会让 /anno-specification 首次进入时浏览器要先下载这些 chunk,导致 tab 切换卡顿。
+ * 这里改成首次点"编辑规范"才动态 import,下载期间显示 loading。
  */
 const formEditVisible = ref(false)
-const handleSpecEdit = (row: AnnoSpec) => {
+const AnnoSpecEditorPreviewComp = shallowRef<any>(null)
+const handleSpecEdit = async (row: AnnoSpec) => {
   formEditVisible.value = false
   rowData.value = { _id: row._id }
+  if (!AnnoSpecEditorPreviewComp.value) {
+    const loading = ElLoading.service({ text: '加载编辑器…' })
+    try {
+      const mod = await import('./anno-spec-editor-preview.vue')
+      AnnoSpecEditorPreviewComp.value = mod.default
+      await nextTick()
+    } finally {
+      loading.close()
+    }
+  }
   formEditVisible.value = true
 }
 

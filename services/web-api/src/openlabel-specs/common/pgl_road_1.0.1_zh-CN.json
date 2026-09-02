@@ -1,0 +1,1278 @@
+{
+    "openlabel": {
+        "meta": {
+            "name": "Road Object Taxonomy",
+            "description": "",
+            "url": ""
+        },
+        "ontologies": {
+            "0": "http://ontology.asam.net/ontologies/Domain"
+        },
+        "classes": [
+            {
+                "name": "RoadTopologyAndTrafficInfrastructure",
+                "definition": {
+                    "ontology_uid": 0,
+                    "ontology_type": "#RoadTopologyAndTrafficInfrastructure",
+                    "color": "#000000"
+                },
+                "properties": {
+                    "visibility": {
+                        "type": "string",
+                        "title": "可见性",
+                        "description": "目标物体的可见程度",
+                        "enum": [
+                            "<40%",
+                            "<60%",
+                            "<80%",
+                            "<=100%"
+                        ],
+                        "default": "unlabeled",
+                        "ui:widget": "RadioWidget"
+                    },
+                    "tags": {
+                        "type": "string",
+                        "title": "标签",
+                        "default": "",
+                        "maxLength": 1024
+                    },
+                    "annotation": {
+                        "type": "string",
+                        "default": "",
+                        "title": "描述",
+                        "maxLength": 1024
+                    }
+                },
+                "children": [
+                    {
+                        "name": "DrivableAreaElement",
+                        "definition": {
+                            "ontology_uid": 0,
+                            "ontology_type": "#DrivableAreaElement",
+                            "color": "#000000"
+                        },
+                        "properties": {},
+                        "children": [
+                            {
+                                "name": "LaneElement",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#LaneElement",
+                                    "color": "#000000"
+                                },
+                                "properties": {},
+                                "children": [
+                                    {
+                                        "name": "Lane",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#Lane",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {},
+                                        "children": [
+                                            {
+                                                "name": "LaneForSpecificParticipants",
+                                                "definition": {
+                                                    "ontology_uid": 0,
+                                                    "ontology_type": "#LaneForSpecificParticipants",
+                                                    "color": "#000000"
+                                                },
+                                                "properties": {},
+                                                "children": [
+                                                    {
+                                                        "name": "BusLane",
+                                                        "definition": {
+                                                            "ontology_uid": 0,
+                                                            "ontology_type": "#BusLane",
+                                                            "color": "#000000"
+                                                        },
+                                                        "properties": {}
+                                                    },
+                                                    {
+                                                        "name": "CycleLane",
+                                                        "definition": {
+                                                            "ontology_uid": 0,
+                                                            "ontology_type": "#CycleLane",
+                                                            "color": "#000000"
+                                                        },
+                                                        "properties": {}
+                                                    },
+                                                    {
+                                                        "name": "Sidewalk",
+                                                        "definition": {
+                                                            "ontology_uid": 0,
+                                                            "ontology_type": "#Sidewalk",
+                                                            "color": "#000000"
+                                                        },
+                                                        "properties": {}
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "name": "LaneWithConstructionProperties",
+                                                "definition": {
+                                                    "ontology_uid": 0,
+                                                    "ontology_type": "#LaneWithConstructionProperties",
+                                                    "color": "#000000"
+                                                },
+                                                "properties": {},
+                                                "children": [
+                                                    {
+                                                        "name": "GrassShoulder",
+                                                        "definition": {
+                                                            "ontology_uid": 0,
+                                                            "ontology_type": "#GrassShoulder",
+                                                            "color": "#000000"
+                                                        },
+                                                        "properties": {}
+                                                    },
+                                                    {
+                                                        "name": "PavedShoulder",
+                                                        "definition": {
+                                                            "ontology_uid": 0,
+                                                            "ontology_type": "#PavedShoulder",
+                                                            "color": "#000000"
+                                                        },
+                                                        "properties": {}
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "name": "LaneWithSpecificRegulations",
+                                                "definition": {
+                                                    "ontology_uid": 0,
+                                                    "ontology_type": "#LaneWithSpecificRegulations",
+                                                    "color": "#000000"
+                                                },
+                                                "properties": {},
+                                                "children": [
+                                                    {
+                                                        "name": "RestrictedLane",
+                                                        "definition": {
+                                                            "ontology_uid": 0,
+                                                            "ontology_type": "#RestrictedLane",
+                                                            "color": "#000000"
+                                                        },
+                                                        "properties": {}
+                                                    },
+                                                    {
+                                                        "name": "ServiceLane",
+                                                        "definition": {
+                                                            "ontology_uid": 0,
+                                                            "ontology_type": "#ServiceLane",
+                                                            "color": "#000000"
+                                                        },
+                                                        "properties": {}
+                                                    },
+                                                    {
+                                                        "name": "StopLane",
+                                                        "definition": {
+                                                            "ontology_uid": 0,
+                                                            "ontology_type": "#StopLane",
+                                                            "color": "#000000"
+                                                        },
+                                                        "properties": {}
+                                                    },
+                                                    {
+                                                        "name": "TrafficLane",
+                                                        "definition": {
+                                                            "ontology_uid": 0,
+                                                            "ontology_type": "#TrafficLane",
+                                                            "color": "#000000"
+                                                        },
+                                                        "properties": {}
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "name": "LaneDivider",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#LaneDivider",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {},
+                                        "children": [
+                                            {
+                                                "name": "LaneMarking",
+                                                "definition": {
+                                                    "ontology_uid": 0,
+                                                    "ontology_type": "#LaneMarking",
+                                                    "color": "#000000"
+                                                },
+                                                "properties": {},
+                                                "children": [
+                                                    {
+                                                        "name": "BrokenLine",
+                                                        "definition": {
+                                                            "ontology_uid": 0,
+                                                            "ontology_type": "#BrokenLine",
+                                                            "color": "#000000"
+                                                        },
+                                                        "properties": {}
+                                                    },
+                                                    {
+                                                        "name": "DoubleSolidLine",
+                                                        "definition": {
+                                                            "ontology_uid": 0,
+                                                            "ontology_type": "#DoubleSolidLine",
+                                                            "color": "#000000"
+                                                        },
+                                                        "properties": {}
+                                                    },
+                                                    {
+                                                        "name": "SolidLine",
+                                                        "definition": {
+                                                            "ontology_uid": 0,
+                                                            "ontology_type": "#SolidLine",
+                                                            "color": "#000000"
+                                                        },
+                                                        "properties": {}
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "name": "LaneSection",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#LaneSection",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "PhysicalDivider",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#PhysicalDivider",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {},
+                                        "children": [
+                                            {
+                                                "name": "Curb",
+                                                "definition": {
+                                                    "ontology_uid": 0,
+                                                    "ontology_type": "#Curb",
+                                                    "color": "#000000"
+                                                },
+                                                "properties": {}
+                                            },
+                                            {
+                                                "name": "GuardRail",
+                                                "definition": {
+                                                    "ontology_uid": 0,
+                                                    "ontology_type": "#GuardRail",
+                                                    "color": "#000000"
+                                                },
+                                                "properties": {}
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "Road",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#Road",
+                                    "color": "#000000"
+                                },
+                                "properties": {},
+                                "children": [
+                                    {
+                                        "name": "DistributorRoad",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#DistributorRoad",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "DividedRoad",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#DividedRoad",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "MinorRoad",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#MinorRoad",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "Motorway",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#Motorway",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "Parking",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#Parking",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "RadialRoad",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#RadialRoad",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "SharedSpace",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#SharedSpace",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "UndividedRoad",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#UndividedRoad",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "RoadMarking",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#RoadMarking",
+                                    "color": "#000000"
+                                },
+                                "properties": {},
+                                "children": [
+                                    {
+                                        "name": "LaneMarking",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#LaneMarking",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {},
+                                        "children": [
+                                            {
+                                                "name": "BrokenLine",
+                                                "definition": {
+                                                    "ontology_uid": 0,
+                                                    "ontology_type": "#BrokenLine",
+                                                    "color": "#000000"
+                                                },
+                                                "properties": {}
+                                            },
+                                            {
+                                                "name": "DoubleSolidLine",
+                                                "definition": {
+                                                    "ontology_uid": 0,
+                                                    "ontology_type": "#DoubleSolidLine",
+                                                    "color": "#000000"
+                                                },
+                                                "properties": {}
+                                            },
+                                            {
+                                                "name": "SolidLine",
+                                                "definition": {
+                                                    "ontology_uid": 0,
+                                                    "ontology_type": "#SolidLine",
+                                                    "color": "#000000"
+                                                },
+                                                "properties": {}
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "RoadSurfaceElement",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#RoadSurfaceElement",
+                                    "color": "#000000"
+                                },
+                                "properties": {},
+                                "children": [
+                                    {
+                                        "name": "RoadSurface",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#RoadSurface",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {},
+                                        "children": [
+                                            {
+                                                "name": "LooseSurface",
+                                                "definition": {
+                                                    "ontology_uid": 0,
+                                                    "ontology_type": "#LooseSurface",
+                                                    "color": "#000000"
+                                                },
+                                                "properties": {}
+                                            },
+                                            {
+                                                "name": "SegmentedSurface",
+                                                "definition": {
+                                                    "ontology_uid": 0,
+                                                    "ontology_type": "#SegmentedSurface",
+                                                    "color": "#000000"
+                                                },
+                                                "properties": {}
+                                            },
+                                            {
+                                                "name": "UniformSurface",
+                                                "definition": {
+                                                    "ontology_uid": 0,
+                                                    "ontology_type": "#UniformSurface",
+                                                    "color": "#000000"
+                                                },
+                                                "properties": {}
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "name": "RoadSurfaceFeature",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#RoadSurfaceFeature",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {},
+                                        "children": [
+                                            {
+                                                "name": "Cracks",
+                                                "definition": {
+                                                    "ontology_uid": 0,
+                                                    "ontology_type": "#Cracks",
+                                                    "color": "#000000"
+                                                },
+                                                "properties": {}
+                                            },
+                                            {
+                                                "name": "Manhole",
+                                                "definition": {
+                                                    "ontology_uid": 0,
+                                                    "ontology_type": "#Manhole",
+                                                    "color": "#000000"
+                                                },
+                                                "properties": {}
+                                            },
+                                            {
+                                                "name": "Potholes",
+                                                "definition": {
+                                                    "ontology_uid": 0,
+                                                    "ontology_type": "#Potholes",
+                                                    "color": "#000000"
+                                                },
+                                                "properties": {}
+                                            },
+                                            {
+                                                "name": "Ruts",
+                                                "definition": {
+                                                    "ontology_uid": 0,
+                                                    "ontology_type": "#Ruts",
+                                                    "color": "#000000"
+                                                },
+                                                "properties": {}
+                                            },
+                                            {
+                                                "name": "Swells",
+                                                "definition": {
+                                                    "ontology_uid": 0,
+                                                    "ontology_type": "#Swells",
+                                                    "color": "#000000"
+                                                },
+                                                "properties": {}
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "FixedRoadStructure",
+                        "definition": {
+                            "ontology_uid": 0,
+                            "ontology_type": "#FixedRoadStructure",
+                            "color": "#000000"
+                        },
+                        "properties": {},
+                        "children": [
+                            {
+                                "name": "Building",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#Building",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "RoadStructureWithVegetation",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#RoadStructureWithVegetation",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "RoadwayEdgeElement",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#RoadwayEdgeElement",
+                                    "color": "#000000"
+                                },
+                                "properties": {},
+                                "children": [
+                                    {
+                                        "name": "BarriersOnRoadEdge",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#BarriersOnRoadEdge",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "SoundBarrier",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#SoundBarrier",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "WallOnRoadEdge",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#WallOnRoadEdge",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "StreetFurniture",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#StreetFurniture",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "StreetLight",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#StreetLight",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "TrafficIsland",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#TrafficIsland",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Junction",
+                        "definition": {
+                            "ontology_uid": 0,
+                            "ontology_type": "#Junction",
+                            "color": "#000000"
+                        },
+                        "properties": {},
+                        "children": [
+                            {
+                                "name": "GradeSeparatedIntersection",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#GradeSeparatedIntersection",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "IntersectionAtGrade",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#IntersectionAtGrade",
+                                    "color": "#000000"
+                                },
+                                "properties": {},
+                                "children": [
+                                    {
+                                        "name": "CrossRoad",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#CrossRoad",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "StaggeredIntersection",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#StaggeredIntersection",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "TIntersection",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#TIntersection",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "YIntersection",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#YIntersection",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "Roundabout",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#Roundabout",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "SpecialStructure",
+                        "definition": {
+                            "ontology_uid": 0,
+                            "ontology_type": "#SpecialStructure",
+                            "color": "#000000"
+                        },
+                        "properties": {},
+                        "children": [
+                            {
+                                "name": "AutomaticAccessControlSystem",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#AutomaticAccessControlSystem",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "BorderCrossing",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#BorderCrossing",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "Bridge",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#Bridge",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "PedestrianCrossing",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#PedestrianCrossing",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "RailCrossing",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#RailCrossing",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "TollPlaza",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#TollPlaza",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "Tunnel",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#Tunnel",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "TemporaryRoadStructure",
+                        "definition": {
+                            "ontology_uid": 0,
+                            "ontology_type": "#TemporaryRoadStructure",
+                            "color": "#000000"
+                        },
+                        "properties": {},
+                        "children": [
+                            {
+                                "name": "ConstructionSign",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#ConstructionSign",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "ConstructionSiteDetour",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#ConstructionSiteDetour",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "Debris",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#Debris",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "RefuseCollection",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#RefuseCollection",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "RoadSignage",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#RoadSignage",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "RoadWork",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#RoadWork",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "Roadblocks",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#Roadblocks",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "TrafficCone",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#TrafficCone",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "TrafficSign",
+                        "definition": {
+                            "ontology_uid": 0,
+                            "ontology_type": "#TrafficSign",
+                            "color": "#000000"
+                        },
+                        "properties": {},
+                        "children": [
+                            {
+                                "name": "TrafficSignByFunction",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#TrafficSignByFunction",
+                                    "color": "#000000"
+                                },
+                                "properties": {},
+                                "children": [
+                                    {
+                                        "name": "InformationSign",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#InformationSign",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "RegulatorySign",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#RegulatorySign",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "WarningSign",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#WarningSign",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "TrafficSignByState",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#TrafficSignByState",
+                                    "color": "#000000"
+                                },
+                                "properties": {},
+                                "children": [
+                                    {
+                                        "name": "DynamicTrafficSign",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#DynamicTrafficSign",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "StaticTrafficSign",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#StaticTrafficSign",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "TrafficZone",
+                        "definition": {
+                            "ontology_uid": 0,
+                            "ontology_type": "#TrafficZone",
+                            "color": "#000000"
+                        },
+                        "properties": {},
+                        "children": [
+                            {
+                                "name": "GeofencedZone",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#GeofencedZone",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "InterferenceZone",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#InterferenceZone",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "PedestrianZone",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#PedestrianZone",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "SchoolZone",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#SchoolZone",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "TrafficManagementZone",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#TrafficManagementZone",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "VehicleRestrictionArea",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#VehicleRestrictionArea",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "roadTopologyAndTrafficInfrastructureProperty",
+                        "definition": {
+                            "ontology_uid": 0,
+                            "ontology_type": "#roadTopologyAndTrafficInfrastructureProperty",
+                            "color": "#000000"
+                        },
+                        "properties": {},
+                        "children": [
+                            {
+                                "name": "drivableAreaGeometry",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#drivableAreaGeometry",
+                                    "color": "#000000"
+                                },
+                                "properties": {},
+                                "children": [
+                                    {
+                                        "name": "horizontalGeometry",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#horizontalGeometry",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {},
+                                        "children": [
+                                            {
+                                                "name": "curve",
+                                                "definition": {
+                                                    "ontology_uid": 0,
+                                                    "ontology_type": "#curve",
+                                                    "color": "#000000"
+                                                },
+                                                "properties": {},
+                                                "children": [
+                                                    {
+                                                        "name": "arc",
+                                                        "definition": {
+                                                            "ontology_uid": 0,
+                                                            "ontology_type": "#arc",
+                                                            "color": "#000000"
+                                                        },
+                                                        "properties": {}
+                                                    },
+                                                    {
+                                                        "name": "spiral",
+                                                        "definition": {
+                                                            "ontology_uid": 0,
+                                                            "ontology_type": "#spiral",
+                                                            "color": "#000000"
+                                                        },
+                                                        "properties": {}
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "name": "straightLine",
+                                                "definition": {
+                                                    "ontology_uid": 0,
+                                                    "ontology_type": "#straightLine",
+                                                    "color": "#000000"
+                                                },
+                                                "properties": {}
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "name": "transverseGeometry",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#transverseGeometry",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {},
+                                        "children": [
+                                            {
+                                                "name": "lateralProfile",
+                                                "definition": {
+                                                    "ontology_uid": 0,
+                                                    "ontology_type": "#lateralProfile",
+                                                    "color": "#000000"
+                                                },
+                                                "properties": {}
+                                            },
+                                            {
+                                                "name": "superElevation",
+                                                "definition": {
+                                                    "ontology_uid": 0,
+                                                    "ontology_type": "#superElevation",
+                                                    "color": "#000000"
+                                                },
+                                                "properties": {}
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "name": "verticalGeometry",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#verticalGeometry",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {},
+                                        "children": [
+                                            {
+                                                "name": "downSlope",
+                                                "definition": {
+                                                    "ontology_uid": 0,
+                                                    "ontology_type": "#downSlope",
+                                                    "color": "#000000"
+                                                },
+                                                "properties": {}
+                                            },
+                                            {
+                                                "name": "levelPlane",
+                                                "definition": {
+                                                    "ontology_uid": 0,
+                                                    "ontology_type": "#levelPlane",
+                                                    "color": "#000000"
+                                                },
+                                                "properties": {}
+                                            },
+                                            {
+                                                "name": "upSlope",
+                                                "definition": {
+                                                    "ontology_uid": 0,
+                                                    "ontology_type": "#upSlope",
+                                                    "color": "#000000"
+                                                },
+                                                "properties": {}
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "drivingDirection",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#drivingDirection",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "inducedRoadSurfaceCondition",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#inducedRoadSurfaceCondition",
+                                    "color": "#000000"
+                                },
+                                "properties": {},
+                                "children": [
+                                    {
+                                        "name": "contaminatingRoadCondition",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#contaminatingRoadCondition",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "floodedRoadCondition",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#floodedRoadCondition",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "icyRoadCondition",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#icyRoadCondition",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "mirageRoadCondition",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#mirageRoadCondition",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "snowyRoadCondition",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#snowyRoadCondition",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "standingWaterCondition",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#standingWaterCondition",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "wetRoadCondition",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#wetRoadCondition",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "laneProperty",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#laneProperty",
+                                    "color": "#000000"
+                                },
+                                "properties": {},
+                                "children": [
+                                    {
+                                        "name": "laneDimension",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#laneDimension",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "laneMarkingColor",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#laneMarkingColor",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    },
+                                    {
+                                        "name": "laneMarkingWidth",
+                                        "definition": {
+                                            "ontology_uid": 0,
+                                            "ontology_type": "#laneMarkingWidth",
+                                            "color": "#000000"
+                                        },
+                                        "properties": {}
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "numberOfLanes",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#numberOfLanes",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "roadFrictionScaleFactor",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#roadFrictionScaleFactor",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "speedLimitForLane",
+                                "definition": {
+                                    "ontology_uid": 0,
+                                    "ontology_type": "#speedLimitForLane",
+                                    "color": "#000000"
+                                },
+                                "properties": {}
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

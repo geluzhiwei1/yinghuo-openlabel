@@ -20,6 +20,7 @@ import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import UnoCSS from 'unocss/vite'
 import { resolve } from 'path'
+import http from 'node:http'
 import { viteCommonjs } from '@originjs/vite-plugin-commonjs'
 import { yinghuoIconifyBundler } from './build/iconify-bundler.mjs'
 import { version as pkgVersion } from './package.json'
@@ -31,6 +32,12 @@ process.env.VITE_APP_VERSION = pkgVersion
 // saas 用 ee/tenant_admin.html + saas/platform.html(SaaS 专属 platform 视图)。
 const EDITION = process.env.YH_EDITION ?? 'ce'
 
+// base 必须与 Dockerfile 的 VITE_APP_BASE_URI / nginx alias 对齐,
+// 否则 dist 里的 <script src> 会落到不存在的路径上,生产构建全 404。
+// 历史上有 /guis/v0.3.4 这种带版本号的写法,每次升版本都得改 3 处 + 重打镜像,
+// 故改为稳定路径,版本号仅用于运行时 metadata(VITE_APP_VERSION)。
+const BASE = '/guis/yinghuo'
+
 export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const extraInputs = EDITION === 'ce' ? {} : {
@@ -39,9 +46,7 @@ export default defineConfig(({ command, mode }) => {
       EDITION === 'saas' ? 'saas/platform.html' : 'ee/platform.html'),
   }
   return {
-    // base 硬编码,%VITE_APP_BASE_URI% 仅用于 HTML 模板内联资源引用,
-    // 设为空避免 vite 再叠一层前缀(/guis/v0.3.4/guis/v0.3.4/...)
-    base: '/guis/v0.3.4',
+    base: BASE,
     plugins: [
       vue(),
       viteCommonjs(),
@@ -54,7 +59,7 @@ export default defineConfig(({ command, mode }) => {
         name: 'yinghuo-dev-index-redirect',
         apply: 'serve',
         configureServer(server) {
-          const base = '/guis/v0.3.4'
+          const base = BASE
           server.middlewares.use((req, res, next) => {
             const url = req.url ?? ''
             const path = url.split('?')[0]
@@ -65,6 +70,50 @@ export default defineConfig(({ command, mode }) => {
               return
             }
             next()
+          })
+
+          // SSE 旁路转发:vite 自带的 http-proxy 在 /notifications/stream 这种长连接
+          // 上会把响应头缓存/等 Content-Length,导致浏览器 EventSource 一直收不到
+          // 任何字节。直接用 node:http.request 转发并立即 flush,绕过 vite proxy。
+          // 只匹配 SSE 端点;其他 /api/v1/b/* 仍走原 proxy。
+          const ssePath = '/api/v1/b/notifications/stream'
+          const upstream = (env.API_URL_APP || 'http://127.0.0.1:8423').replace(/\/$/, '')
+          server.middlewares.use((req, res, next) => {
+            if ((req.url ?? '').split('?')[0] !== ssePath) return next()
+            const url = upstream + '/notifications/stream' + (req.url?.includes('?') ? req.url.substring(req.url.indexOf('?')) : '')
+            const proxyReq = http.request(url, {
+              method: req.method,
+              headers: { ...req.headers, host: new URL(upstream).host },
+            }, (proxyRes) => {
+              res.statusCode = proxyRes.statusCode || 502
+              for (const [k, v] of Object.entries(proxyRes.headers)) {
+                if (v !== undefined) res.setHeader(k, v as string | string[])
+              }
+              res.flushHeaders?.()
+              proxyRes.on('data', (chunk) => {
+                if (!res.write(chunk)) {
+                  proxyRes.pause()
+                  res.once('drain', () => proxyRes.resume())
+                }
+              })
+              proxyRes.on('end', () => res.end())
+              proxyRes.on('error', () => res.end())
+            })
+            // GET 没有 body,直接 end 上行;POST/PUT 等先转发 body 再 end。
+            // 上行 socket 关闭(浏览器断网 / 切页)时,主动 destroy 上行避免泄漏。
+            if (req.method === 'GET' || req.method === 'HEAD') {
+              proxyReq.end()
+            } else {
+              req.on('data', (chunk) => proxyReq.write(chunk))
+              req.on('end', () => proxyReq.end())
+            }
+            req.on('close', () => proxyReq.destroy())
+            proxyReq.on('error', () => {
+              if (!res.headersSent) {
+                res.statusCode = 502
+                res.end('upstream error')
+              }
+            })
           })
         },
       },
@@ -114,7 +163,7 @@ export default defineConfig(({ command, mode }) => {
       port: Number(env.SERVER_PORT),
       // pnpm dev 启动时打开 dev 信息面板(端口、连接串、API 入口、默认账号)。
       // 不是真正的应用入口,只是开发参考;真正的业务入口在面板里点。
-      open: '/guis/v0.3.4/dev.html',
+      open: `${BASE}/dev.html`,
       proxy: {
         '/webapps/': {
           target: env.VITE_APP_PLUGIN_BASE_URI,

@@ -1,6 +1,6 @@
 <template>
     <div>
-        <el-button type="primary" icon="circle-plus-filled" @click="showEditor('addTop', {})"> 添加一级部门 </el-button>
+        <el-button v-permiss="'business:team:write'" type="primary" icon="circle-plus-filled" @click="showEditor('addTop', {})"> 添加一级部门 </el-button>
     </div>
     <div>
         <el-tree v-loading="loading" style="max-width: 600px" :data="dataSource" :show-checkbox="false" node-key="id" default-expand-all
@@ -9,12 +9,9 @@
                 <span class="custom-tree-node">
                     <span>{{ node.label }}</span>
                     <span>
-                        <!-- <a @click="showEditor('addSub', data)"> 添加 </a> -->
-                        <el-button size="small"  @click="showEditor('addSub', data)">添加子部门</el-button>
-                        <!-- <a style="margin-left: 8px" @click="showEditor('edit', data)"> 编辑 </a> -->
-                        <el-button size="small" style="margin-left: 8px" @click="showEditor('edit', data)">编辑</el-button>
-                        <!-- <a v-if="data.children.length === 0" style="margin-left: 8px" @click="remove(node, data)"> 删除 </a> -->
-                        <el-button type="danger" size="small" :disabled="data.children && data.children.length > 0" style="margin-left: 8px" @click="remove(node, data)">删除</el-button>
+                        <el-button v-permiss="'business:team:write'" size="small"  @click="showEditor('addSub', data)">添加子部门</el-button>
+                        <el-button v-permiss="'business:team:write'" size="small" style="margin-left: 8px" @click="showEditor('edit', data)">编辑</el-button>
+                        <el-button v-permiss="'business:team:write'" type="danger" size="small" :disabled="data.children && data.children.length > 0" style="margin-left: 8px" @click="remove(node, data)">删除</el-button>
                     </span>
                 </span>
             </template>

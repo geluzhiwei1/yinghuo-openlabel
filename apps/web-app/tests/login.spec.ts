@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 
-const basePath = '/guis/v0.3.4';
+const basePath = '/guis/yinghuo';
 
 test.describe('Login Page', () => {
   test('should allow a user to log in successfully', async ({ page }) => {

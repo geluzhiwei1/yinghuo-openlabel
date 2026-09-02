@@ -92,7 +92,7 @@ const tableData = ref<Role[]>([]);
 const getData = async () => {
     tableLoading.value = true
     roleApi
-        .search(buildQuery())
+        .query_list()
         .then((res) => {
             tableData.value = res.data.map((item) => {
                 return {

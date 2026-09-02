@@ -1,0 +1,37 @@
+admin:
+  user: prod@geluzhiwei.com
+  password: yinghuo
+global:
+  mode: prod
+  # 演示任务 seed 的数据 URL 前缀(migrations/data 的 demo job 用)
+  demo_data_base_url: 'http://localhost:6600/guis/yinghuo/demo-data'
+  log:
+    level: info
+    root_dir: /app/logs
+  weights:
+    root_dir: /app/weights
+  datas:
+    YH_USER_DATA_ROOT: /app/yh_user_data
+  redis:
+    host: redis
+    port: 6379
+    uri: redis://redis:6379
+  mongodb:
+    uri: mongodb://produser:prodpass@ferretdb:27017/
+    db: yinghuo-ce
+  postgres:
+    host: postgres
+    port: 5432
+    username: produser
+    password: prodpass
+    database: yinghuo-ce
+    uri: ''
+    tortoise_uri: asyncpg://produser:prodpass@postgres:5432/yinghuo-ce
+  smtp:
+    host: smtp.x.com
+    port: 465
+    user: xx
+    password: xx
+    from_email: xx
+  jwt:
+    JWT_SECRET: 01bd162ded133d313836a2c637b7c23ead9e32f2b33f8d69f873692fc67431ec

@@ -12,8 +12,6 @@ from ..db.collection import UserProfile
 
 class UserProfileService(object):
     def __init__(self):
-        self._sys_resource_cache = None
-        
         self._cache = {
             7: UserProfile(max_job_count=50),
         }

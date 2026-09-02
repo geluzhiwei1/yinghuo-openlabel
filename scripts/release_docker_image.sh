@@ -18,6 +18,7 @@ COMMAND=""
 SERVICE=""
 VERSION=""
 ENVIRONMENT="production"
+EDITION="ce"
 REGISTRY_URL=""
 REGISTRY_NAMESPACE=""
 BUILD_PLATFORM=""
@@ -214,17 +215,27 @@ Docker 镜像发布脚本
 参数:
     --version <version>          镜像版本标签（必需）
     --environment <env>          构建环境（可选，默认为 production）
+    --edition <ed>               三版分发:ce(默认) / ee / saas
+                                 镜像名追加 -<edition> 后缀,tag 模板 {edition} 占位
     --help                       显示此帮助信息
 
 示例:
-    $0 build frontend --version 0.3.5
-    $0 build backend --version 0.1.1 --environment staging
-    $0 build_and_push frontend --version 0.3.5
-    $0 build_all --version 1.0.0
-    $0 push_all --version 1.0.0 --environment staging
-    $0 release --version 1.0.0 --environment production
+    $0 build frontend --version 0.3.5 --edition ce
+    $0 build backend --version 0.1.1 --environment staging --edition ee
+    $0 build_and_push frontend --version 0.3.5 --edition saas
+    $0 build_all --version 1.0.0 --edition ce
+    $0 push_all --version 1.0.0 --environment staging --edition ee
+    $0 release --version 1.0.0 --environment production --edition saas
     $0 list_services
     $0 show_config
+
+注:
+    CE 不需要任何私有仓库挂载;
+    EE 需先在 yinghuo-openlabel-ee 私有仓运行 CE_ROOT=<本仓路径> scripts/setup-edition.sh ee;
+    SaaS 需先在 yinghuo-openlabel-saas 私有仓运行
+        CE_ROOT=<本仓路径> YH_EDITION_EE_REPO=<ee 仓> scripts/setup-edition.sh saas
+      (自动挂 EE + SaaS)。
+    脚本会在构建前校验挂载点,声明了 ee/saas 但目录缺失会 fail-fast。
 
 EOF
 }
@@ -261,6 +272,10 @@ parse_arguments() {
                 ENVIRONMENT="$2"
                 shift 2
                 ;;
+            --edition)
+                EDITION="$2"
+                shift 2
+                ;;
             --help|-h)
                 show_help
                 exit 0
@@ -277,6 +292,15 @@ parse_arguments() {
                 ;;
         esac
     done
+
+    # 校验 edition 取值
+    case "$EDITION" in
+        ce|ee|saas) ;;
+        *)
+            log_error "Invalid --edition '$EDITION' (must be ce|ee|saas)"
+            exit 2
+            ;;
+    esac
     
     # 验证必需的参数
     case "$COMMAND" in
@@ -299,49 +323,98 @@ parse_arguments() {
     esac
 }
 
+# 校验 edition 挂载点与声明一致
+# CE:  ee/saas 都不挂
+# EE:  ee 挂、saas 不挂
+# SaaS: ee + saas 都挂
+validate_edition_mounts() {
+    local edition=$1
+    local require_list=$(yq eval ".edition_mounts.$edition.require[]" "$CONFIG_FILE" 2>/dev/null || true)
+    local forbid_list=$(yq eval ".edition_mounts.$edition.forbid[]" "$CONFIG_FILE" 2>/dev/null || true)
+    local failed=0
+
+    log_info "Validating mount points for edition '$edition'..."
+
+    if [ -n "$require_list" ]; then
+        while IFS= read -r p; do
+            [[ -z "$p" || "$p" = "null" ]] && continue
+            if [[ ! -e "$PROJECT_ROOT/$p" ]]; then
+                log_error "Required mount missing for edition '$edition': $p"
+                log_error "  Run from yinghuo-openlabel-$edition private repo:"
+                log_error "    CE_ROOT=$PROJECT_ROOT scripts/setup-edition.sh $edition"
+                failed=1
+            fi
+        done <<< "$require_list"
+    fi
+
+    if [ -n "$forbid_list" ]; then
+        while IFS= read -r p; do
+            [[ -z "$p" || "$p" = "null" ]] && continue
+            if [[ -e "$PROJECT_ROOT/$p" || -L "$PROJECT_ROOT/$p" ]]; then
+                log_error "Forbidden mount present for edition '$edition': $p"
+                log_error "  Run from yinghuo-openlabel-$edition private repo:"
+                log_error "    CE_ROOT=$PROJECT_ROOT scripts/setup-edition.sh $edition  # 会 teardown"
+                failed=1
+            fi
+        done <<< "$forbid_list"
+    fi
+
+    if [ "$failed" -ne 0 ]; then
+        exit 2
+    fi
+    log_info "Edition mount validation passed for '$edition'"
+}
+
 # 生成镜像标签
 generate_tags() {
     local service=$1
     local version=$2
     local environment=$3
+    local edition=$4
     local tags=()
-    
+
     # 获取服务配置
     local service_config=$(get_yaml_value ".services.$service")
-    
+
     if [ "$service_config" = "null" ]; then
         log_error "Service '$service' not found in configuration"
         exit 2
     fi
-    
+
     # 获取基础标签模板
     local base_tags=$(yq eval ".services.$service.tags[]" "$CONFIG_FILE" 2>/dev/null || true)
-    
+
     # 获取环境特定标签
     local env_tags=$(yq eval ".environments.$environment.tags[]" "$CONFIG_FILE" 2>/dev/null || true)
-    
+
     # 处理基础标签
     if [ -n "$base_tags" ]; then
         while IFS= read -r tag_template; do
             if [ -n "$tag_template" ] && [ "$tag_template" != "null" ]; then
                 # 替换模板变量
-                local tag=$(echo "$tag_template" | sed "s/{version}/$version/g" | sed "s/{environment}/$environment/g")
+                local tag=$(echo "$tag_template" | sed \
+                    -e "s/{version}/$version/g" \
+                    -e "s/{environment}/$environment/g" \
+                    -e "s/{edition}/$edition/g")
                 tags+=("$tag")
             fi
         done <<< "$base_tags"
     fi
-    
+
     # 处理环境特定标签
     if [ -n "$env_tags" ]; then
         while IFS= read -r tag_template; do
             if [ -n "$tag_template" ] && [ "$tag_template" != "null" ]; then
                 # 替换模板变量
-                local tag=$(echo "$tag_template" | sed "s/{version}/$version/g" | sed "s/{environment}/$environment/g")
+                local tag=$(echo "$tag_template" | sed \
+                    -e "s/{version}/$version/g" \
+                    -e "s/{environment}/$environment/g" \
+                    -e "s/{edition}/$edition/g")
                 tags+=("$tag")
             fi
         done <<< "$env_tags"
     fi
-    
+
     # 去重并返回
     printf '%s\n' "${tags[@]}" | sort -u
 }
@@ -351,68 +424,76 @@ build_service() {
     local service=$1
     local version=$2
     local environment=$3
-    
-    log_info "Building $service image with version $version for environment $environment"
-    
+    local edition=$4
+
+    log_info "Building $service image with version $version for environment $environment (edition=$edition)"
+
+    # 校验挂载点(EE/SaaS 必须先在私有仓运行 setup-edition.sh,见 show_help)
+    validate_edition_mounts "$edition"
+
     # 获取服务配置
-    local image_name=$(get_yaml_value ".services.$service.image_name")
+    local base_image_name=$(get_yaml_value ".services.$service.image_name")
     local dockerfile=$(get_yaml_value ".services.$service.dockerfile")
     local context=$(get_yaml_value ".services.$service.context")
-    
-    if [ "$image_name" = "null" ] || [ "$dockerfile" = "null" ] || [ "$context" = "null" ]; then
+
+    if [ "$base_image_name" = "null" ] || [ "$dockerfile" = "null" ] || [ "$context" = "null" ]; then
         log_error "Invalid configuration for service '$service'"
         exit 2
     fi
-    
+
+    # 追加 edition 后缀:yinghuo-frontend → yinghuo-frontend-ce
+    local image_name="${base_image_name}-${edition}"
+
     # 检查 Dockerfile 是否存在
     if [ ! -f "$PROJECT_ROOT/$dockerfile" ]; then
         log_error "Dockerfile not found: $PROJECT_ROOT/$dockerfile"
         exit 3
     fi
-    
+
     # 生成标签
-    local tags=($(generate_tags "$service" "$version" "$environment"))
-    
+    local tags=($(generate_tags "$service" "$version" "$environment" "$edition"))
+
     if [ ${#tags[@]} -eq 0 ]; then
         log_error "No tags generated for service '$service'"
         exit 2
     fi
-    
+
     # 构建标签参数
     local tag_args=()
     for tag in "${tags[@]}"; do
         tag_args+=("-t" "$REGISTRY_URL/$REGISTRY_NAMESPACE/$image_name:$tag")
     done
-    
+
     # 获取构建参数
     local build_args=()
-    
+
     # 添加服务特定的构建参数
     local node_version=$(yq eval ".services.$service.build_args.NODE_VERSION" "$CONFIG_FILE" 2>/dev/null || true)
     if [ -n "$node_version" ] && [ "$node_version" != "null" ]; then
         build_args+=("--build-arg" "NODE_VERSION=$node_version")
     fi
-    
+
     local pnpm_version=$(yq eval ".services.$service.build_args.PNPM_VERSION" "$CONFIG_FILE" 2>/dev/null || true)
     if [ -n "$pnpm_version" ] && [ "$pnpm_version" != "null" ]; then
         build_args+=("--build-arg" "PNPM_VERSION=$pnpm_version")
     fi
-    
+
     # 添加环境特定的构建参数
     local build_env=$(yq eval ".environments.$environment.build_args.BUILD_ENVIRONMENT" "$CONFIG_FILE" 2>/dev/null || true)
     if [ -n "$build_env" ] && [ "$build_env" != "null" ]; then
         build_args+=("--build-arg" "BUILD_ENVIRONMENT=$build_env")
     fi
-    
+
     local debug=$(yq eval ".environments.$environment.build_args.DEBUG" "$CONFIG_FILE" 2>/dev/null || true)
     if [ -n "$debug" ] && [ "$debug" != "null" ]; then
         build_args+=("--build-arg" "DEBUG=$debug")
     fi
-    
+
     # 添加通用构建参数
     build_args+=("--build-arg" "APP_VERSION=$version")
     build_args+=("--build-arg" "BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%S")")
-    
+    build_args+=("--build-arg" "YH_EDITION=$edition")
+
     # 构建命令
     local build_cmd=(
         docker buildx build --load
@@ -422,12 +503,12 @@ build_service() {
         "-f" "$PROJECT_ROOT/$dockerfile"
         "$PROJECT_ROOT/$context"
     )
-    
+
     log_debug "Build command: ${build_cmd[*]}"
-    
+
     # 执行构建
     if "${build_cmd[@]}"; then
-        log_info "Successfully built $service image"
+        log_info "Successfully built $service image (image=$image_name)"
         return 0
     else
         log_error "Failed to build $service image"
@@ -440,28 +521,32 @@ push_service() {
     local service=$1
     local version=$2
     local environment=$3
-    
-    log_info "Pushing $service image with version $version for environment $environment"
-    
+    local edition=$4
+
+    log_info "Pushing $service image with version $version for environment $environment (edition=$edition)"
+
     # 获取服务配置
-    local image_name=$(get_yaml_value ".services.$service.image_name")
-    
-    if [ "$image_name" = "null" ]; then
+    local base_image_name=$(get_yaml_value ".services.$service.image_name")
+
+    if [ "$base_image_name" = "null" ]; then
         log_error "Invalid configuration for service '$service'"
         exit 2
     fi
-    
+
+    # 追加 edition 后缀,与 build_service 保持一致
+    local image_name="${base_image_name}-${edition}"
+
     # 生成标签
-    local tags=($(generate_tags "$service" "$version" "$environment"))
-    
+    local tags=($(generate_tags "$service" "$version" "$environment" "$edition"))
+
     if [ ${#tags[@]} -eq 0 ]; then
         log_error "No tags generated for service '$service'"
         exit 2
     fi
-    
+
     # 登录到容器仓库
     log_info "Logging in to container registry..."
-    
+
     # 检查 GITHUB_TOKEN 是否设置
     if [ -z "${GITHUB_TOKEN:-}" ]; then
         log_error "GITHUB_TOKEN environment variable is not set or empty"
@@ -471,7 +556,7 @@ push_service() {
         log_error "Example: export GITHUB_TOKEN=your_token_here"
         exit 5
     fi
-    
+
     if echo "$GITHUB_TOKEN" | docker login "$REGISTRY_URL" --username "$REGISTRY_NAMESPACE" --password-stdin; then
         log_debug "Successfully logged in to $REGISTRY_URL"
     else
@@ -479,12 +564,12 @@ push_service() {
         log_error "Please check your GITHUB_TOKEN and registry permissions"
         exit 5
     fi
-    
+
     # 推送所有标签
     for tag in "${tags[@]}"; do
         local full_image_name="$REGISTRY_URL/$REGISTRY_NAMESPACE/$image_name:$tag"
         log_info "Pushing $full_image_name"
-        
+
         if docker push "$full_image_name"; then
             log_info "Successfully pushed $full_image_name"
         else
@@ -492,7 +577,7 @@ push_service() {
             exit 4
         fi
     done
-    
+
     log_info "Successfully pushed all tags for $service"
 }
 
@@ -501,40 +586,45 @@ build_and_push_service() {
     local service=$1
     local version=$2
     local environment=$3
-    
-    build_service "$service" "$version" "$environment"
-    push_service "$service" "$version" "$environment"
+    local edition=$4
+
+    build_service "$service" "$version" "$environment" "$edition"
+    push_service "$service" "$version" "$environment" "$edition"
 }
 
 # 构建所有服务
 build_all_services() {
     local version=$1
     local environment=$2
-    
-    log_info "Building all services with version $version for environment $environment"
-    
+    local edition=$3
+
+    log_info "Building all services with version $version for environment $environment (edition=$edition)"
+
+    # 校验挂载点(只校验一次,所有服务共用)
+    validate_edition_mounts "$edition"
+
     # 获取所有服务
     local services=$(yq eval '.services | keys | .[]' "$CONFIG_FILE" 2>/dev/null || true)
-    
+
     if [ -z "$services" ]; then
         log_error "No services found in configuration"
         exit 2
     fi
-    
+
     # 检查是否启用并行构建
     local parallel=$(get_yaml_value ".build_options.parallel" "true")
-    
+
     if [ "$parallel" = "true" ]; then
         log_info "Building services in parallel..."
         local pids=()
-        
+
         while IFS= read -r service; do
             if [ -n "$service" ] && [ "$service" != "null" ]; then
-                build_service "$service" "$version" "$environment" &
+                build_service "$service" "$version" "$environment" "$edition" &
                 pids+=($!)
             fi
         done <<< "$services"
-        
+
         # 等待所有构建完成
         for pid in "${pids[@]}"; do
             if ! wait $pid; then
@@ -542,17 +632,17 @@ build_all_services() {
                 exit 3
             fi
         done
-        
+
         log_info "All services built successfully"
     else
         log_info "Building services sequentially..."
-        
+
         while IFS= read -r service; do
             if [ -n "$service" ] && [ "$service" != "null" ]; then
-                build_service "$service" "$version" "$environment"
+                build_service "$service" "$version" "$environment" "$edition"
             fi
         done <<< "$services"
-        
+
         log_info "All services built successfully"
     fi
 }
@@ -561,20 +651,21 @@ build_all_services() {
 push_all_services() {
     local version=$1
     local environment=$2
-    
-    log_info "Pushing all services with version $version for environment $environment"
-    
+    local edition=$3
+
+    log_info "Pushing all services with version $version for environment $environment (edition=$edition)"
+
     # 获取所有服务
     local services=$(yq eval '.services | keys | .[]' "$CONFIG_FILE" 2>/dev/null || true)
-    
+
     if [ -z "$services" ]; then
         log_error "No services found in configuration"
         exit 2
     fi
-    
+
     # 登录到容器仓库（只需要登录一次）
     log_info "Logging in to container registry..."
-    
+
     # 检查 GITHUB_TOKEN 是否设置
     if [ -z "${GITHUB_TOKEN:-}" ]; then
         log_error "GITHUB_TOKEN environment variable is not set or empty"
@@ -584,7 +675,7 @@ push_all_services() {
         log_error "Example: export GITHUB_TOKEN=your_token_here"
         exit 5
     fi
-    
+
     if echo "$GITHUB_TOKEN" | docker login "$REGISTRY_URL" --username "$REGISTRY_NAMESPACE" --password-stdin; then
         log_debug "Successfully logged in to $REGISTRY_URL"
     else
@@ -592,14 +683,14 @@ push_all_services() {
         log_error "Please check your GITHUB_TOKEN and registry permissions"
         exit 5
     fi
-    
+
     # 推送所有服务
     while IFS= read -r service; do
         if [ -n "$service" ] && [ "$service" != "null" ]; then
-            push_service "$service" "$version" "$environment"
+            push_service "$service" "$version" "$environment" "$edition"
         fi
     done <<< "$services"
-    
+
     log_info "All services pushed successfully"
 }
 
@@ -607,15 +698,16 @@ push_all_services() {
 release_all() {
     local version=$1
     local environment=$2
-    
-    log_info "Starting full release process with version $version for environment $environment"
-    
+    local edition=$3
+
+    log_info "Starting full release process with version $version for environment $environment (edition=$edition)"
+
     # 构建所有服务
-    build_all_services "$version" "$environment"
-    
+    build_all_services "$version" "$environment" "$edition"
+
     # 推送所有服务
-    push_all_services "$version" "$environment"
-    
+    push_all_services "$version" "$environment" "$edition"
+
     log_info "Full release process completed successfully"
 }
 
@@ -678,7 +770,7 @@ show_configuration() {
 # 主函数
 main() {
     # 先检查是否是帮助命令，避免加载配置
-    if [ $# -gt 0 ] && [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    if [ $# -gt 0 ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
         show_help
         exit 0
     fi
@@ -695,22 +787,22 @@ main() {
     # 执行命令
     case $COMMAND in
         build)
-            build_service "$SERVICE" "$VERSION" "$ENVIRONMENT"
+            build_service "$SERVICE" "$VERSION" "$ENVIRONMENT" "$EDITION"
             ;;
         push)
-            push_service "$SERVICE" "$VERSION" "$ENVIRONMENT"
+            push_service "$SERVICE" "$VERSION" "$ENVIRONMENT" "$EDITION"
             ;;
         build_and_push)
-            build_and_push_service "$SERVICE" "$VERSION" "$ENVIRONMENT"
+            build_and_push_service "$SERVICE" "$VERSION" "$ENVIRONMENT" "$EDITION"
             ;;
         build_all)
-            build_all_services "$VERSION" "$ENVIRONMENT"
+            build_all_services "$VERSION" "$ENVIRONMENT" "$EDITION"
             ;;
         push_all)
-            push_all_services "$VERSION" "$ENVIRONMENT"
+            push_all_services "$VERSION" "$ENVIRONMENT" "$EDITION"
             ;;
         release)
-            release_all "$VERSION" "$ENVIRONMENT"
+            release_all "$VERSION" "$ENVIRONMENT" "$EDITION"
             ;;
         list_services)
             list_services

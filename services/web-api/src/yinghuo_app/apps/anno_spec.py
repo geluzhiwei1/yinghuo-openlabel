@@ -22,7 +22,7 @@ from ..biz.db.collection import Pager, CollectionBase
 from openlabel import OpenLabel
 from .dependency import permission_required
 
-app = APIRouter(dependencies=[permission_required("admin:project:write")])
+app = APIRouter()
 
 
 class AnnoSpec(CollectionBase):
@@ -34,7 +34,8 @@ class AnnoSpec(CollectionBase):
     spec: Annotated[str, Field(max_length=102400)] = ""
 
 
-@app.post("/create", summary="创建", tags=["anno_spec"])
+@app.post("/create", summary="创建", tags=["anno_spec"],
+          dependencies=[permission_required("business:project:write")])
 async def create(anno_spec: AnnoSpec, request: Request):
 
     # 重置核心字段
@@ -56,7 +57,8 @@ async def create(anno_spec: AnnoSpec, request: Request):
         return wrap_json([], status=1, statusText="create failed")
 
 
-@app.delete("/delete", summary="删除", tags=["anno_spec"])
+@app.delete("/delete", summary="删除", tags=["anno_spec"],
+             dependencies=[permission_required("business:project:write")])
 async def delete_list(request: Request):
     req_json = await request.json()
     collection = Conf.MG_DATA_ANNO_SPEC
@@ -81,7 +83,8 @@ async def delete_list(request: Request):
         return wrap_json([], status=1, statusText="_id or _ids is invalid")
 
 
-@app.put("/update", summary="更新", tags=["anno_spec"])
+@app.put("/update", summary="更新", tags=["anno_spec"],
+         dependencies=[permission_required("business:project:write")])
 async def update(anno_spec: dict, request: Request):
     query = {}
     if ObjectId.is_valid(anno_spec["_id"]):
@@ -114,7 +117,8 @@ async def update(anno_spec: dict, request: Request):
     return wrap_json([], status=1, statusText="update failed")
 
 
-@app.get("/query", summary="查询列表", tags=["anno_spec"])
+@app.get("/query", summary="查询列表", tags=["anno_spec"],
+         dependencies=[permission_required("business:project:read")])
 async def query(request: Request, _id: str = Query(None)):
     """查询一条或者所有"""
     if ObjectId.is_valid(_id):
@@ -128,7 +132,8 @@ async def query(request: Request, _id: str = Query(None)):
             row["spec"] = OpenLabel.from_json(json.loads(row["spec"])).openlabel()
     return wrap_json(mongo_json_encoder(rows))
 
-@app.get("/classes", summary="获取 classes", tags=["anno_spec"])
+@app.get("/classes", summary="获取 classes", tags=["anno_spec"],
+         dependencies=[permission_required("business:project:read")])
 async def classes(_id: str = Query(None)):
     rows = []
     if ObjectId.is_valid(_id):
@@ -152,7 +157,8 @@ class Search(BaseModel):
     query: SearchFields
 
 
-@app.post("/search", summary="分页搜索", tags=["anno_spec"])
+@app.post("/search", summary="分页搜索", tags=["anno_spec"],
+          dependencies=[permission_required("business:project:read")])
 async def paged_search(search: Search):
     """分页搜索
     Args:

@@ -18,11 +18,11 @@
         </p>
       </div>
       <div class="dash-hero__right">
-        <el-link href="https://gitee.com/gerwee/yinghuo/issues" target="_blank" :underline="false" class="dash-hero__link">
+        <el-link href="https://gitee.com/gerwee/yinghuo/issues" target="_blank" :underline="'never'" class="dash-hero__link">
           <Icon icon="lucide:message-square" :width="14" />
           {{ t('dashboard.action.feedback') }}
         </el-link>
-        <el-link href="https://www.bilibili.com/video/BV1xoTvz2ES5?t=4.4" target="_blank" :underline="false" class="dash-hero__link">
+        <el-link href="https://www.bilibili.com/video/BV1xoTvz2ES5?t=4.4" target="_blank" :underline="'never'" class="dash-hero__link">
           <Icon icon="lucide:video" :width="14" />
           {{ t('dashboard.action.tutorial') }}
         </el-link>
@@ -147,11 +147,11 @@
     <div class="dash-quick">
       <span class="dash-quick__eyebrow">QUICK · ACTIONS</span>
       <div class="dash-quick__row">
-        <button class="dash-act dash-act--primary" @click="$router.push('/annojob-v2')">
+        <button class="dash-act dash-act--primary" @click="$router.push('/my-job')">
           <Icon icon="lucide:plus" :width="16" />
           <span>{{ t('dashboard.action.newJob') }}</span>
         </button>
-        <button class="dash-act" @click="$router.push('/annojob-v2')">
+        <button class="dash-act" @click="$router.push('/my-job')">
           <Icon icon="lucide:list-checks" :width="16" />
           <span>{{ t('dashboard.action.myJobs') }}</span>
         </button>

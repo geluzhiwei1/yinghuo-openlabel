@@ -3,6 +3,7 @@ export default {
     'app.description': 'A 2D GUI for the web.',
     dashboard: {
         guest: 'Guest',
+        greeting: 'Good morning',
         lastLogin: 'Last login: {time}',
         kpi: {
             myJobs: 'My Jobs',

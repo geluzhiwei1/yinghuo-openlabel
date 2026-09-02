@@ -5,6 +5,7 @@ export default {
     },
     dashboard: {
         guest: '游客',
+        greeting: '早上好',
         lastLogin: '上次登录：{time}',
         kpi: {
             myJobs: '我的任务',

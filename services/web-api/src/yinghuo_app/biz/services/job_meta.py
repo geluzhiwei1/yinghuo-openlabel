@@ -1,9 +1,9 @@
 import os
-import pathlib
 from bson import ObjectId
 from pydash import _
 
 from ...config import Conf, gConf, settings
+from ..data_paths import file_uri_prefix
 from yinghuo_conf.api_util.utils import wrap_json, json_encoder, mongo_json_encoder
 
 
@@ -37,7 +37,8 @@ def find_stream_meta(uuid: str, stream: str, data_source:str, seq=None):
             _.set(v, "frame_properties.name", uri)
 
             if data_source == 'serverLocalDir' and seq is not None:
-                uri = f"{pathlib.Path(Conf.FILE_PATH) / str(job_owner_id) / (seq.strip('/')) / (uri.replace('file://.', ''))}"
+                uri = uri.replace("file://.", "")
+                uri = f"{file_uri_prefix(job_owner_id, seq) / uri.strip('/')}"
 
             _.set(v, "frame_properties.uri", uri)
         

@@ -15,7 +15,25 @@ from .role import role_service
 
 
 def _utcnow() -> datetime:
+    """Aware UTC,用于写入 DB。
+
+    asyncpg 写 naive datetime 进 TIMESTAMP WITHOUT TIME ZONE 列时,会按客户端本地
+    时区解释后转 UTC 存储,导致读出来比写入少 8 小时(本机 TZ=Asia/Shanghai)。
+    用 aware UTC 写入可避免这个偏移,DB 实际存的就是正确的 UTC 值。
+    """
     return datetime.now(timezone.utc)
+
+
+def _from_db_naive_utc(dt: Optional[datetime]) -> Optional[datetime]:
+    """Tortoise 配置 use_tz=False,DB 读出的 datetime 是 naive(字面值即 UTC)。
+
+    加上 UTC tzinfo 才能跟 _utcnow()(aware UTC)直接比较,避免 tz mismatch TypeError。
+    """
+    if dt is None:
+        return None
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt
 
 
 def _ip_fail_key(ip: str) -> str:
@@ -52,17 +70,27 @@ class UserService(CRUDBase[User, UserCreate, UserUpdate]):
     # —— 登录限频 / 失败锁定 ——————————————————————————
 
     async def _check_ip_throttle(self, redis: aioredis.Redis, ip: str | None) -> None:
-        """同一 IP 在窗口内失败次数限制,防止同一来源撞库。"""
+        """同一 IP 在窗口内失败次数限制,防止同一来源撞库。
+
+        只读当前计数,达到阈值直接 429。计数自增由 _record_ip_fail 在
+        失败路径单独触发,避免成功登录也被算进窗口。
+        """
+        if not ip:
+            return
+        count = int(await redis.get(_ip_fail_key(ip)) or 0)
+        if count > settings.LOGIN_FAIL_MAX_ATTEMPTS:
+            raise HTTPException(
+                status_code=429, detail="该 IP 登录失败次数过多,请稍后再试"
+            )
+
+    async def _record_ip_fail(self, redis: aioredis.Redis, ip: str | None) -> None:
+        """登录失败时调用:IP 失败计数 +1,首次写入带 TTL。"""
         if not ip:
             return
         key = _ip_fail_key(ip)
         count = await redis.incr(key)
         if count == 1:
             await redis.expire(key, settings.LOGIN_FAIL_WINDOW_SECONDS)
-        if count > settings.LOGIN_FAIL_MAX_ATTEMPTS:
-            raise HTTPException(
-                status_code=429, detail="该 IP 登录失败次数过多,请稍后再试"
-            )
 
     async def _record_user_fail(self, redis: aioredis.Redis, user: User) -> None:
         """累计 user.failed_login_count,达到阈值写入 locked_until。"""
@@ -106,7 +134,7 @@ class UserService(CRUDBase[User, UserCreate, UserUpdate]):
         redis: aioredis.Redis | None = None,
         client_ip: str | None = None,
     ) -> Optional["User"]:
-        """校验凭据。失败累加计数,达到阈值锁定;成功由上层调用 reset_login_fail_count。"""
+        """校验凭据。失败累加计数(IP + user),达到阈值锁定;成功由上层调用 reset_login_fail_count。"""
         if redis is not None:
             await self._check_ip_throttle(redis, client_ip)
 
@@ -120,14 +148,14 @@ class UserService(CRUDBase[User, UserCreate, UserUpdate]):
 
         # 用户不存在也记一次 IP 失败(防止枚举探测),但不写 user.failed_login_count
         if not user:
-            if redis is not None and client_ip:
-                # IP 计数已在 _check_ip_throttle 中 incr,这里仅返回错误
-                pass
+            if redis is not None:
+                await self._record_ip_fail(redis, client_ip)
             raise HTTPException(status_code=501, detail="账号或密码错误！")
 
         # 锁定检查
-        if user.locked_until and user.locked_until > _utcnow():
-            remaining_min = int((user.locked_until - _utcnow()).total_seconds() // 60) + 1
+        locked_until_utc = _from_db_naive_utc(user.locked_until)
+        if locked_until_utc and locked_until_utc > _utcnow():
+            remaining_min = int((locked_until_utc - _utcnow()).total_seconds() // 60) + 1
             raise HTTPException(
                 status_code=423, detail=f"账号已锁定,请约 {remaining_min} 分钟后重试"
             )
@@ -145,6 +173,7 @@ class UserService(CRUDBase[User, UserCreate, UserUpdate]):
         if not verified:
             if redis is not None:
                 await self._record_user_fail(redis, user)
+                await self._record_ip_fail(redis, client_ip)
             raise HTTPException(status_code=502, detail="账号或密码错误!")
 
         if not user.is_active:

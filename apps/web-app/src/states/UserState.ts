@@ -9,6 +9,7 @@ export const userAuth = useLocalStorage(
     isLogin: false,
     access_token: '',
     refresh_token: '',
+    expires_at: 0, // access_token 过期时间(epoch ms);登录/刷新时写入,供主动刷新判断
     token_type: "bearer",
     roles: [] as string[], // 用户的角色
     permissions: [] as string[], // 用户的权限

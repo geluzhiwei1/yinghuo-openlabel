@@ -1,0 +1,810 @@
+{
+    "openlabel": {
+        "meta": {
+            "name": "COCO 2017",
+            "description": "COCO is a large-scale object detection, segmentation, and captioning dataset.",
+            "url": "https://cocodataset.org/"
+        },
+        "ontologies": {
+            "0": "https://cocodataset.org/"
+        },
+        "classes": [
+            {
+                "name": "coco-2017",
+                "definition": {
+                    "ontology_uid": -1,
+                    "ontology_type": ""
+                },
+                "properties": {
+                    "visibility": {
+                        "type": "string",
+                        "title": "可见性",
+                        "description": "目标物体的可见程度",
+                        "enum": [
+                            "<40%",
+                            "<60%",
+                            "<80%",
+                            "<=100%"
+                        ],
+                        "default": "unlabeled",
+                        "ui:widget": "RadioWidget"
+                    },
+                    "tags": {
+                        "type": "string",
+                        "title": "标签",
+                        "default": "",
+                        "maxLength": 1024
+                    },
+                    "annotation": {
+                        "type": "string",
+                        "default": "",
+                        "title": "描述",
+                        "maxLength": 1024
+                    }
+                },
+                "children": [
+                    {
+                        "name": "persons",
+                        "definition": {
+                            "ontology_uid": "persons",
+                            "ontology_type": "persons"
+                        },
+                        "properties": {},
+                        "children": [
+                            {
+                                "name": "person",
+                                "definition": {
+                                    "ontology_uid": 1,
+                                    "ontology_type": "person"
+                                },
+                                "properties": {}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "vehicle",
+                        "definition": {
+                            "ontology_uid": "vehicle",
+                            "ontology_type": "vehicle"
+                        },
+                        "properties": {},
+                        "children": [
+                            {
+                                "name": "bicycle",
+                                "definition": {
+                                    "ontology_uid": 2,
+                                    "ontology_type": "bicycle"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "car",
+                                "definition": {
+                                    "ontology_uid": 3,
+                                    "ontology_type": "car"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "motorcycle",
+                                "definition": {
+                                    "ontology_uid": 4,
+                                    "ontology_type": "motorcycle"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "airplane",
+                                "definition": {
+                                    "ontology_uid": 5,
+                                    "ontology_type": "airplane"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "bus",
+                                "definition": {
+                                    "ontology_uid": 6,
+                                    "ontology_type": "bus"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "train",
+                                "definition": {
+                                    "ontology_uid": 7,
+                                    "ontology_type": "train"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "truck",
+                                "definition": {
+                                    "ontology_uid": 8,
+                                    "ontology_type": "truck"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "boat",
+                                "definition": {
+                                    "ontology_uid": 9,
+                                    "ontology_type": "boat"
+                                },
+                                "properties": {}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "outdoor",
+                        "definition": {
+                            "ontology_uid": "outdoor",
+                            "ontology_type": "outdoor"
+                        },
+                        "properties": {},
+                        "children": [
+                            {
+                                "name": "traffic light",
+                                "definition": {
+                                    "ontology_uid": 10,
+                                    "ontology_type": "traffic light"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "fire hydrant",
+                                "definition": {
+                                    "ontology_uid": 11,
+                                    "ontology_type": "fire hydrant"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "stop sign",
+                                "definition": {
+                                    "ontology_uid": 13,
+                                    "ontology_type": "stop sign"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "parking meter",
+                                "definition": {
+                                    "ontology_uid": 14,
+                                    "ontology_type": "parking meter"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "bench",
+                                "definition": {
+                                    "ontology_uid": 15,
+                                    "ontology_type": "bench"
+                                },
+                                "properties": {}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "animal",
+                        "definition": {
+                            "ontology_uid": "animal",
+                            "ontology_type": "animal"
+                        },
+                        "properties": {},
+                        "children": [
+                            {
+                                "name": "bird",
+                                "definition": {
+                                    "ontology_uid": 16,
+                                    "ontology_type": "bird"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "cat",
+                                "definition": {
+                                    "ontology_uid": 17,
+                                    "ontology_type": "cat"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "dog",
+                                "definition": {
+                                    "ontology_uid": 18,
+                                    "ontology_type": "dog"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "horse",
+                                "definition": {
+                                    "ontology_uid": 19,
+                                    "ontology_type": "horse"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "sheep",
+                                "definition": {
+                                    "ontology_uid": 20,
+                                    "ontology_type": "sheep"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "cow",
+                                "definition": {
+                                    "ontology_uid": 21,
+                                    "ontology_type": "cow"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "elephant",
+                                "definition": {
+                                    "ontology_uid": 22,
+                                    "ontology_type": "elephant"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "bear",
+                                "definition": {
+                                    "ontology_uid": 23,
+                                    "ontology_type": "bear"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "zebra",
+                                "definition": {
+                                    "ontology_uid": 24,
+                                    "ontology_type": "zebra"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "giraffe",
+                                "definition": {
+                                    "ontology_uid": 25,
+                                    "ontology_type": "giraffe"
+                                },
+                                "properties": {}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "accessory",
+                        "definition": {
+                            "ontology_uid": "accessory",
+                            "ontology_type": "accessory"
+                        },
+                        "properties": {},
+                        "children": [
+                            {
+                                "name": "backpack",
+                                "definition": {
+                                    "ontology_uid": 27,
+                                    "ontology_type": "backpack"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "umbrella",
+                                "definition": {
+                                    "ontology_uid": 28,
+                                    "ontology_type": "umbrella"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "handbag",
+                                "definition": {
+                                    "ontology_uid": 31,
+                                    "ontology_type": "handbag"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "tie",
+                                "definition": {
+                                    "ontology_uid": 32,
+                                    "ontology_type": "tie"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "suitcase",
+                                "definition": {
+                                    "ontology_uid": 33,
+                                    "ontology_type": "suitcase"
+                                },
+                                "properties": {}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "sports",
+                        "definition": {
+                            "ontology_uid": "sports",
+                            "ontology_type": "sports"
+                        },
+                        "properties": {},
+                        "children": [
+                            {
+                                "name": "frisbee",
+                                "definition": {
+                                    "ontology_uid": 34,
+                                    "ontology_type": "frisbee"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "skis",
+                                "definition": {
+                                    "ontology_uid": 35,
+                                    "ontology_type": "skis"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "snowboard",
+                                "definition": {
+                                    "ontology_uid": 36,
+                                    "ontology_type": "snowboard"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "sports ball",
+                                "definition": {
+                                    "ontology_uid": 37,
+                                    "ontology_type": "sports ball"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "kite",
+                                "definition": {
+                                    "ontology_uid": 38,
+                                    "ontology_type": "kite"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "baseball bat",
+                                "definition": {
+                                    "ontology_uid": 39,
+                                    "ontology_type": "baseball bat"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "baseball glove",
+                                "definition": {
+                                    "ontology_uid": 40,
+                                    "ontology_type": "baseball glove"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "skateboard",
+                                "definition": {
+                                    "ontology_uid": 41,
+                                    "ontology_type": "skateboard"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "surfboard",
+                                "definition": {
+                                    "ontology_uid": 42,
+                                    "ontology_type": "surfboard"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "tennis racket",
+                                "definition": {
+                                    "ontology_uid": 43,
+                                    "ontology_type": "tennis racket"
+                                },
+                                "properties": {}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "kitchen",
+                        "definition": {
+                            "ontology_uid": "kitchen",
+                            "ontology_type": "kitchen"
+                        },
+                        "properties": {},
+                        "children": [
+                            {
+                                "name": "bottle",
+                                "definition": {
+                                    "ontology_uid": 44,
+                                    "ontology_type": "bottle"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "wine glass",
+                                "definition": {
+                                    "ontology_uid": 46,
+                                    "ontology_type": "wine glass"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "cup",
+                                "definition": {
+                                    "ontology_uid": 47,
+                                    "ontology_type": "cup"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "fork",
+                                "definition": {
+                                    "ontology_uid": 48,
+                                    "ontology_type": "fork"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "knife",
+                                "definition": {
+                                    "ontology_uid": 49,
+                                    "ontology_type": "knife"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "spoon",
+                                "definition": {
+                                    "ontology_uid": 50,
+                                    "ontology_type": "spoon"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "bowl",
+                                "definition": {
+                                    "ontology_uid": 51,
+                                    "ontology_type": "bowl"
+                                },
+                                "properties": {}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "food",
+                        "definition": {
+                            "ontology_uid": "food",
+                            "ontology_type": "food"
+                        },
+                        "properties": {},
+                        "children": [
+                            {
+                                "name": "banana",
+                                "definition": {
+                                    "ontology_uid": 52,
+                                    "ontology_type": "banana"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "apple",
+                                "definition": {
+                                    "ontology_uid": 53,
+                                    "ontology_type": "apple"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "sandwich",
+                                "definition": {
+                                    "ontology_uid": 54,
+                                    "ontology_type": "sandwich"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "orange",
+                                "definition": {
+                                    "ontology_uid": 55,
+                                    "ontology_type": "orange"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "broccoli",
+                                "definition": {
+                                    "ontology_uid": 56,
+                                    "ontology_type": "broccoli"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "carrot",
+                                "definition": {
+                                    "ontology_uid": 57,
+                                    "ontology_type": "carrot"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "hot dog",
+                                "definition": {
+                                    "ontology_uid": 58,
+                                    "ontology_type": "hot dog"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "pizza",
+                                "definition": {
+                                    "ontology_uid": 59,
+                                    "ontology_type": "pizza"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "donut",
+                                "definition": {
+                                    "ontology_uid": 60,
+                                    "ontology_type": "donut"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "cake",
+                                "definition": {
+                                    "ontology_uid": 61,
+                                    "ontology_type": "cake"
+                                },
+                                "properties": {}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "furniture",
+                        "definition": {
+                            "ontology_uid": "furniture",
+                            "ontology_type": "furniture"
+                        },
+                        "properties": {},
+                        "children": [
+                            {
+                                "name": "chair",
+                                "definition": {
+                                    "ontology_uid": 62,
+                                    "ontology_type": "chair"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "couch",
+                                "definition": {
+                                    "ontology_uid": 63,
+                                    "ontology_type": "couch"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "potted plant",
+                                "definition": {
+                                    "ontology_uid": 64,
+                                    "ontology_type": "potted plant"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "bed",
+                                "definition": {
+                                    "ontology_uid": 65,
+                                    "ontology_type": "bed"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "dining table",
+                                "definition": {
+                                    "ontology_uid": 67,
+                                    "ontology_type": "dining table"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "toilet",
+                                "definition": {
+                                    "ontology_uid": 70,
+                                    "ontology_type": "toilet"
+                                },
+                                "properties": {}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "electronic",
+                        "definition": {
+                            "ontology_uid": "electronic",
+                            "ontology_type": "electronic"
+                        },
+                        "properties": {},
+                        "children": [
+                            {
+                                "name": "tv",
+                                "definition": {
+                                    "ontology_uid": 72,
+                                    "ontology_type": "tv"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "laptop",
+                                "definition": {
+                                    "ontology_uid": 73,
+                                    "ontology_type": "laptop"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "mouse",
+                                "definition": {
+                                    "ontology_uid": 74,
+                                    "ontology_type": "mouse"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "remote",
+                                "definition": {
+                                    "ontology_uid": 75,
+                                    "ontology_type": "remote"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "keyboard",
+                                "definition": {
+                                    "ontology_uid": 76,
+                                    "ontology_type": "keyboard"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "cell phone",
+                                "definition": {
+                                    "ontology_uid": 77,
+                                    "ontology_type": "cell phone"
+                                },
+                                "properties": {}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "appliance",
+                        "definition": {
+                            "ontology_uid": "appliance",
+                            "ontology_type": "appliance"
+                        },
+                        "properties": {},
+                        "children": [
+                            {
+                                "name": "microwave",
+                                "definition": {
+                                    "ontology_uid": 78,
+                                    "ontology_type": "microwave"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "oven",
+                                "definition": {
+                                    "ontology_uid": 79,
+                                    "ontology_type": "oven"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "toaster",
+                                "definition": {
+                                    "ontology_uid": 80,
+                                    "ontology_type": "toaster"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "sink",
+                                "definition": {
+                                    "ontology_uid": 81,
+                                    "ontology_type": "sink"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "refrigerator",
+                                "definition": {
+                                    "ontology_uid": 82,
+                                    "ontology_type": "refrigerator"
+                                },
+                                "properties": {}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "indoor",
+                        "definition": {
+                            "ontology_uid": "indoor",
+                            "ontology_type": "indoor"
+                        },
+                        "properties": {},
+                        "children": [
+                            {
+                                "name": "book",
+                                "definition": {
+                                    "ontology_uid": 84,
+                                    "ontology_type": "book"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "clock",
+                                "definition": {
+                                    "ontology_uid": 85,
+                                    "ontology_type": "clock"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "vase",
+                                "definition": {
+                                    "ontology_uid": 86,
+                                    "ontology_type": "vase"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "scissors",
+                                "definition": {
+                                    "ontology_uid": 87,
+                                    "ontology_type": "scissors"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "teddy bear",
+                                "definition": {
+                                    "ontology_uid": 88,
+                                    "ontology_type": "teddy bear"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "hair drier",
+                                "definition": {
+                                    "ontology_uid": 89,
+                                    "ontology_type": "hair drier"
+                                },
+                                "properties": {}
+                            },
+                            {
+                                "name": "toothbrush",
+                                "definition": {
+                                    "ontology_uid": 90,
+                                    "ontology_type": "toothbrush"
+                                },
+                                "properties": {}
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

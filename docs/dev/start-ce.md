@@ -1,7 +1,7 @@
 # dev setup — CE(社区版)
 
 > 三版分层:CE ⊂ EE ⊂ SaaS。本文只覆盖 **CE**(`YH_EDITION` 默认或 `=ce`)。
-> 切到 EE 见 [start-ee.md](./start-ee.md),切到 SaaS 见 [start-saas.md](./start-saas.md)。
+> EE / SaaS 的本地开发文档与脚本引用私有仓库,不进 CE 仓库(见 `.gitignore` 相应条目)。
 > 端口 / 账号 / 路由一览见 [start.md](./start.md#端口--账号--路由一览) 或 [dev 信息面板](../../apps/web-app/dev.html)。
 
 ## 0. 一键启动(推荐)

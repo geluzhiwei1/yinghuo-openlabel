@@ -152,19 +152,6 @@ class UserTeam(CollectionBase):
     class Config:
         extra = "allow"
 
-class UserResource(CollectionBase):
-    resources: list[str]
-    # title: Optional[str] = None
-    # index: Optional[str] = None
-    # icon: Optional[str] = None
-    # order: Optional[int] = 0
-    # parent_id: Optional[str] = ''
-    # type: ResourceType = ResourceType.MENU
-    # desc: Optional[Annotated[str, Field(max_length=1000, description="备注", example="主菜单")]]
-    # class Config:
-    #     extra = "allow"
-
-    
 class UserProfile(CollectionBase):
     max_job_count: Optional[int] = 15
     avatar: Optional[str] = None

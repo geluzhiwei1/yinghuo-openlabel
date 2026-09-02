@@ -24,8 +24,17 @@ const notify = (err: YhError) => {
 
 const authRedirect = (path: string) => {
   if (typeof window === 'undefined') return
-  if (!window.location.pathname.endsWith(path)) {
-    window.location.href = `${import.meta.env.BASE_URL}${path}`
+  // 带 .html 的目标(如 /auth.html)是独立 entry,直接跳;以 / 开头的非 .html 路径
+  // 应当走 hash 路由,在当前 home.html 内 hash 切换,避免落空到不存在的 html。
+  if (path.endsWith('.html')) {
+    if (!window.location.pathname.endsWith(path)) {
+      window.location.href = `${import.meta.env.BASE_URL}${path}`
+    }
+    return
+  }
+  const target = `${import.meta.env.BASE_URL}/home.html#${path}`
+  if (window.location.href !== target) {
+    window.location.href = target
   }
 }
 
@@ -57,11 +66,35 @@ const refreshAccessToken = async (): Promise<string> => {
     if (data.refresh_token) {
       userAuth.value.refresh_token = data.refresh_token
     }
+    userAuth.value.expires_at = Date.now() + (data.expires_in ?? 1800) * 1000
     return data.access_token as string
   })().finally(() => {
     _refreshPromise = null
   })
   return _refreshPromise
+}
+
+// ── proactive token refresh ────────────────────────────────────
+// access_token 只有 30 分钟;页面久置不动时靠 401 事后刷新会产生一批控制台 401
+// 报错、SSE 也会带着过期 token 重连失败。这里在过期前 2 分钟主动换新。
+let _autoRefreshTimer: ReturnType<typeof setInterval> | null = null
+const AUTO_REFRESH_INTERVAL_MS = 60_000
+const AUTO_REFRESH_AHEAD_MS = 120_000
+
+export function startTokenAutoRefresh(): void {
+  if (_autoRefreshTimer) return
+  _autoRefreshTimer = setInterval(() => {
+    if (!userAuth.value.isLogin || !userAuth.value.refresh_token) return
+    const exp = Number(userAuth.value.expires_at)
+    // 旧会话 localStorage 里没有 expires_at:补一次刷新把字段填上
+    if (!Number.isFinite(exp) || exp <= 0) {
+      refreshAccessToken().catch(() => {})
+      return
+    }
+    if (exp - Date.now() <= AUTO_REFRESH_AHEAD_MS) {
+      refreshAccessToken().catch(() => {})
+    }
+  }, AUTO_REFRESH_INTERVAL_MS)
 }
 
 export const reqJson = (options: any) => {

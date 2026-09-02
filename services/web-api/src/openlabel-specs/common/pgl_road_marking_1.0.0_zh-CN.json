@@ -1,0 +1,268 @@
+{
+    "openlabel": {
+        "meta": {
+            "name": "道路标线分类",
+            "description": "日常驾驶中常见的道路标线分类，参考《道路交通标志和标线（GB-5768-2022）》",
+            "version": "1.0.0",
+            "license": "CCBY-SA 4.0",
+            "copyright": "Copyright © 2024 openlabel.gerwee.com",
+            "authors": [
+                {"name": "Zhang Lizhi", "email": "gerwee@qq.com"}
+            ],
+            "contributors": [
+            ]
+        },
+        "ontologies": {
+            "0": "http://openlabel.gerwee.com/taxonomy/road_marking_1.0.0_zh-CN"
+        },
+        "classes": [
+            {
+                "name": "道路标线",
+                "definition": {
+                    "description": "道路交通标线是由施划或安装于道路上的各种线条、箭头、文字、图案及立面标记、实体标记、突起路标和轮廓标等所构成的交通设施，它的作用是向道路使用者传递有关道路交通的规则、警告、指引等信息，可以与标志配合使用，也可以单独使用。"
+                },
+                "properties": {
+                    "color": {
+                        "type": "string",
+                        "title": "颜色",
+                        "description": "标线颜色",
+                        "enum": [
+                            "白色",
+                            "黄色",
+                            "橙色",
+                            "蓝色"
+                        ],
+                        "minLength": 1,
+                        "default": "unlabeled",
+                        "ui:widget": "RadioWidget"
+                    },
+                    "style": {
+                        "type": "string",
+                        "title": "线型",
+                        "description": "标线的线型",
+                        "enum": [
+                            "虚线",
+                            "实线",
+                            "虚虚线",
+                            "实实线",
+                            "虚实线",
+                            "实虚线"
+                        ],
+                        "minLength": 1,
+                        "default": "unlabeled",
+                        "ui:widget": "RadioWidget"
+                    },
+                    "visibility": {
+                        "type": "string",
+                        "title": "可见性",
+                        "description": "目标物体的可见程度",
+                        "enum": [
+                            "<40%",
+                            "<60%",
+                            "<80%",
+                            "<=100%"
+                        ],
+                        "default": "unlabeled",
+                        "ui:widget": "RadioWidget"
+                    },
+                    "tags": {
+                        "type": "string",
+                        "title": "标签",
+                        "default": "",
+                        "maxLength": 1024
+                    },
+                    "annotation": {
+                        "type": "string",
+                        "default": "",
+                        "title": "描述",
+                        "maxLength": 1024
+                    }
+                },
+                "children": [
+                    {
+                        "name": "指示标线",
+                        "definition": {
+                            "description": "指示车行道、行车方向、路面边缘、人行道、停车位、停靠站及减速丘等的标线"
+                        },
+                        "properties": {
+                        },
+                        "children": [
+                            {
+                                "name": "车行道边缘线",
+                                "definition": {
+                                    "description": "指示机动车道的边缘或划分与非机动车道的分界，一般线宽为15cm或20cm，特殊情况可10cm。可以是实线、虚线、实虚线、虚实线等"
+                                }
+                            },
+                            {
+                                "name": "道路边缘",
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "title": "纵向减速",
+                                        "description": "标线是否包含了纵向减速标线（鱼骨线）",
+                                        "enum": [
+                                            "路肩线",
+                                            "路缘线",
+                                            "栅栏",
+                                            "墙体",
+                                            "沟槽"
+                                        ],
+                                        "enumNames": [
+                                            "路肩线：车行道外缘，高于路面",
+                                            "路缘线：车行道外缘，平于路面",
+                                            "栅栏",
+                                            "墙体",
+                                            "沟槽：低于路面的沟槽"
+                                        ],
+                                        "minLength": 1,
+                                        "default": "unlabeled",
+                                        "ui:widget": "RadioWidget"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "路面导向箭头",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "title": "分类",
+                                        "description": "箭头类别细分",
+                                        "enum": [
+                                            "直行",
+                                            "直行或左转",
+                                            "直行或右转",
+                                            "左转",
+                                            "右转",
+                                            "调头",
+                                            "直行或调头",
+                                            "左转或调头",
+                                            "右转或右转",
+                                            "道路右弯或向右合流",
+                                            "道路左弯或向左合流"
+                                        ],
+                                        "minLength": 1,
+                                        "default": "unlabeled",
+                                        "ui:widget": "RadioWidget"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "路面文字标记",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                    "text": {
+                                        "type": "string",
+                                        "title": "文字",
+                                        "default": "",
+                                        "maxLength": 1024
+                                    }
+                                }
+                            },
+                            {
+                                "name": "普通指示标线",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "title": "分类",
+                                        "description": "车道线细分",
+                                        "enum": [
+                                            "导向车道线",
+                                            "左转弯待转区线",
+                                            "路口导向线",
+                                            "人行横道线",
+                                            "潮汐车道线",
+                                            "可变导向车道线",
+                                            "车距确认线",
+                                            "减速丘标线",
+                                            "停靠站标线",
+                                            "停车位标线",
+                                            "道路出入口标线"
+                                        ],
+                                        "minLength": 1,
+                                        "default": "unlabeled",
+                                        "ui:widget": "RadioWidget"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "路面图形标记",
+                                "definition": {
+                                    "description": ""
+                                },
+                                "properties": {
+                                    "text": {
+                                        "type": "string",
+                                        "title": "图形",
+                                        "default": "",
+                                        "maxLength": 1024
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "警告标线",
+                        "definition": {
+                            "description": "促使道路使用者了解道路上的特殊情况，提高警觉准备应变防范措施的标线"
+                        },
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "title": "分类",
+                                "description": "警告标线细分",
+                                "enum": [
+                                    "纵向减速标线",
+                                    "横向减速标线",
+                                    "路面（车行道）宽度渐变标线",
+                                    "接近障碍物标线",
+                                    "铁路平交道口标线",
+                                    "立面标记"
+                                ],
+                                "minLength": 1,
+                                "default": "unlabeled",
+                                "ui:widget": "RadioWidget"
+                            }
+                        }
+                    },
+                    {
+                        "name": "禁止标线",
+                        "definition": {
+                            "description": "告示道路交通的遵行、禁止、限制等特殊规定的标线"
+                        },
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "title": "分类",
+                                "description": "禁止标线细分",
+                                "enum": [
+                                    "禁止跨越车道-实线",
+                                    "停止线",
+                                    "停车让行线",
+                                    "减速让行线",
+                                    "导流线",
+                                    "网状线",
+                                    "禁止停车线",
+                                    "专用车道线",
+                                    "禁止掉头（转弯）线",
+                                    "非机动车禁驶区标线",
+                                    "中心圈"
+                                ],
+                                "minLength": 1,
+                                "default": "unlabeled",
+                                "ui:widget": "RadioWidget"
+                            }
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

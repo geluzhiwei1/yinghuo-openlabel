@@ -471,6 +471,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
         userAuth.value.access_token = json.data.access_token
         // 保持登录:勾选时保存 refresh_token(7天),不勾时清空(关闭页面即过期)
         userAuth.value.refresh_token = form.rememberMe ? (json.data.refresh_token || '') : ''
+        userAuth.value.expires_at = Date.now() + (json.data.expires_in ?? 1800) * 1000
         userAuth.value.token_type = 'jwt'
         userAuth.value.isLogin = true
 

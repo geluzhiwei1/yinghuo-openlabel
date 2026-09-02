@@ -24,7 +24,7 @@ from openlabel import OpenLabel
 import pydash
 from .dependency import permission_required
 
-app = APIRouter(dependencies=[permission_required("admin:team:write")])
+app = APIRouter()
 
 class UserDepts(CollectionBase):
     label: Annotated[str, Field(max_length=100, min_length=1, description="部门名称", example="标注小组1")]
@@ -51,7 +51,8 @@ class UserDepts(CollectionBase):
 #         raise BizException(status=503, statusText="没有找到对应的数据")
 #     return rows[0]
     
-@app.post("/create", summary="创建", tags=["user_depts"])
+@app.post("/create", summary="创建", tags=["user_depts"],
+          dependencies=[permission_required("business:team:write")])
 async def create(dto: UserDepts, request: Request):
     
     # 重置核心字段
@@ -73,7 +74,8 @@ async def create(dto: UserDepts, request: Request):
         return wrap_json([], status=1, statusText="create failed")
 
 
-@app.delete("/delete", summary="删除", tags=["user_depts"])
+@app.delete("/delete", summary="删除", tags=["user_depts"],
+             dependencies=[permission_required("business:team:write")])
 async def delete_list(request: Request):
     req_json = await request.json()
     _id = pydash.get(req_json, "id", None)
@@ -104,7 +106,8 @@ async def delete_list(request: Request):
         return wrap_json([], status=1, statusText="删除数据失败")
 
 
-@app.put("/update", summary="更新", tags=["user_depts"])
+@app.put("/update", summary="更新", tags=["user_depts"],
+         dependencies=[permission_required("business:team:write")])
 async def update(dto_dict: dict):
     query = {}
     _id = dto_dict["id"]
@@ -160,7 +163,8 @@ async def update(dto_dict: dict):
 #     collection = Conf.MG_USER_DEPTS
 #     result = collection.insert_one(dto)
 
-@app.get("/query", summary="查询列表", tags=["user_depts"])
+@app.get("/query", summary="查询列表", tags=["user_depts"],
+         dependencies=[permission_required("business:team:read")])
 async def query(_id: str = Query(None)):
     """查询一条或者所有"""
     if ObjectId.is_valid(_id):
@@ -191,7 +195,8 @@ def build_tree(top_node, sub_rows):
             top_node['children'].append(cur_node)
             build_tree(cur_node, sub_rows)
 
-@app.get("/query_tree", summary="查询数结构", tags=["user_depts"])
+@app.get("/query_tree", summary="查询数结构", tags=["user_depts"],
+         dependencies=[permission_required("business:team:read")])
 async def query_tree():
     query = {"authority.owners": CTX_USER_ID.get("user_id")}
     collection = Conf.MG_USER_DEPTS

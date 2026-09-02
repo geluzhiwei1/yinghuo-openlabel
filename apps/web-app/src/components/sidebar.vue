@@ -1,16 +1,21 @@
 <template>
     <div class="sidebar">
-        <el-menu class="sidebar-el-menu" :collapse="sidebar.collapse" router>
-            <template v-for="item in menuData">
+        <el-menu
+            class="sidebar-el-menu"
+            :collapse="sidebar.collapse"
+            :default-openeds="openedSubMenus"
+            router
+        >
+            <template v-for="item in visibleMenuData">
                 <template v-if="item.children">
-                    <el-sub-menu :index="item.index" :key="item.index" v-permiss="item.id">
+                    <el-sub-menu :index="item.index" :key="item.index" v-permiss="item.permiss || item.id">
                         <template #title>
                             <Icon :icon="item.icon" :width="20"></Icon>
                             <span>{{ item.title }}</span>
                         </template>
                         <template v-for="subItem in item.children">
                             <el-sub-menu v-if="subItem.children" :index="subItem.index" :key="subItem.index"
-                                v-permiss="subItem.id">
+                                v-permiss="subItem.permiss || subItem.id">
                                 <template #title>
                                     <Icon :icon="item.icon" :width="20"></Icon>
                                     {{ subItem.title }}
@@ -20,7 +25,7 @@
                                     {{ threeItem.title }}
                                 </el-menu-item>
                             </el-sub-menu>
-                            <el-menu-item v-else :index="subItem.index" :route="subItem.index" v-permiss="subItem.id"
+                            <el-menu-item v-else :index="subItem.index" :route="subItem.index" v-permiss="subItem.permiss || subItem.id"
                                 >
                                 {{ subItem.title }}
                             </el-menu-item>
@@ -28,8 +33,8 @@
                     </el-sub-menu>
                 </template>
                 <template v-else>
-                    <el-menu-item :index="item.index" :route="item.index" :key="item.index" 
-                        v-permiss="item.id">
+                    <el-menu-item :index="item.index" :route="item.index" :key="item.index"
+                        v-permiss="item.permiss || item.id">
                         <!-- <el-icon>
                             <component :is="item.icon"></component>
                         </el-icon> -->
@@ -43,8 +48,9 @@
 </template>
 
 <script setup lang="ts">
-import { watch } from 'vue'
+import { computed } from 'vue'
 import { useSidebarStore } from '../store/sidebar'
+import { usePermission } from '@/states/usePermission'
 import { Icon } from '@iconify/vue'
 
 const props = defineProps({
@@ -53,6 +59,27 @@ const props = defineProps({
         default: []
     }
 })
+
+// 镜像 v-permiss 指令的判定:有 `permiss`(含 `:`)就走 can,否则视为可见
+const { can } = usePermission()
+const isChildVisible = (sub: any): boolean => {
+    if (sub?.permiss && String(sub.permiss).includes(':')) {
+        return can(sub.permiss)
+    }
+    return true
+}
+
+const visibleMenuData = computed(() =>
+    (props.menuData || []).filter((item: any) => {
+        // 白名单:showAlways 的叶子项始终保留(如标注任务入口)
+        if (item.showAlways) return true
+        if (!Array.isArray(item.children) || item.children.length === 0) return false
+        return item.children.some(isChildVisible)
+    })
+)
+
+// 默认展开所有一级子菜单
+const openedSubMenus = computed(() => visibleMenuData.value.map((item: any) => item.index))
 // import { useRoute, useRouter } from 'vue-router'
 // import { usePermissStore } from '@/store/permiss';
 

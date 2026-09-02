@@ -445,7 +445,8 @@ html.dark .yh-filter .el-input__wrapper { background: rgba(255,255,255,0.06) !im
 
 .el-tree-node__content {
   height: auto !important;
-  padding: 6px 0 !important;
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
 }
 
 .el-tree-node__content:hover {

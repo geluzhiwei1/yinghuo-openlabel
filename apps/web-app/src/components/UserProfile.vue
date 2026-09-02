@@ -6,30 +6,29 @@
     <template #dropdown>
       <el-dropdown-menu>
         <!-- <el-dropdown-item @click="toMainPage()">主页</el-dropdown-item> -->
-        <el-dropdown-item @click="modifyPassword()">账号信息</el-dropdown-item>
+        <el-dropdown-item @click="toUserInfo()">账号信息</el-dropdown-item>
         <el-dropdown-item divided @click="logout()">退出登录</el-dropdown-item>
       </el-dropdown-menu>
     </template>
   </el-dropdown>
-  <UserProfilePanel ref="userProfilePanelRef"/>
 </template>
 <script lang="tsx" setup>
 import { ElDropdown, ElDropdownItem, ElDropdownMenu, ElMessage } from 'element-plus'
 import { Icon } from '@iconify/vue'
-import UserProfilePanel from '@/home/views/system/user/UserProfilePanel.vue'
-import { watch, ref } from 'vue'
+import { watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { messages } from '@/states'
 import { isEmpty } from 'radash'
 import { cleanLoginfo } from '@/states/UserState'
 
-const userProfilePanelRef = ref(null)
+const router = useRouter()
 
 const toMainPage = () => {
   window.location.href = 'dashboard'
 }
 
-const modifyPassword = () => {
-  userProfilePanelRef.value?.open()
+const toUserInfo = () => {
+  router.push('/user-info')
 }
 
 const logout = () => {

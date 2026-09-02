@@ -7,12 +7,14 @@ import functools
 
 from ..db.collection import AnnoJob, JobStatus
 from ...config import Conf, settings
+from ..data_paths import shared_data_root, split_shared_prefix
 from .user import user_service
 from ...dto.data_seq import SimpleDataSeq
 from .team import team_service
 from ...dto.users import RoleEnum, UserJobAuth
 from .role import role_service
 from ...log import logger
+from ...exceptions import BizException
 from yinghuo_app.dto.seq_data import SeqData
 
 
@@ -50,29 +52,43 @@ class JobService(object):
             else:
                 file_exts = job_def["label_spec"]["data"]["file_exts"]
                 if file_exts is None or len(file_exts) == 0:
-                    raise Exception("file_exts不能为空")
-            
-                data_root = os.path.join(settings.YH_USER_DATA_ROOT, str(user_id))
-                sds = SimpleDataSeq(data_root, seq, streams=dto.label_spec.data.streams, file_exts=file_exts)
+                    raise BizException(status=400, statusText="file_exts不能为空")
+
+                # shared-datas 前缀的 seq 落在共享根下,其余在用户私有目录
+                seq_is_shared, seq_rest = split_shared_prefix(seq)
+                data_root = shared_data_root() if seq_is_shared else os.path.join(settings.YH_USER_DATA_ROOT, str(user_id))
+                sds = SimpleDataSeq(data_root, seq_rest, streams=dto.label_spec.data.streams, file_exts=file_exts)
                 meta_dict, stream_meta_dicts, streams = sds.build_seq_meta()
                 # return wrap_json(sds.get_seq_meta())
             job_def["label_spec"]["data"]["streams"] = streams
         elif job_def["label_spec"]["data"]["format"] == "openlabel":
-            data_root = os.path.join(settings.YH_USER_DATA_ROOT, str(user_id))
-            seq_dir = os.path.join(data_root, seq.lstrip("/"))
+            seq_is_shared, seq_rest = split_shared_prefix(seq)
+            data_root = shared_data_root() if seq_is_shared else os.path.join(settings.YH_USER_DATA_ROOT, str(user_id))
+            seq_dir = os.path.join(data_root, seq_rest)
             meta_path = os.path.join(seq_dir, "meta.json")
             if not os.path.exists(meta_path):
-                raise Exception(f"数据路径无效：{seq} 下未找到 meta.json（OpenLABEL格式），请选择包含 meta.json 的数据目录，或将数据格式改为 directory")
+                hint = ""
+                if os.path.isdir(seq_dir):
+                    ol_children = [
+                        e.name for e in os.scandir(seq_dir)
+                        if e.is_dir() and not e.name.startswith((".", "_"))
+                        and os.path.exists(os.path.join(e.path, "meta.json"))
+                    ]
+                    if ol_children:
+                        hint = f"；该目录下找到 openlabel 子目录: {', '.join(ol_children[:5])}" + (
+                            " 等" if len(ol_children) > 5 else ""
+                        )
+                raise BizException(status=400, statusText=f"数据路径无效：{seq} 下未找到 meta.json（OpenLABEL格式），请选择包含 meta.json 的数据目录，或将数据格式改为 directory{hint}")
             seqData = SeqData.from_seq_data_dir(seq_dir)
             meta_dict = seqData.seq_meta_obj.meta_dict
             # stream_meta_dicts = {k:v.meta_dict for k, v in seqData.stream_metas_obj.streams.items()}
             streams = job_def["label_spec"]["data"]["streams"]
             stream_meta_dicts = [seqData.stream_metas_obj.streams[stream].meta_dict for stream in streams]
         else:
-            raise Exception("未知的format类型")
-        
+            raise BizException(status=400, statusText="未知的format类型")
+
         if len(streams) < 1:
-            raise Exception("streams不存在")
+            raise BizException(status=400, statusText="streams不存在")
         result = Conf.MG_ANNO_JOB_PERFORM.insert_one(job_def)
         if result.acknowledged:
             r1 = Conf.MG_DATA_SEQ_META.insert_one(

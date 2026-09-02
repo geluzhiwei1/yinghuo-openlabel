@@ -168,6 +168,41 @@ class GlPointcloud {
     eventBus.emit(eventBus.pcEditor.Gl.Updated)
   }
 
+  /**
+   * 新加载的点云与相机尺度悬殊(云的包围球半径 > 相机距离 5 倍,或反之)时,
+   * 沿当前视线把相机退到能装下整朵云的距离。
+   *
+   * 地理参考坐标的 LAS/LAZ 平移到原点后半径仍可达数公里,而相机默认在
+   * (0,0,50)、fov 75°,可见点只有个位数,页面看起来就是空的;靠滚轮把
+   * OrbitControls 从 50m 缩放到 ~5km 要上百格。只在悬殊时干预,正常同尺度
+   * 的序列帧(相机距离与云半径同量级)不受影响。
+   */
+  fitCameraToCloud() {
+    const mainView: any = glGlobals.mainView
+    if (!mainView?.camera || !mainView?.orbitControl) return
+    const bs = this.pcdMesh.geometry.boundingSphere
+    if (!bs || !Number.isFinite(bs.radius) || bs.radius <= 0) return
+
+    const camera: THREE.PerspectiveCamera = mainView.camera
+    const center = bs.center.clone()
+    const dir = camera.position.clone().sub(center)
+    const dist = dir.length()
+    if (dist > 0) dir.normalize()
+    else dir.set(0, 0, 1)
+
+    if (bs.radius <= dist * 5 && dist <= bs.radius * 5) return
+
+    const fov = (camera.fov * Math.PI) / 180
+    const need = (bs.radius / Math.sin(fov / 2)) * 1.2
+    camera.position.copy(center).addScaledVector(dir, need)
+    if (camera.far < need + bs.radius) {
+      camera.far = (need + bs.radius) * 2
+      camera.updateProjectionMatrix()
+    }
+    mainView.orbitControl.target.copy(center)
+    mainView.orbitControl.update()
+  }
+
   updateColor() {
     const colorAttribute = new THREE.Float32BufferAttribute(this.colorArr, 3)
     colorAttribute.setUsage(THREE.DynamicDrawUsage)
@@ -263,6 +298,14 @@ class GlPointcloud {
       colorArr = color
     }
 
+    // 兜底:选了 RGB/颜色映射但点云没有对应数据(如 LAS point format 1 无
+    // RGB)时,colorArr 会是空数组,长度为 0 的 color attribute 在 WebGL 里
+    // 取默认值 (0,0,0),整朵云渲染成黑色、暗色主题下等于不可见。退回单色。
+    if (colorArr.length < this.pcd.position.length) {
+      colorArr = new Array<number>(this.pcd.position.length)
+      colorArr.fill(pcUserSettings.value.setting.pointBrightness)
+    }
+
     // step 2 color by label
     this.colorArr = colorArr
     this.colorByLabels()
@@ -297,6 +340,7 @@ class GlLidars {
     } else {
       const pointsObject = await pySeqData.loadPcd({ ...jobConfig, streamId:stream, ts })
       const glLidar = new GlPointcloud(pointsObject, stream, ts, frame)
+      glLidar.fitCameraToCloud()
       glLidar.colorPoints()
       this.glLidars.set(glGlobals.buildPcdMeshName(options), glLidar)
 

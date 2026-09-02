@@ -1,0 +1,1 @@
+https://github.com/amisadmin/fastapi-scheduler/blob/master/fastapi_scheduler/admin.py

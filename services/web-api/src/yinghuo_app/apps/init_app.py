@@ -33,7 +33,6 @@ from .openpgl_app import app as openlabel
 from .algo_app import app as algo_app
 from .system_app import app as system_app
 from .auth import router as auth_app
-from .user_resource import app as user_resource_app
 from .orgs import router as orgs_app
 from .projects import router as projects_app
 from .project_templates import router as project_templates_app
@@ -111,7 +110,6 @@ def register_routers(app: FastAPI):
     app.include_router(openlabel, prefix="/openlabel")
     app.include_router(algo_app, prefix="/algo")
     app.include_router(system_app, prefix="/system")
-    app.include_router(user_resource_app, prefix="/resource")
     # Stage 4 新增:租户感知的项目 / 标签集 路由
     app.include_router(projects_app, prefix="/projects")
     app.include_router(taxonomies_app, prefix="/taxonomies")
@@ -228,7 +226,7 @@ async def BizException_handler(request: Request, exc: BizException) -> Response:
     logger.error(exc)
     traceback.print_exception(exc)
     return JSONResponse(
-        content={"status": exec.status, "statusText": exc.statusText},
+        content={"status": exc.status, "statusText": exc.statusText},
     )
     
 def register_exceptions(app: FastAPI):

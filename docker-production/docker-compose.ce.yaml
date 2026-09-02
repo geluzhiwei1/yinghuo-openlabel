@@ -1,0 +1,76 @@
+# CE (Community Edition)
+# 用法: cp env-templates/.env.ce.template .env.ce && docker compose --env-file .env.ce -f docker-compose.ce.yaml up -d
+services:
+  postgres:
+    container_name: yh-ce-postgres
+    image: ghcr.io/ferretdb/postgres-documentdb:17-0.105.0-ferretdb-2.4.0
+    restart: on-failure
+    environment:
+      - POSTGRES_USER=produser
+      - POSTGRES_PASSWORD=prodpass
+      - POSTGRES_DB=postgres
+      - POSTGRES_PORT=5432
+    volumes:
+      - ${POSTGRES_DATA_DIR}:/var/lib/postgresql/data
+    networks:
+      - yh-ce-network
+
+  ferretdb:
+    container_name: yh-ce-ferretdb
+    image: ghcr.io/ferretdb/ferretdb:2.4.0
+    restart: on-failure
+    environment:
+      - FERRETDB_POSTGRESQL_URL=postgres://produser:prodpass@postgres:5432/postgres
+    depends_on:
+      - postgres
+    networks:
+      - yh-ce-network
+
+  redis:
+    container_name: yh-ce-redis
+    image: redis:latest
+    restart: always
+    volumes:
+      - ${REDIS_DATA_DIR}:/root/redis
+    command: redis-server
+    networks:
+      - yh-ce-network
+
+  web-api:
+    container_name: yh-ce-web-api
+    image: ghcr.io/geluzhiwei1/yinghuo-backend-ce:latest-ce
+    restart: on-failure
+    ports:
+      - "${WEB_API_PORT}:8423"
+    environment:
+      - YH_EDITION=ce
+      - YH_CONFIG_FILE=/app/config/yinghuo.yaml
+      - YH_JWT_SECRET=${YH_JWT_SECRET:?must set in .env.ce}
+    depends_on:
+      - ferretdb
+      - redis
+    volumes:
+      - ./app-config/ce/yinghuo.yaml:/app/config/yinghuo.yaml
+      - ${YH_USER_DATA_ROOT}:/app/yh_user_data
+      - ${LOG_ROOT}:/app/logs
+      - ./scripts/ce/init-db.sh:/app/init-db.sh
+    command: bash /app/init-db.sh
+    networks:
+      - yh-ce-network
+
+  web-app:
+    container_name: yh-ce-web-app
+    image: ghcr.io/geluzhiwei1/yinghuo-frontend-ce:latest-ce
+    restart: on-failure
+    ports:
+      - "${WEB_APP_PORT}:80"
+    depends_on:
+      - web-api
+    networks:
+      - yh-ce-network
+    volumes:
+      - ./nginx-conf/ce:/etc/nginx/conf.d
+
+networks:
+  yh-ce-network:
+    driver: bridge

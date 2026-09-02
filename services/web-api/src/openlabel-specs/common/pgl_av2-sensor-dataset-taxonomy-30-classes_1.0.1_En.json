@@ -1,0 +1,342 @@
+{
+    "openlabel": {
+        "meta": {
+            "name": "Argoverse2 Sensor Dataset Taxonomy",
+            "description": "",
+            "url": "https://argoverse.github.io/user-guide/datasets/sensor.html#sensor-dataset-taxonomy"
+        },
+        "ontologies": {
+            "0": "https://argoverse.github.io/user-guide/datasets/sensor.html#sensor-dataset-taxonomy"
+        },
+        "classes": [
+            {
+                "name": "TrafficParticipant&TrafficInfrastructure",
+                "definition": {
+                },
+                "properties":{
+                    "visibility": {
+                        "type": "string",
+                        "title": "可见性",
+                        "description": "目标物体的可见程度",
+                        "enum": [
+                            "<40%",
+                            "<60%",
+                            "<80%",
+                            "<=100%"
+                        ],
+                        "default": "unlabeled",
+                        "ui:widget": "RadioWidget"
+                    },
+                    "tags": {
+                        "type": "string",
+                        "title": "标签",
+                        "default": "",
+                        "maxLength": 1024
+                    },
+                    "annotation": {
+                        "type": "string",
+                        "default": "",
+                        "title": "描述",
+                        "maxLength": 1024
+                    }
+                },
+                "children":[
+                    {
+                        "name": "Motorized vehicle",
+                        "definition": {
+                        },
+                        "properties": {
+                            "driving_status": {
+                                "type": "string",
+                                "title": "行驶状态",
+                                "description": "车辆的行驶状态",
+                                "enum": [
+                                    "泊车",
+                                    "行驶",
+                                    "停车"
+                                ],
+                                "minLength": 1,
+                                "default": "unlabeled",
+                                "ui:widget": "RadioWidget"
+                            },
+                            "vehicle_light": {
+                                "type": "array",
+                                "uniqueItems": true,
+                                "title": "车灯",
+                                "description": "车辆的灯光状态",
+                                "items": {
+                                    "type": "string",
+                                    "enum": [
+                                        "左转向灯",
+                                        "右转向灯",
+                                        "刹车灯",
+                                        "警告灯"
+                                    ],
+                                    "enumNames": [
+                                        "左转向灯",
+                                        "右转向灯",
+                                        "刹车灯",
+                                        "警告灯"
+                                    ]
+                                  },
+                                "default": [],
+                                "ui:widget": "CheckboxesWidget"
+                            },
+                            "door_status": {
+                                "type": "array",
+                                "title": "车门状态",
+                                "description": "车门关闭情况",
+                                "items": {
+                                    "type": "string",
+                                    "enum": [
+                                        "关闭",
+                                        "左侧门开",
+                                        "右侧门开"
+                                    ],
+                                    "enumNames": [
+                                        "关闭",
+                                        "左侧门开",
+                                        "右侧门开"
+                                    ]
+                                  },
+                                "default": [],
+                                "uniqueItems": true,
+                                "ui:widget": "CheckboxesWidget"
+                            },
+                            "speed": {
+                                "type": "number",
+                                "title": "速度",
+                                "description": "车辆行驶速度",
+                                "default": -1,
+                                "multipleOf": 0,
+                                "minimum": -1,
+                                "maximum": 300,
+                                "ui:options": {
+                                    "precision": 3
+                                }
+                            }
+                        },
+                        "children": [
+                            {
+                                "name": "BUS",
+                                "definition": {
+                                    "description":"Standard city buses designed to carry a large number of people."
+                                }
+                            },
+                            {
+                                "name": "SCHOOL_BUS",
+                                "definition": {
+                                    "description":"Bus that primarily holds school children (typically yellow) and can control the flow of traffic via the use of an articulating stop sign and loading/unloading flasher lights."
+                                }
+                            },
+                            {
+                                "name": "ARTICULATED_BUS",
+                                "definition": {
+                                    "description":"Articulated buses perform the same function as a standard city bus, but are able to bend (articulate) towards the center. These will also have a third set of wheels not present on a typical bus."
+                                }
+                            },
+                            {
+                                "name": "TRUCK",
+                                "definition": {
+                                    "description":"Vehicles that are clearly defined as a truck but does not fit into the subclasses of Box Truck or Truck Cab. Examples include common delivery vehicles (UPS, FedEx), mail trucks, garbage trucks, utility trucks, ambulances, dump trucks, etc."
+                                }
+                            },
+                            {
+                                "name": "TRUCK_CAB",
+                                "definition": {
+                                    "description":"Heavy truck commonly known as “Semi cab”, “Tractor”, or “Lorry”. This refers to only the front of part of an articulated tractor trailer."
+                                }
+                            },
+                            {
+                                "name": "BOX_TRUCK",
+                                "definition": {
+                                    "description":"SChassis cab truck with an enclosed cube shaped cargo area. It should be noted that the cargo area is rigidly attached to the cab, and they do not articulate."
+                                }
+                            },
+                            {
+                                "name": "REGULAR_VEHICLE",
+                                "definition": {
+                                    "description":"Any conventionally sized passenger vehicle used for the transportation of people and cargo. This includes Cars, vans, pickup trucks, SUVs, etc."
+                                }
+                            },
+                            {
+                                "name": "LARGE_VEHICLE",
+                                "definition": {
+                                    "description":"Large motorized vehicles (four wheels or more) which do not fit into any more specific subclass. Examples include extended passenger vans, fire trucks, RVs, etc."
+                                }
+                            },
+                            {
+                                "name": "RAILED_VEHICLE",
+                                "definition": {
+                                    "description":"Any vehicle that relies on rails to move. This applies to trains, trolleys, train engines, train freight cars, train tanker cars, subways, etc."
+                                }
+                            },
+                            {
+                                "name": "MESSAGE_BOARD_TRAILER",
+                                "definition": {
+                                    "description":"Trailer carrying a large, mounted, electronic sign to display messages. Often found around construction sites or large events."
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Non-motorized Vehicle",
+                        "definition": {
+                        },
+                        "properties": {
+                        },
+                        "children":[
+                            {
+                                "name": "BICYCLE",
+                                "definition": {
+                                    "description":"Non-motorized vehicle that typically has two wheels and is propelled by human power pushing pedals in a circular motion."
+                                }
+                            },
+                            {
+                                "name": "WHEELED_DEVICE",
+                                "definition": {
+                                    "description":"Objects involved in the transportation of a person and do not fit a more specific class. Examples range from skateboards, non-motorized scooters, segways, to golf-carts."
+                                }
+                            },
+                            {
+                                "name": "MOTORCYCLE",
+                                "definition": {
+                                    "description":"Motorized vehicle with two wheels where the rider straddles the engine. These are capable of high speeds similar to a car."
+                                }
+                            },
+                            {
+                                "name": "VEHICULAR_TRAILER",
+                                "definition": {
+                                    "description":"Non-motorized, wheeled vehicle towed behind a motorized vehicle."
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Humman & Cyclist",
+                        "definition": {
+                        },
+                        "properties": {
+                        },
+                        "children":[
+                            {
+                                "name": "PEDESTRIAN",
+                                "definition": {
+                                    "description":"Person that is not driving or riding in/on a vehicle. They can be walking, standing, sitting, prone, etc."
+                                }
+                            },
+                            {
+                                "name": "OFFICIAL_SIGNALER",
+                                "definition": {
+                                    "description":"Person with authority specifically responsible for stopping and directing vehicles through traffic."
+                                }
+                            },
+                            {
+                                "name": "BICYCLIST",
+                                "definition": {
+                                    "description":"Person actively riding a bicycle, non-pedaling passengers included."
+                                }
+                            },
+                            {
+                                "name": "MOTORCYCLIST",
+                                "definition": {
+                                    "description":"Person actively riding a motorcycle or a moped, including passengers."
+                                }
+                            },
+                            {
+                                "name": "WHEELED_RIDER",
+                                "definition": {
+                                    "description":"Person actively riding or being carried by a wheeled device."
+                                }
+                            },
+                            {
+                                "name": "STROLLER",
+                                "definition": {
+                                    "description":"Push-cart with wheels meant to hold a baby or toddler."
+                                }
+                            },
+                            {
+                                "name": "WHEELCHAIR",
+                                "definition": {
+                                    "description":"Chair fitted with wheels for use as a means of transport by a person who is unable to walk as a result of illness, injury, or disability. This includes both motorized and non-motorized wheelchairs as well as low-speed seated scooters not intended for use on the roadway."
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Animals",
+                        "definition": {
+                        },
+                        "properties": {
+                        },
+                        "children":[
+                            {
+                                "name":"DOG",
+                                "definition": {
+                                    "description":"Any member of the canine family."
+                                }
+                            },
+                            {
+                                "name":"ANIMAL",
+                                "definition": {
+                                    "description":"All recognized animals large enough to affect traffic, but that do not fit into the Cat, Dog, or Horse categories"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Road Facilities & Traffic Infrastructure",
+                        "definition": {
+                        },
+                        "properties": {
+                        },
+                        "children": [
+                            {
+                                "name": "BOLLARD",
+                                "definition": {
+                                    "description":"Bollards are short, sturdy posts installed in the roadway or sidewalk to control the flow of traffic. These may be temporary or permanent and are sometimes decorative."
+                                }
+                            },
+                            {
+                                "name": "CONSTRUCTION_CONE",
+                                "definition": {
+                                    "description":"Movable traffic cone that is used to alert drivers to a hazard. These will typically be orange and white striped and may or may not have a blinking light attached to the top."
+                                }
+                            },
+                            {
+                                "name": "STOP_SIGN",
+                                "definition": {
+                                    "description":"Red octagonal traffic sign displaying the word STOP used to notify drivers that they must come to a complete stop and make sure no other road users are coming before proceeding."
+                                }
+                            },
+                            {
+                                "name": "SIGN",
+                                "definition": {
+                                    "description":"Official road signs placed by the Department of Transportation (DOT signs) which are of interest to us. This includes yield signs, speed limit signs, directional control signs, construction signs, and other signs that provide required traffic control information. Note that Stop Sign is captured separately and informative signs such as street signs, parking signs, bus stop signs, etc. are not included in this class."
+                                }
+                            },
+                            {
+                                "name": "CONSTRUCTION_BARREL",
+                                "definition": {
+                                    "description":"Construction Barrel is a movable traffic barrel that is used to alert drivers to a hazard. These will typically be orange and white striped and may or may not have a blinking light attached to the top.                                    "
+                                }
+                            },
+                            {
+                                "name": "TRAFFIC_LIGHT_TRAILER",
+                                "definition": {
+                                    "description":"Mounted, portable traffic light unit commonly used in construction zones or for other temporary detours."
+                                }
+                            },
+                            {
+                                "name": "MOBILE_PEDESTRIAN_SIGN",
+                                "definition": {
+                                    "description":"Movable sign designating an area where pedestrians may cross the road."
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

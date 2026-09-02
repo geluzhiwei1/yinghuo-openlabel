@@ -35,6 +35,13 @@ COPY services/web-api/pyproject.toml ./
 COPY services/web-api/src/ ./src/
 COPY services/web-api/config/ ./config/
 
+# captcha 字体文件(PIL truetype 需要)— pyproject 没声明 package-data,显式 COPY
+COPY services/web-api/src/yinghuo_app/captcha/font/ /root/.local/lib/python3.12/site-packages/yinghuo_app/captcha/font/
+
+# openlabel 规范数据(纯 JSON 目录,不随 pip install 进 site-packages)。
+# openlabel.JSON_PATHS 的第三项解析到 site-packages/,这里 COPY 到该位置才能被找到
+COPY services/web-api/src/openlabel-specs/ /root/.local/lib/python3.12/site-packages/openlabel-specs/
+
 RUN pip install . --user -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 EXPOSE 8423
