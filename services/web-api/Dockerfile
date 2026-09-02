@@ -7,7 +7,8 @@ FROM python:${PYTHON_VERSION}-slim AS builder
 WORKDIR /app
 
 COPY services/web-api/pyproject.toml ./
-COPY services/web-api/src/.keep ./src/.keep
+# 只装依赖的缓存层:src 留空目录让 setuptools 构建(包内容为空,依赖照装)
+RUN mkdir -p src
 
 # Install production dependencies using pip
 RUN pip install . -i ${PIP_INDEX_URL}
