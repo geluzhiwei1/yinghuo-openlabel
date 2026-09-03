@@ -1,53 +1,80 @@
-# Docker 镜像发布
+# Docker Image Release (CE)
 
-统一走 `scripts/release_docker_image.sh`。产物推到 `ghcr.io/geluzhiwei1/`,镜像名自动追加 `-ce/-ee/-saas` 后缀,tag 自动生成 4 个:`{version}-{edition}` / `{version}-{edition}-{environment}` / `latest-{edition}` / `latest-{edition}-{environment}`,无需手动打 tag。
+CE image publishing is fully automated by two GitHub Actions workflows. Artifacts are pushed to `ghcr.io/geluzhiwei1/`:
 
-## 前置
+| Trigger | Workflow | Image tags |
+|---|---|---|
+| every push to master | `snapshot.yml` | `<next-version>-snapshot.<yyyymmdd>.<sha>-ce` (immutable) + `snapshot-ce` (moving pointer) |
+| push a `v*` tag | `release.yml` | `X.Y.Z-ce` / `X.Y.Z-ce-production` / `latest-ce` / `latest-ce-production` + GitHub Release |
 
-- `GITHUB_TOKEN` 在环境变量里,需 `write:packages` scope(40 字符 `ghp_` 开头)。
-- 前端镜像只 COPY 预构建的 `apps/web-app/dist/`,构建前端镜像前必须先 `pnpm run build`。
-- EE / SaaS 需先在各自私有仓库(yinghuo-openlabel-ee / yinghuo-openlabel-saas)运行
-  `CE_ROOT=<本仓路径> scripts/setup-edition.sh {ee|saas}` 挂上私有代码(CE 不需要)。
+Core rule: **`latest-*` belongs to formal releases only**. Snapshots never touch latest, so `snapshot-ce` can always be used to try the newest code without affecting production.
 
-## 完整发布(推荐)
-
-frontend + backend 全部构建 + 推送 + 全部 tag:
+## Formal release steps
 
 ```bash
-export GITHUB_TOKEN=ghp_xxx
+# 1. Make sure master is in good shape: both "build" and "snapshot"
+#    workflows are green
+#    https://github.com/geluzhiwei1/yinghuo-openlabel/actions
 
-# 前端先出 dist
-cd apps/web-app && pnpm install && pnpm run build && cd ../..
+# 2. Tag the commit to release and push the tag (explicit key for this host)
+git tag v0.4.2
+GIT_SSH_COMMAND="ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes" git push origin v0.4.2
 
-# 发布(--edition 默认 ce)
-scripts/release_docker_image.sh release --version 0.4.0
-# scripts/release_docker_image.sh release --version 0.4.0 --edition ee
-# scripts/release_docker_image.sh release --version 0.4.0 --edition saas
+# 3. Wait for the release workflow (frontend build + backend assemble check
+#    + both images pushed + GitHub Release created)
 ```
 
-## 分步命令
+The workflow already includes: frontend build (version stamped into package.json before build), backend `pip install -e .` + app import check (verify before pushing anything). If any step fails, no tag is pushed.
+
+## Tag naming rules
+
+| Tag shape | Behavior |
+|---|---|
+| `v0.4.2` (pure semver) | all 4 image tags, latest pointers moved, formal GitHub Release |
+| `v0.5.0-rc.1` (prerelease suffix) | only `X.Y.Z-rc.1-ce(-production)`, **latest NOT moved**, Release marked prerelease |
+| anything else | workflow fails immediately |
+
+## Snapshot version algorithm
+
+Take the newest full-semver git tag (`v0.3` and other legacy short tags are ignored), bump the patch, then append date and short sha. Example: latest tag `v0.4.1` → `0.4.2-snapshot.20260903.1a2b3c4-ce`. If no formal tag exists yet, fall back to the version in `apps/web-app/package.json`.
+
+## Verifying a release
 
 ```bash
-scripts/release_docker_image.sh build_all --version 0.4.0        # 只构建
-scripts/release_docker_image.sh push_all --version 0.4.0         # 只推送
-scripts/release_docker_image.sh build_and_push frontend --version 0.4.0   # 单服务
-scripts/release_docker_image.sh list_services                    # 列出支持的服务
-scripts/release_docker_image.sh show_config                      # 查看当前配置
+# Actual tags on ghcr (GITHUB_TOKEN needs write:packages)
+curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+  https://api.github.com/user/packages/container/yinghuo-backend-ce/versions?per_page=3 \
+  | python3 -c "import json,sys;[print(v['updated_at'],v['metadata']['container']['tags']) for v in json.load(sys.stdin)]"
+
+# Once the container is up, hit the version endpoint (public, no auth)
+curl http://<host>:8423/version
+# → {"version":"0.4.2-ce","git_sha":"...","edition":"ce","channel":"stable"}
 ```
 
-全部选项见 `scripts/release_docker_image.sh --help`。
-
-## 测试验证
+## Smoke test with docker compose
 
 ```bash
 cd docker-production
 cp env-templates/.env.ce.template .env.ce
+# point the image tags in .env.ce at the version you want to verify
 docker compose --env-file .env.ce -f docker-compose.ce.yaml up
 ```
 
-CE 启动后浏览器访问 [app](http://localhost:6600/guis/yinghuo/home.html),账号 `prod@geluzhiwei.com` 密码 `yinghuo`。
+After CE is up, open the [app](http://localhost:6600/guis/yinghuo/home.html), account `prod@geluzhiwei.com` password `yinghuo`.
 
-## 已知坑
+## Known pitfalls
 
-- ghcr 偶发推送卡死:所有层显示 "Layer already exists" 后 manifest PUT 无限挂起(仓库级故障,换 tag 也挂)。解法:把镜像 tag 到一个全新仓库名(如 `xxx-probe`)再推,层会 cross-mount 秒级完成,manifest 通常立即成功;之后再推 canonical 仓库往往已恢复。
-- 推送结果别信管道尾行,用 `docker buildx imagetools inspect ghcr.io/...` 确认远端 digest。
+- **ghcr packages must be linked to the repo**: GITHUB_TOKEN can only push to packages linked to the repository, otherwise `denied: write_package`. For a new package (especially if the first version was pushed manually with a PAT), go to the package settings page → **Manage Actions access → Add repository → Write**. There is no API for this, UI only (both frontend/backend packages were linked on 2026-09-02).
+- **ghcr push occasionally hangs**: all layers show "Layer already exists" but the manifest PUT never completes (repo-level failure; re-tagging doesn't help). Fix: tag the image to a brand-new repository name (e.g. `xxx-probe`) and push — layers cross-mount within seconds and the manifest usually succeeds immediately; pushing to the canonical repository afterwards typically works again.
+- Don't trust the last line of a piped push; confirm the remote digest with `docker buildx imagetools inspect ghcr.io/...`.
+- After changing the backend Dockerfile, run a full local `docker build` before pushing: a global `ARG` before `FROM` is not visible inside a stage (redeclare it in the stage); any file referenced by `COPY` must be committed to git.
+
+## Legacy manual script (archive only)
+
+`scripts/release_docker_image.sh` was the pre-CI manual release path. CE releases **no longer use it**; keep it as a fallback when GitHub Actions is unavailable:
+
+```bash
+export GITHUB_TOKEN=ghp_xxx
+cd apps/web-app && pnpm install && pnpm run build && cd ../..
+scripts/release_docker_image.sh release --version 0.4.2
+```
