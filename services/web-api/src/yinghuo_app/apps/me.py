@@ -4,10 +4,12 @@
 所有路由依赖 business:self:read|write(每个登录用户都有)。
 """
 from typing import Any
+import asyncio
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from redis import asyncio as aioredis
+from yinghuo_conf.api_util.utils import wrap_json
 
 from ..apps.ctx import CTX_USER_ID, get_current_tenant_id
 from ..apps.dependency import permission_required
@@ -19,6 +21,8 @@ from ..biz.services.me import (
     ProfileUpdateIn,
     me_service,
 )
+from ..biz.services.user_profile import user_profile_service
+from ..config import Conf
 from ..redis_conf import init_redis_pool
 
 router = APIRouter()
@@ -79,6 +83,23 @@ async def change_password(
     except MeError as e:
         raise HTTPException(status_code=400, detail=str(e))
     return {"statusText": "密码已更新"}
+
+
+@router.get(
+    "/quota",
+    summary="当前用户配额(任务数上限/已用)",
+    dependencies=[permission_required("business:self:read")],
+)
+async def get_my_quota():
+    uid = _user_id_or_401()
+    profile = await user_profile_service.get_by_user_id(uid)
+    used = await asyncio.to_thread(
+        Conf.MG_ANNO_JOB_PERFORM.count_documents, {"authority.owners": uid}
+    )
+    return wrap_json({
+        "max_job_count": profile.max_job_count,
+        "current_job_count": used,
+    })
 
 
 @router.get(

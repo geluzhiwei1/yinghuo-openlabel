@@ -423,6 +423,9 @@ html.dark .yh-filter .el-input__wrapper { background: rgba(255,255,255,0.06) !im
   margin-bottom: 0 !important;
   padding: 10px 12px 8px !important;
   border-bottom: 1px solid var(--lab-hairline) !important;
+  // slot 标题(H4 等)继承此 color; 不钉的话走 EP --el-text-color-primary,
+  // html.dark 下翻浅 → 白字贴 _shell 钉白的 drawer 表面(白上白)
+  color: var(--lab-ink) !important;
 }
 
 .el-drawer__title {

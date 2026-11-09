@@ -57,11 +57,15 @@ class BaseCanvas {
         this.containerEle = containerEle
         this.canvasEle = canvasEle
 
+        // 主题感知底色: annotator.vue 的 useDark watcher 在画布创建前就执行过,
+        // 不会再来补设, 这里初始化时直接读当前值 (亮色 #ffffff, 暗色深灰)
+        const surface = getComputedStyle(document.documentElement)
+            .getPropertyValue('--y-color-canvas-surface').trim() || '#ffffff'
         this.canvasObj = new fabric.Canvas(canvasEle, {
             hoverCursor: 'default',
             selection: false,
             fireRightClick: true,
-            backgroundColor: '#ffffff',
+            backgroundColor: surface,
         })
 
         this._fabricEvents = new Map()

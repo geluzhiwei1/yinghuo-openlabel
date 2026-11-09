@@ -64,8 +64,8 @@ export const labelApi = {
   seq_load: (data) => {
     return reqJson({ uri: bizBaseURL + '/label/seq_load', method: 'POST', data })
   },
-  export: (data) => {
-    return reqJson({ uri: bizBaseURL + '/label/export', method: 'POST', data })
+  volume_frames_summary: (data) => {
+    return reqJson({ uri: bizBaseURL + '/label/volume_frames_summary', method: 'POST', data })
   },
   export_coco: (data) => {
     return reqJson({ uri: bizBaseURL + '/label/export_coco', method: 'POST', data })
@@ -88,23 +88,18 @@ export const labelApi = {
     }
     return resp.blob()
   },
-  export_format: (data) => {
-    return reqJson({ uri: bizBaseURL + '/label/export_format', method: 'POST', data })
-  },
-  export_format_blob: async (data) => {
-    const resp = await fetch(bizBaseURL + '/label/export_format', {
+  import_format_zip: async (uuid: string, stream: string, mode: string, blob: Blob) => {
+    const q = `uuid=${encodeURIComponent(uuid)}&stream=${encodeURIComponent(stream)}&mode=${mode}`
+    const resp = await fetch(`${bizBaseURL}/label/import_format?${q}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${userAuth.value.access_token}`,
-      },
-      body: JSON.stringify(data),
+      headers: { Authorization: `Bearer ${userAuth.value.access_token}` },
+      body: blob,
     })
     if (!resp.ok) {
       const text = await resp.text().catch(() => '')
-      throw new Error(`导出失败 (${resp.status}): ${text}`)
+      throw new Error(`导入失败 (${resp.status}): ${text}`)
     }
-    return resp.blob()
+    return resp.json()
   },
   deleteSeqAll: (data) => {
     return reqJson({ uri: bizBaseURL + '/label/deleteSeqAll', method: 'POST', data })
@@ -115,6 +110,71 @@ export const fileAPi = {
   uri2: bizBaseURL + '/file2/get',
   mapJson: (data) => {
     return reqJson({ method: 'GET', uri: bizBaseURL + '/file2/get', data})
+  },
+}
+
+// 体数据分割 mask(.seg.nrrd.gz 二进制, 走 raw fetch)
+export const volumeMaskApi = {
+  upload: async (uuid: string, labelUuid: string, bytes: Uint8Array) => {
+    const resp = await fetch(`${bizBaseURL}/label/volume_mask/upload?uuid=${uuid}&label_uuid=${labelUuid}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/octet-stream', Authorization: `Bearer ${userAuth.value.access_token}` },
+      body: bytes as any,
+    })
+    if (!resp.ok) throw new Error(`mask 上传失败 (HTTP ${resp.status}): ${await resp.text().catch(() => '')}`)
+    const j = await resp.json()
+    if (j?.status === 1) throw new Error(`mask 上传失败: ${j.statusText}`)
+    return j
+  },
+  get: async (uuid: string, labelUuid: string) => {
+    const resp = await fetch(`${bizBaseURL}/label/volume_mask/get?uuid=${uuid}&label_uuid=${labelUuid}`, {
+      headers: { Authorization: `Bearer ${userAuth.value.access_token}` },
+    })
+    if (!resp.ok) throw new Error(`mask 下载失败 (HTTP ${resp.status})`)
+    return new Uint8Array(await resp.arrayBuffer())
+  },
+}
+
+// 体数据模型推理(med-seg 代理)。models 探测 503 = 服务未配置, 调用方据此隐藏入口。
+export const volumeInferApi = {
+  models: async (): Promise<Array<{ id: string; label: string; requires: string[]; device?: string }> | null> => {
+    try {
+      const resp = await fetch(`${bizBaseURL}/label/volume_infer/models`, {
+        headers: { Authorization: `Bearer ${userAuth.value.access_token}` },
+      })
+      if (resp.status === 503) return null
+      if (!resp.ok) return null
+      const j = await resp.json()
+      return j?.status === 0 ? j.data : null
+    } catch {
+      return null
+    }
+  },
+  create: async (uuid: string, stream: string, frame: number | string, models: string[]) => {
+    const resp = await fetch(`${bizBaseURL}/label/volume_infer`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${userAuth.value.access_token}` },
+      body: JSON.stringify({ uuid, stream, frame, models }),
+    })
+    const j = resp.ok ? await resp.json() : { status: 1, statusText: `HTTP ${resp.status}` }
+    if (j?.status === 1) throw new Error(j.statusText || '推理任务创建失败')
+    return j.data as { task_id: string }
+  },
+  status: async (taskId: string) => {
+    const resp = await fetch(`${bizBaseURL}/label/volume_infer/${taskId}`, {
+      headers: { Authorization: `Bearer ${userAuth.value.access_token}` },
+    })
+    if (!resp.ok) throw new Error(`状态查询失败 (HTTP ${resp.status})`)
+    const j = await resp.json()
+    if (j?.status === 1) throw new Error(j.statusText || '状态查询失败')
+    return j.data as { status: string; progress: number; error?: string; mask_url?: string }
+  },
+  mask: async (maskUrl: string) => {
+    const resp = await fetch(`${bizBaseURL}${maskUrl}`, {
+      headers: { Authorization: `Bearer ${userAuth.value.access_token}` },
+    })
+    if (!resp.ok) throw new Error(`mask 下载失败 (HTTP ${resp.status})`)
+    return await resp.arrayBuffer()
   },
 }
 
@@ -519,6 +579,7 @@ export const unitsApi = {
 // ----- Stage 8: Me / Preferences / Notifications -----
 export const meApi = {
   getProfile: () => reqJson({ uri: `${bizBaseURL}/me`, method: 'GET' }),
+  getQuota: () => reqJson({ uri: `${bizBaseURL}/me/quota`, method: 'GET' }),
   updateProfile: (data: any) => reqJson({ uri: `${bizBaseURL}/me`, data, method: 'PATCH' }),
   changePassword: (data: any) => reqJson({ uri: `${bizBaseURL}/me/password`, data, method: 'POST' }),
   getPreferences: () => reqJson({ uri: `${bizBaseURL}/me/preferences`, method: 'GET' }),

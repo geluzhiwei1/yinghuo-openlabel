@@ -21,8 +21,12 @@ dependencies = [
     "pymongo>=4.8.0",
     "click",
     "python-dotenv>=1.1.1",
+    # yinghuo_conf/config 直接 import yaml;此前靠 open3d 传递带入,
+    # 换镜像源后 open3d 0.20.0 元数据不再拉它,必须显式声明
+    "pyyaml>=6.0",
     "fastapi>=0.114.0",
     "uvicorn>=0.29.0",
+    "watchfiles>=0.21.0",  # uvicorn --reload 无它回退 StatReload 轮询 .venv 全树,烧满一核
     "pydash>=8.0.3",
     "json5>=0.9.25",
     "tortoise-orm>=0.25.1",
@@ -48,11 +52,12 @@ dependencies = [
     "fire>=0.7.0",
     "httpx>=0.28.1",
     "pytransform3d",
-    "open3d",
+    # 0.20 起 wheel 链接 torch/CUDA 原生库,slim CPU 镜像跑不起来;钉回 0.19
+    "open3d>=0.19,<0.20",
     "seaborn",
     "babel>=2.17.0",
     "motor>=3.7.1",
-    "sqlalchemy>=2.0.41",
+    "sqlalchemy[asyncio]>=2.0.41",
     "aiosqlite>=0.20.0",
     "async-lru>=2.0.5",
     # 邮件:用 PyPI 上的 emails 包(替换原 libs/python-emails 源码依赖)。
@@ -78,6 +83,8 @@ include = ["*"]
 [project.optional-dependencies]
 lint = ["black[jupyter]", "mypy", "ruff"]
 test = ["pytest", "debugpy", "fastapi", "httpx", "aerich", "pytest-asyncio"]
+# DICOM 原生导入(scripts/import_dicom.py 专用;API 运行时不导入,不进主依赖)
+dicom = ["pydicom>=2.4", "SimpleITK>=2.3"]
 
 # 注:阶段 2 换上源端代码后,把下面的 tortoise_orm 路径改为 yinghuo_app.config.settings.TORTOISE_ORM
 # (源端 config 在 yinghuo_app/config.py,目标端在 yinghuo_conf/loader.py)

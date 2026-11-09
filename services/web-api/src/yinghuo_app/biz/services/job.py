@@ -119,6 +119,7 @@ class JobService(object):
                 )
         else:
             raise Exception("插入job数据失败")
+        return str(result.inserted_id)
 
     @functools.lru_cache(maxsize=1024)
     def can_user_see_job(self, user_id: int, job_id: str, freshness=0):

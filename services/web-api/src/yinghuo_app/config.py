@@ -52,6 +52,9 @@ class Config(BaseServConfig):
             'objectBBox3d': db['label_object3d_bbox'],
             'pcSemantic3d': db['label_setamic3d_pc'],
             'pcPolyline3d': db['label_polyline3d_pc'],
+
+            # 医学体数据分割(体素labelmap + 轮廓双表示,mask 走 /label/volume_mask/* 端点)
+            'volumeSegment3d': db['label_volume_segment3d'],
             
             # 图像自身的标注信息
             'imageLabel': db['label_image'],

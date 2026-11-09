@@ -36,24 +36,49 @@ from .dependency import permission_required
 app = APIRouter(dependencies=[permission_required("business:anno-job:write")])
 PATH = "/perform"
 
+def _start_volume_pre_annotate(job: AnnoJob, job_id: str) -> None:
+    """B3: 体数据任务勾选了预标注模型 → 后台拉起逐帧推理管线。
+
+    模型列表来自表单 label_spec.data.pre_annotate(DTO extra=allow 透传);
+    job_id 是落库后的真实 _id(create_job 返回, DTO 上的 _id 不会进 model_dump)。
+    失败只落日志, 不影响建任务。
+    """
+    try:
+        if (job.label_spec.mission or {}).get('key') != 'volumeSegment3d':
+            return
+        models = list(getattr(job.label_spec.data, 'pre_annotate', None) or [])
+        if not models:
+            return
+        from .label_app import _med_seg_base
+        if not _med_seg_base():
+            logger.warning(f"pre_annotate: infer 服务未配置, 跳过 job {job_id}")
+            return
+        import asyncio
+        from ..biz.services.volume_pre_annotate import run_pre_annotate
+        asyncio.create_task(run_pre_annotate(job_id, models))
+        logger.info(f"pre_annotate: launched for job {job_id} models={models}")
+    except Exception as e:  # noqa: BLE001
+        logger.warning(f"pre_annotate launch failed: {e}")
+
+
 @app.post("/perform", summary="创建", tags=["annoJobPerform"])
 async def create(anno_job_perform: AnnoJob):
-    
+
     user_id = CTX_USER_ID.get("user_id")
     query1 = {"authority.owners": user_id}
     collection = Conf.MG_ANNO_JOB_PERFORM
     total_count = collection.count_documents(query1)
-    
-    max_job_count = 15
+
     profile:UserProfile = await user_profile_service.get_by_user_id(user_id)
-    if profile is not None:
-        max_job_count = profile.max_job_count
-    if total_count > max_job_count:
-        return wrap_json([], status=1, statusText="超出最大限制。")
-    
+    max_job_count = profile.max_job_count
+    if total_count >= max_job_count:
+        return wrap_json([], status=1, statusText=f"超出任务数量上限({max_job_count} 个),可在「我的信息」查看用量。")
+
     logger.info(f"create new job")
     user_id = CTX_USER_ID.get("user_id")
-    await job_service.create_job(user_id, anno_job_perform)
+    job_id = await job_service.create_job(user_id, anno_job_perform)
+    if job_id:
+        _start_volume_pre_annotate(anno_job_perform, job_id)
     return wrap_json([])
 
 

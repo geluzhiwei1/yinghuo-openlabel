@@ -418,7 +418,11 @@ const loadData = () => {
             data: item.label_spec.data,
             anno_hrefs: item.label_spec.data.streams.map((stream: string) => ({
               stream,
-              uri: `anno.html?uuid=${item._id}&stream=${encodeURIComponent(stream)}`,
+              uri: item.label_spec.mission.key === 'volumeSegment3d'
+                ? `nrrd.html?uuid=${item._id}&stream=${encodeURIComponent(stream)}`
+                : (['objectBBox3d', 'pcPolyline3d', 'pcSemantic3d'].includes(item.label_spec.mission.key)
+                  ? `pc.html?uuid=${item._id}&stream=${encodeURIComponent(stream)}`
+                  : `anno.html?uuid=${item._id}&stream=${encodeURIComponent(stream)}`),
             })),
             current_status: item.current_status,
             status_history: item.status_history,

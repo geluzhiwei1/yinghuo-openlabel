@@ -150,6 +150,31 @@ html.dark body.anno-app {
   --y-chart-heat-mid:  #6E2B2B;
   --y-chart-heat-high: #F85149;
 
+  // -- lab palette flip ------------------------------------------
+  // lab/_palette.scss intentionally ships no dark values ("lab UI is
+  // always paper"), but this workbench supports Pro Dark. Everything
+  // styled with --lab-* directly (annoPanel paper panels, ink pills,
+  // dialogs/dropdowns/inputs via lab/_ep-bridge.scss and lab/_shell.scss)
+  // would otherwise stay light inside a dark workbench. Mapped onto the
+  // Pro Dark surfaces above; var() resolves at the point of use, so all
+  // consumers inside body.anno-app flip — including overlays teleported
+  // to body (dialogs, message boxes, poppers, notifications).
+  --lab-paper:    #0F1115;  // was #f7f6f2 — page base
+  --lab-cream:    #1C1F26;  // was #fbfaf5 — inputs, hover fill
+  --lab-snow:     #16181D;  // was #ffffff — cards, dialogs, poppers
+
+  --lab-ink:      #E6E8EB;  // was #0e0e10 — primary text AND ink-pill bg
+  --lab-graphite: #C9D1D9;  // was #1c1c20 — ink-pill hover fill
+  --lab-slate:    #8B949E;  // was #3f4046 — secondary text
+  --lab-ash:      #8B949E;  // was #8a8b92 — mono mini-labels
+  --lab-fog:      #6E7681;  // was #b8b9be — weak text
+
+  --lab-line:     #23262F;  // was #e6e4dc
+  --lab-hairline: #1C1F26;  // was #ececea
+
+  // Signal (lime/coral) and pastel badges keep their light-mode values:
+  // bright accents and pastel chips with dark text read fine on dark.
+
   color-scheme: dark;
 }
 
@@ -507,4 +532,100 @@ html.dark body.anno-app {
   background: rgba(255, 106, 61, 0.10);
   border-color: rgba(255, 106, 61, 0.22);
   color: var(--lab-coral, #ff6a3d);
+}
+
+// ============================================================
+// DARK — bridge compensations
+//
+// lab/_ep-bridge.scss and lab/_shell.scss pair ink backgrounds with
+// hardcoded #fff text, and cream/graphite hover fills with hardcoded light
+// tints. With --lab-ink flipped to a light color above, those hardcoded
+// values need dark counterparts — otherwise white-on-light pills and
+// paper hovers appear inside the dark workbench. Scoped to body.anno-app
+// so the always-paper entries (home/auth/dashboard) keep the bridge as-is.
+// ============================================================
+html.dark body.anno-app {
+  // Primary button = light ink pill → dark text, lighter hover
+  .el-button.el-button--primary:not(.is-plain) {
+    --el-button-text-color: #0F1115;
+    --el-button-hover-text-color: #0F1115;
+    --el-button-active-text-color: #0F1115;
+    --el-button-disabled-text-color: #0F1115;
+    --el-button-hover-bg-color: #F0F1F3;
+    --el-button-hover-border-color: #F0F1F3;
+    --el-button-active-bg-color: #D7DADE;
+    --el-button-active-border-color: #D7DADE;
+  }
+
+  // Plain button hover = light ink fill → dark text
+  .el-button.is-plain {
+    --el-button-hover-text-color: #0F1115;
+  }
+
+  // Dropdown selected item = light ink fill
+  .el-dropdown-menu__item.is-active,
+  .el-select-dropdown__item.selected {
+    color: #0F1115;
+  }
+
+  // Pagination active page = light ink pill
+  .el-pagination button.is-active,
+  .el-pagination .el-pager li.is-active {
+    color: #0F1115;
+  }
+
+  // Tabs / sidebar menu active item = light ink fill
+  .el-tabs__item.is-active,
+  .el-menu-item.is-active {
+    color: #0F1115;
+  }
+
+  // Info/default toast = light ink pill
+  .el-message:not(.el-message--success):not(.el-message--warning):not(.el-message--error) {
+    color: #0F1115;
+    .el-message__content { color: #0F1115; }
+  }
+
+  // Dark-effect tooltip = light ink fill
+  .el-popper.is-dark {
+    color: #0F1115 !important;
+  }
+
+  // Checked checkbox/radio = light ink fill → dark check glyph
+  .el-checkbox__input.is-checked .el-checkbox__inner::after {
+    border-color: #0F1115 !important;
+  }
+  .el-radio__input.is-checked .el-radio__inner::after {
+    background-color: #0F1115 !important;
+  }
+
+  // Table row hover — bridge hardcodes paper rgba
+  .el-table {
+    --el-table-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  }
+  .el-table .el-table__row:hover > td {
+    background: rgba(255, 255, 255, 0.06) !important;
+  }
+
+  // Input hover — bridge hardcodes #f3f1e8
+  .el-input__wrapper:hover,
+  .el-textarea__inner:hover,
+  .el-select__wrapper:hover,
+  .el-date-editor.el-input__wrapper:hover {
+    background: #23262F !important;
+  }
+
+  // Pastel tags (lab/_shell.scss) keep dark text when graphite flips light
+  .yh-card .el-tag.el-tag--success,
+  .el-dialog .el-tag.el-tag--success {
+    color: #1F4A2E !important;
+  }
+  .yh-card .el-tag.el-tag--info,
+  .el-dialog .el-tag.el-tag--info {
+    color: #1E3A5F !important;
+  }
+  .yh-card .el-tag.el-tag--warning,
+  .el-dialog .el-tag.el-tag--warning {
+    color: #6B4A16 !important;
+  }
 }

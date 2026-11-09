@@ -325,7 +325,9 @@ const densityIcon = computed(() => {
 }
 
 /* ── Table itself ─────────────────────────────── */
-.y-table-pro__table :deep(.el-table) {
+/* y-table-pro__table sits on the el-table root itself — a descendant :deep()
+   selector can never match it (and would let EP's html.dark tr-bg win) */
+.y-table-pro__table.el-table {
   background: transparent;
   --el-table-border-color: var(--lab-hairline, #ececea);
   --el-table-header-bg-color: var(--lab-cream);

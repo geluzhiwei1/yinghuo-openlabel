@@ -26,6 +26,12 @@
           <el-input v-model="form1.email" :readonly="form1.email !== ''" maxlength="100" style="width: 100%"
             placeholder="登录账号" />
         </el-form-item>
+        <el-form-item label="任务配额">
+          <el-text v-if="quota" size="large" :type="quota.current_job_count >= quota.max_job_count ? 'danger' : ''">
+            已用 {{ quota.current_job_count }} / 上限 {{ quota.max_job_count }} 个任务
+          </el-text>
+          <el-text v-else size="large" type="info">加载中…</el-text>
+        </el-form-item>
         <el-form-item>
           <el-row style="justify-content: center; align-items: center;width: 100%;">
             <el-button @click="submitForm1(form1Ref)" type="primary">确定</el-button>
@@ -36,16 +42,24 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import UserPassword from './UserPassword.vue'
 import { userAuth } from '@/states/UserState'
 import { ElMessage, type FormRules } from 'element-plus'
-import { systemApi } from '@/api'
+import { systemApi, meApi } from '@/api'
 import { validateEmail, validateMobilePhoneNo } from '@/libs/validtor'
 
 const curTab = ref('accountInfo')
 const form1Loading = ref(false)
 const form1Ref = ref()
+
+const quota = ref<{ max_job_count: number; current_job_count: number } | null>(null)
+
+onMounted(() => {
+  meApi.getQuota().then((res) => {
+    quota.value = res?.data ?? null
+  })
+})
 
 const form1Default = {
   email: userAuth.value.user.email || '',

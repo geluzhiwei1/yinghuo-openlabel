@@ -162,6 +162,34 @@
   padding: 10px 14px;
 }
 
+// Label/placeholder text must not follow EP's html.dark flip — the surfaces
+// these sit on (drawer/dialog/popper, all pinned lab paper in both modes)
+// stay light, so flipped-light text becomes white-on-white (dark-mode bug).
+.el-radio { --el-radio-text-color: var(--lab-graphite); }
+.el-checkbox { --el-checkbox-text-color: var(--lab-graphite); }
+.el-tree { --el-tree-text-color: var(--lab-graphite); }
+.el-select__placeholder,
+.el-select__placeholder.is-transparent {
+  color: var(--lab-ash);
+}
+
+// el-text: EP's default --el-text-color-regular flips light under html.dark
+// (white-on-white on the lab-paper surfaces these sit on), and the semantic
+// variants follow --el-color-* pastels (~1.7:1). Pin base to lab-graphite
+// (auto-flips in anno dark via _anno-theme) and variants to the LIGHT
+// --y-color token values. EP's variant selectors are compound
+// (.el-text.el-text--success) — mirror that to win the cascade.
+.el-text                     { --el-text-color: var(--lab-graphite); }
+.el-text.el-text--primary    { --el-text-color: var(--el-color-primary); }
+.el-text.el-text--success    { --el-text-color: #16A34A; }
+.el-text.el-text--info       { --el-text-color: #98A2B3; }
+.el-text.el-text--danger     { --el-text-color: #E5484D; }
+.el-text.el-text--warning    { --el-text-color: #F59E0B; }
+
+.el-tree-node__expand-icon {
+  color: var(--lab-ash);   // EP default --el-text-color-placeholder flips near-white in dark
+}
+
 .el-input__inner {
   color: var(--lab-ink);
   font-family: var(--y-font-family-base);
@@ -229,6 +257,14 @@
   }
 }
 
+// surface is pinned to --lab-snow above, so text must be lab too:
+// dark-aware --y-color-*/EP vars turn light under html.dark → white-on-white
+.el-message-box {
+  .el-message-box__title { color: var(--lab-ink); }
+  .el-message-box__content,
+  .el-message-box__message { color: var(--lab-slate); }
+}
+
 // ===== Dropdown menus — rounded-2xl popovers =====
 .el-dropdown-menu,
 .el-select__popper.el-popper,
@@ -268,6 +304,11 @@
   --el-table-header-text-color: var(--lab-ash);
   --el-table-row-hover-bg-color: rgba(251, 250, 245, 0.6);
   --el-table-text-color: var(--lab-ink);
+  // Rows/table must sit on the host surface (card, popper). If left unset,
+  // EP's html.dark css-vars paint #161B26 rows while --lab-* text stays dark
+  // on the paper entries (home/dashboard) → dark-on-dark (annojob-v2 bug).
+  --el-table-tr-bg-color: transparent;
+  --el-table-bg-color: transparent;
   background: transparent !important;
   font-size: 13px;
 

@@ -77,9 +77,10 @@ async def get_file(request: Request):
     else:
         seq_base = f"{settings.YH_USER_DATA_ROOT}/{job_owner_id}/{job_seq.strip('/')}"
 
-    # 检查stream meta
+    # 检查stream meta(path=相对路径,优先;回退 name 兼容旧文档)
     stream_meta = find_stream_meta(uuid, stream, doc["label_spec"]["data"].get("dataSource", ""), seq=job_seq)
-    file_path = _.get(stream_meta, f"openlabel.frames.{frame}.frame_properties.name", None)
+    file_path = _.get(stream_meta, f"openlabel.frames.{frame}.frame_properties.path", None) \
+        or _.get(stream_meta, f"openlabel.frames.{frame}.frame_properties.name", None)
     if file_path is None:
         # 存储成文件了
         full_file_paths = glob.glob(f"{seq_base}/{stream}/{frame:06d}.*")

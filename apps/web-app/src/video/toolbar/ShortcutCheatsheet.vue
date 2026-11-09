@@ -51,51 +51,96 @@ interface ShortcutGroup {
   items: ShortcutItem[]
 }
 
-defineProps<{ visible: boolean }>()
+const props = defineProps<{ visible: boolean; mode?: 'default' | 'nrrd' }>()
 defineEmits<{ 'update:visible': [val: boolean] }>()
 
 const t = (key: string) => i18n.global.t(key)
 
 const keyword = ref('')
 
-const allGroups: ShortcutGroup[] = [
-  {
-    name: t('shortcutCheatsheet.group.file'),
-    items: [
-      { name: t('shortcutCheatsheet.save'), keys: ['Shift', 'S'] },
-      { name: t('shortcutCheatsheet.load'), keys: ['Shift', 'R'] },
-    ],
-  },
-  {
-    name: t('shortcutCheatsheet.group.edit'),
-    items: [
-      { name: t('shortcutCheatsheet.undo'), keys: ['Shift', 'Z'] },
-      { name: t('shortcutCheatsheet.redo'), keys: ['Shift', 'D'] },
-      { name: t('shortcutCheatsheet.deleteSelected'), keys: ['X'] },
-      { name: t('shortcutCheatsheet.deleteAll'), keys: ['Shift', 'X'] },
-    ],
-  },
-  {
-    name: t('shortcutCheatsheet.group.navigation'),
-    items: [
-      { name: t('shortcutCheatsheet.prevImage'), keys: ['R'] },
-      { name: t('shortcutCheatsheet.nextImage'), keys: ['F'] },
-    ],
-  },
-  {
-    name: t('shortcutCheatsheet.group.tools'),
-    items: [
-      { name: t('shortcutCheatsheet.newVideoEvent'), keys: ['N'] },
-      { name: t('shortcutCheatsheet.toggleVideoEvent'), keys: ['E'] },
-      { name: t('shortcutCheatsheet.restoreLastSubTool'), keys: ['Space'] },
-    ],
-  },
-]
+function defaultGroups(): ShortcutGroup[] {
+  return [
+    {
+      name: t('shortcutCheatsheet.group.file'),
+      items: [
+        { name: t('shortcutCheatsheet.save'), keys: ['Shift', 'S'] },
+        { name: t('shortcutCheatsheet.load'), keys: ['Shift', 'R'] },
+      ],
+    },
+    {
+      name: t('shortcutCheatsheet.group.edit'),
+      items: [
+        { name: t('shortcutCheatsheet.undo'), keys: ['Shift', 'Z'] },
+        { name: t('shortcutCheatsheet.redo'), keys: ['Shift', 'D'] },
+        { name: t('shortcutCheatsheet.deleteSelected'), keys: ['X'] },
+        { name: t('shortcutCheatsheet.deleteAll'), keys: ['Shift', 'X'] },
+      ],
+    },
+    {
+      name: t('shortcutCheatsheet.group.navigation'),
+      items: [
+        { name: t('shortcutCheatsheet.prevImage'), keys: ['R'] },
+        { name: t('shortcutCheatsheet.nextImage'), keys: ['F'] },
+      ],
+    },
+    {
+      name: t('shortcutCheatsheet.group.tools'),
+      items: [
+        { name: t('shortcutCheatsheet.newVideoEvent'), keys: ['N'] },
+        { name: t('shortcutCheatsheet.toggleVideoEvent'), keys: ['E'] },
+        { name: t('shortcutCheatsheet.restoreLastSubTool'), keys: ['Space'] },
+      ],
+    },
+  ]
+}
+
+/** 体数据工作台(nrrd.html)实际注册的快捷键, 见 Annotator.vue onKey */
+function nrrdGroups(): ShortcutGroup[] {
+  return [
+    {
+      name: t('shortcutCheatsheet.group.edit'),
+      items: [
+        { name: t('shortcutCheatsheet.undo'), keys: ['Ctrl', 'Z'] },
+        { name: t('shortcutCheatsheet.redo'), keys: ['Ctrl', 'Shift', 'Z'] },
+        { name: t('nrrd.shortcut.cancelStroke'), keys: ['Esc'] },
+        { name: t('nrrd.shortcut.contourClose'), keys: ['Enter'] },
+      ],
+    },
+    {
+      name: t('shortcutCheatsheet.group.navigation'),
+      items: [
+        { name: t('nrrd.shortcut.layoutGrid'), keys: ['0'] },
+        { name: t('nrrd.shortcut.layoutAxial'), keys: ['1'] },
+        { name: t('nrrd.shortcut.layoutCoronal'), keys: ['2'] },
+        { name: t('nrrd.shortcut.layoutSagittal'), keys: ['3'] },
+        { name: t('nrrd.shortcut.layoutVrt'), keys: ['4'] },
+      ],
+    },
+    {
+      name: t('shortcutCheatsheet.group.tools'),
+      items: [
+        { name: t('nrrd.tool.brush'), keys: ['B'] },
+        { name: t('nrrd.tool.sphereBrush'), keys: ['P'] },
+        { name: t('nrrd.tool.eraser'), keys: ['E'] },
+        { name: t('nrrd.tool.thresholdPaint'), keys: ['T'] },
+        { name: t('nrrd.tool.contour'), keys: ['C'] },
+        { name: t('nrrd.tool.magicWand'), keys: ['W'] },
+        { name: t('nrrd.tool.growCut'), keys: ['G'] },
+        { name: t('nrrd.seg.interpolate'), keys: ['I'] },
+        { name: t('nrrd.shortcut.brushSmaller'), keys: ['['] },
+        { name: t('nrrd.shortcut.brushBigger'), keys: [']'] },
+        { name: t('nrrd.shortcut.brushWheel'), keys: ['Shift', 'Wheel'] },
+      ],
+    },
+  ]
+}
+
+const allGroups = computed<ShortcutGroup[]>(() => (props.mode === 'nrrd' ? nrrdGroups() : defaultGroups()))
 
 const filteredGroups = computed(() => {
-  if (!keyword.value.trim()) return allGroups
+  if (!keyword.value.trim()) return allGroups.value
   const kw = keyword.value.toLowerCase()
-  return allGroups
+  return allGroups.value
     .map((g) => ({
       ...g,
       items: g.items.filter(

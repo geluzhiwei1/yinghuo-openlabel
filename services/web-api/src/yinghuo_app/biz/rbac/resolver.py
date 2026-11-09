@@ -20,10 +20,11 @@ CACHE_TTL_SECONDS = 300
 
 
 def _expand_wildcards(perms: Iterable[str]) -> set[str]:
-    """把 `face:*` / `face:resource:*` 展开成显式 key 集合,方便精确比较。
-
-    另外应用一条约定:`face:resource:write` 蕴含 `face:resource:read`,
+    """应用蕴含约定:`face:resource:write` 蕴含 `face:resource:read`,
     `face:resource:manage` 蕴含 write+read。便于路由级用单一 :write 权限覆盖 GET+POST。
+
+    通配授权(`face:*` / `face:resource:*`)原样保留,由 has_permission 前缀匹配。
+    注意:不得从普通 key 反向派生通配 —— 那会让任意单键持有者获得整面权限。
     """
     expanded: set[str] = set()
     for p in perms:
@@ -35,8 +36,6 @@ def _expand_wildcards(perms: Iterable[str]) -> set[str]:
                 expanded.add(f"{face}:{resource}:read")
             if action == "manage":
                 expanded.add(f"{face}:{resource}:write")
-        for i in range(1, len(parts)):
-            expanded.add(":".join(parts[:i]) + ":*")
     return expanded
 
 

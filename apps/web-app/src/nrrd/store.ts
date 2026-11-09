@@ -1,362 +1,103 @@
-import { createGlobalState, useStorage  } from '@vueuse/core'
-import { ref, reactive, computed } from 'vue'
-import _ from 'lodash'
+/**
+ * 体数据编辑器全局状态(模块级 reactive 单例, 遵循 src/states 约定)。
+ */
+import { reactive } from 'vue'
+import type { MedicalVolume } from './data/volumeModel'
+import { CT_WL_PRESETS, defaultWl } from './data/presets'
+import type { VrtMode } from './render/vrtMaterial'
 
-export const useDataState = createGlobalState(() => {
-    const current_seq = reactive({
-      seq: '',
-      stream: '',
-      frame: -1,
-      ts: .0,
-      coordinate_system: '',
-      mission: ''
-    })
-    const seq_meta = ref(new Map())
-    const stream_meta = ref(new Map())
-  
-    // actions
-    function update_seq_meta(id: string, meta: {}) {
-      seq_meta.value.set(id, meta)
-    }
-    function update_stream_meta(id: string, meta: {}) {
-      stream_meta.value.set(id, meta)
-    }
-  
-    async function getCurrentSeqMetaAsync() {
-      const seq_id = current_seq.seq
-      if (!seq_meta.value.has(seq_id)) {
-        // 加载数据
-        const params = { seq: seq_id }
-        const res = await getDataSeqMeta(params)
-        if (res) {
-          update_seq_meta(seq_id, res)
-        }
-      }
-      return seq_meta.value.get(seq_id)
-    }
-  
-  function getCurrentSeqMeta() {
-    const seq_id = current_seq.seq
-    if (!seq_meta.value.has(seq_id)) {
-      return null
-    }
-    return seq_meta.value.get(seq_id)
-  }
-  
-    async function getStreamMetaAsync(seq: string, stream: string) {
-      const stream_key = `${seq}_${stream}`
-      if (!stream_meta.value.has(stream_key)) {
-        // 加载数据
-        const params = { seq, stream }
-        const res = await getStreamMeta(params)
-        if (res) {
-          update_stream_meta(stream_key, res)
-        }
-      }
-      return stream_meta.value.get(stream_key)
-    }
-  
-    function getStreamMetaSync(seq: string, stream: string) {
-      const stream_key = `${seq}_${stream}`
-      return stream_meta.value.get(stream_key)
-    }
-  
-  function getCameras(seq_id:string | null = null):Array<any> {
-    if (_.isEmpty(seq_id)) {
-      seq_id = current_seq.seq
-    }
-    const seqMeta = seq_meta.value.get(seq_id)
-      const cams: any[] = []
-      _.forIn(seqMeta.openlabel.streams, (streamObj, key) => {
-        if (streamObj.type === 'camera') {
-          cams.push({
-            camera_id: key,
-            camera_type: streamObj.type,
-            group_name: _.get(streamObj, 'stream_properties.group.name', ''),
-            group_value: _.get(streamObj, 'stream_properties.group.value', ''),
-            camera_resolution: `${_.get(
-              streamObj,
-              'stream_properties.intrinsics_pinhole.width_px',
-              ''
-            )} x ${_.get(streamObj, 'stream_properties.intrinsics_pinhole.height_px', '')}`,
-            checked: false
-          })
-        }
-      })
-    
-    return cams
-    }
-  
-    async function getCurrentStreamMeta() {
-      // const stream_key = `${current_seq.seq}_${current_seq.stream}`
-      return getStreamMetaAsync(current_seq.seq, current_seq.stream)
-    }
-  
-    // 确保数据已经加载
-    const currentStreamMeta = computed(() => {
-      const stream_key = `${current_seq.seq}_${current_seq.stream}`
-      console.assert(stream_meta.value.has(stream_key), 'data is null')
-      return stream_meta.value.get(stream_key)
-    })
-    const currentMeta = computed(() => {
-      return getCurrentSeqMeta()
-    })
-  
+export type ToolId = 'none' | 'brush' | 'sphereBrush' | 'eraser' | 'thresholdPaint' | 'contour' | 'magicWand' | 'growCut'
+export type LayoutMode = 'grid' | 'axial' | 'coronal' | 'sagittal' | 'vrt'
 
-  
-    return {
-      current_seq,
-      getCameras,
-      getCurrentSeqMeta,
-      getCurrentSeqMetaAsync,
-      getStreamMetaSync,
-      getStreamMetaAsync,
-      currentMeta,
-      currentStreamMeta,
-      getCurrentStreamMeta,
-      seq_meta
-    }
-})
-  
-export const useGlobalStore = createGlobalState(
-  () => { 
-    const appState = useStorage(
-      'app-liadr-3d',
-      {
-        gui: {
-          currentSize: 'default',
-          theme: 'light'
-        },
-        autoSave: false,
-        currentSize: 'default'
-      },
-      localStorage,
-      { mergeDefaults: true }, 
-    )
-    return {appState}
-  }
-)
+/** 笔刷半径上限(体素) */
+export const BRUSH_MAX = 200
+/** 依赖笔刷半径的工具(半径滑条 / Shift+滚轮调径) */
+export const RADIUS_TOOLS: ReadonlySet<ToolId> = new Set<ToolId>(['brush', 'sphereBrush', 'eraser', 'thresholdPaint', 'growCut'])
+/** 调整笔刷半径一步的增量(键盘/Shift+滚轮共用) */
+export function stepBrushRadius(r: number, dir: 1 | -1): number {
+  const step = r < 8 ? 1 : Math.max(1, Math.round(r * 0.15))
+  return Math.max(1, Math.min(BRUSH_MAX, r + dir * step))
+}
 
-export const useAppState = createGlobalState(() => {
-  const labelAppStatus = reactive({
-    currentMission: '', // aabb2d
-    currentTool: '', // rectTool
-    currentSubTool: '',
-    pre_seq: {
-      seq: '',
-      stream: '',
-      frame: -1,
-      coordinate_system: '',
-      mission: '',
-      ts: .0
+export const volState = reactive({
+    loading: false,
+    loadProgress: 0,
+    loadStage: '',
+
+    base: null as MedicalVolume | null,      // 主体积(CT/单模态)
+    overlay: null as MedicalVolume | null,   // PET(融合模式, 已重采样到 base 网格)
+    fusionMode: false,
+    petOn: true,                              // PET 叠加显示开关(2D 切片 + 3D 融合同步)
+
+    crosshair: { i: 0, j: 0, k: 0 },         // 体素交叉线(全局同步)
+
+    wl: { width: 400, level: 40 },
+    wlPresetKey: 'soft',
+    petWl: { width: 1, level: 0 },
+    petLut: 'hot',
+    petAlpha: 0.65,
+    labelAlpha: 0.4,
+
+    layoutMode: 'grid' as LayoutMode,
+    activeTool: 'none' as ToolId,
+    brushRadius: 8,                           // 体素(上限 BRUSH_MAX)
+    eraserScope: 'active' as 'active' | 'all', // 橡皮只擦激活段 / 擦全部
+    thresholdRange: { lo: 0, hi: 0 },
+    wandCriterion: 'tolerance' as 'tolerance' | 'threshold', // 魔法棒: 种子±容差 / 阈值区间
+    wandTolerance: 80,
+    wandScope: 'slice' as 'slice' | 'volume',     // 魔法棒: 当前层 / 整体
+    contourSnap: false,                           // 轮廓布点模式: Live Wire 吸附边缘
+    growSeed: 'fg' as 'fg' | 'bg',                // GrowCut: 当前涂的是前景/背景种子
+
+    vrt: {
+        mode: 'vrt' as VrtMode,               // mip | vrt | fused | petMip
+        tfPreset: '骨骼 CT-VRT',
+        steps: 400,
+        quality: 1,                            // 交互中自动降 0.5
     },
-    windowResized: false,
-    // current_data: {
-    //   image_uri: '',
-    //   pcd_uri: '',
-    //   image_blob: null,
-    // },
-    auxiliaryFrames: [0,1,2,3,4],
-    // editor: {
-    //   pointSetting:{
-    //     pointSize: 3.0,
-    //     pointBrightness: 0.5
-    //   }
-    // }
-  })
 
-  const editorSetting = reactive({
-    setting: {
-      baseUrl: '',
-      enablePyAPI:false,
-      enableRadar: false,
-      enableAuxLidar: false,
-      enableDynamicGroundLevel: true,
-      coordinateSystem: 'utm',
-      pointSize: 2,
-      pointBrightness: 0.6,
-      box_opacity: 1,
-      show_background: true,
-      colorObject: 'category',
-      theme: 'light',
-      enableFilterPoints: false,
-      filterPointsZ: 2.0,
-      batchModeInstNumber: 20,
-      batchModeSubviewSize: { width: 130, height: 450 },
-      preloadNumber: 5,
-      maxEmptyBoxPoints: 10,
-      // edit on one box, apply to all selected boxes.
-      linkEditorsInBatchMode: false,
-  
-      // only rotate z in 'auto/interpolate' algs
-      enableAutoRotateXY: false,
-      autoSave: true,
-  
-      autoUpdateInterpolatedBoxes: true,
-  
-      hideId: false,
-      hideCategory: false,
-  
-      moveStep: 0.01, // ratio, percentage,
-      rotateStep: Math.PI / 360,
-  
-      speedUpForRepeatedOp: 2,
-  
-      ignoreDistantObject: true,
-      cameraGroupForContext: 'camera',
-  
-      /// editorCfg
-  
-      // disableSceneSelector: true;
-      // disableFrameSelector: true;
-      // disableCameraSelector: true;
-      // disableFastToolbox= true;
-      // disableMainView= true;
-      // disableMainImageContext: true;
-      // disableGrid: true;
-      // disableAxis: true;
-      // disableMainViewKeyDown: true;
-      // projectRadarToImage: true;
-      projectLidarToImage: false,
-      projectBoxesToImage: true,
-      autoCheckScene: false,
-      enableImageAnnotation: false,
-      enableCircleRanges: true,
-      circleRanges:[
-        {
-          enabled: true,
-          radius: 50,
-          color: [0,1,0],
-          lineWidth: 2
-        },
-        {
-          enabled: true,
-          radius: 100,
-          color: [0,1,0],
-          lineWidth: 2
-        },
-        {
-          enabled: true,
-          radius: 150,
-          color: [0,1,0],
-          lineWidth: 20
-        }
-      ],
-      enableRectRanges: true,
-      rectRanges: [
-        {
-          enabled: true,
-          dims: [200, 160, 2],
-          color: [0,0,1],
-          lineWidth: 1
-        },
-      ]
-    },
-    tools: {
-      highlightColor: 'rgb(100%,0%,0%)',
-      selectedColor: 'rgb(70%,0%,0%)',
-      polyline: {
-        handle: {
-          color: 'rgb(0%,80%,0%)',
-          scale: 0.2
-        },
-        highlight:{
-          color: 'rgb(100%,0%,0%)',
-          scale: 5
-        }
-      }
-    }
-  })
-
-  const shortcuts = reactive({
-    entityCommonOp: {
-      items: [{
-        id:'',
-        icon: '',
-        name: '选中',
-        shortcut: '左击',
-        description: '<el-text>左键单击选中</el-text>',
-        showButton: false,
-        handler: () => { },
-      },
-      {
-        id:'',
-        icon: '',
-        name: '切换',
-        shortcut: '切换',
-        description: '<el-text>按Tab键切换</el-text>',
-        showButton: false,
-        handler: () => { },
-      },
-      {
-        id:'',
-        icon: '',
-        name: '删除',
-        shortcut: '右双击',
-        description: '<el-text>选中件，再右键双击</el-text>',
-        showButton: false,
-        handler: () => { },
-      },
-      {
-        id:'delete',
-        icon: 'ep:delete',
-        name: '删除',
-        shortcut: 'X',
-        description: '<el-text>选中件，再按键盘X</el-text>',
-        showButton: true,
-        handler: () => { },
-      },
-      {
-        id:'delete-all',
-        icon: 'ep:delete-filled',
-        name: '清除',
-        shortcut: 'Ctrl+Shift+X',
-        description: '<el-text>选中后，同时按键盘Ctrl + Shift + X</el-text>',
-        showButton: true,
-        handler: () => { },
-      },
-    ]
-    },
-    entityOp: {
-      items: []
-    }
-  })
-
-  const appLayout = reactive({
-    editor: {
-      height: 800,
-      width: 1024,
-      toolBar: { width: -1, height: -1, left: 100, top: 100 },
-      toolBarSetting: { width: 0, height:0, left: -99999, top:0 },
-      rightPanel: { width: 350,left: 1024 + 350, top: 64},
-      imageView: { width: 250, left: 100, top: 800 },
-      boxImageView: { width: 250,left: 100, top:0, height:350 },
-      threeView: {
-        width: 350,
-        topView: { left: 1024, top: 64, height:500},
-        leftView: { left: 1024, top: 500, height:400},
-        backView: { left: 1024, top: 900, height:300 },
-      },
-      mainVis: { width: 500, left: 0, top: 0, },
-    },
-    imageViews: {'auto': true}
-  })
-
-  const taxonomyStatus = reactive({
-    currentDomain: "av2-sensor-dataset-taxonomy-30-classes_1.0.1",
-    currentDomainLang: "zh-CN",
-    currentClassName: "",
-    defaultClassName: "",
-    classSchemaMap: new Map()
-  })
-
-  return { labelAppStatus, editorSetting, shortcuts, appLayout, taxonomyStatus }
+    dirty: false,                             // 有未保存标注
+    savedAt: 0,
 })
 
+export function initVolumeState(base: MedicalVolume, overlay: MedicalVolume | null) {
+    volState.base = base
+    volState.overlay = overlay
+    volState.fusionMode = !!overlay
+    volState.petOn = !!overlay
+    const [nx, ny, nz] = base.grid.dims
+    volState.crosshair = { i: nx >> 1, j: ny >> 1, k: nz >> 1 }
+    volState.wl = defaultWl('ct', base.intensity.min, base.intensity.max)
+    volState.wlPresetKey = 'soft'
+    if (overlay) {
+        volState.petWl = defaultWl('pet', overlay.intensity.min, overlay.intensity.max)
+    }
+    volState.dirty = false
+}
 
-export const useOntologyState = createGlobalState(() => {
-  const ontologyStatus = reactive({
-    defaultClass: 'Un',
-  })
-  return { ontologyStatus }
-})
+export const wlPresets = CT_WL_PRESETS
+
+/** 实际生效的 3D 模式: overlay 缺失或 PET 关闭时 fused/petMip 回退渲染 vrt */
+export function effectiveVrtMode(): VrtMode {
+    return volState.overlay && volState.petOn ? volState.vrt.mode
+        : (volState.vrt.mode === 'fused' || volState.vrt.mode === 'petMip' ? 'vrt' : volState.vrt.mode)
+}
+
+export const sliceCount = (axis: 0 | 1 | 2): number => {
+    const b = volState.base
+    return b ? b.grid.dims[axis] : 0
+}
+
+export const crosshairSlice = (axis: 0 | 1 | 2): number => {
+    const c = volState.crosshair
+    return axis === 0 ? c.i : axis === 1 ? c.j : c.k
+}
+
+export function setCrosshairSlice(axis: 0 | 1 | 2, value: number) {
+    const dims = volState.base?.grid.dims
+    if (!dims) return
+    const v = Math.max(0, Math.min(dims[axis] - 1, Math.round(value)))
+    if (axis === 0) volState.crosshair.i = v
+    else if (axis === 1) volState.crosshair.j = v
+    else volState.crosshair.k = v
+}

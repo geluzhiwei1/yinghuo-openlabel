@@ -45,6 +45,7 @@ class OpenLabel():
         return [
             {"key": "intelligent-driving", "name": "智能驾驶"},
             {"key": "medical-ultrasound", "name": "医疗-超声影像"},
+            {"key": "medical-volume", "name": "医疗-CT/PET体数据"},
             {"key": "open-dataset", "name": "公开数据集"},
         ]
     

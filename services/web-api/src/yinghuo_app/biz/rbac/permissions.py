@@ -77,6 +77,8 @@ BUSINESS_PERMISSIONS: Final[dict[str, str]] = {
     "business:team:write":       "邀请/修改/移除本租户团队协作者,维护部门树",
     "business:algo:write":       "触发算法流水线执行",
     "business:dnn:write":        "调用 DNN 模型推理服务",
+    "business:notification:read":  "查看站内通知",
+    "business:notification:write": "标记站内通知已读",
 }
 
 ALL_PERMISSIONS: Final[dict[str, str]] = {
@@ -117,6 +119,7 @@ BUILTIN_ROLES: Final[list[dict]] = [
             "business:team:read", "business:team:write",
             "business:algo:write",
             "business:dnn:write",
+            "business:notification:read", "business:notification:write",
         ],
     },
     {
@@ -135,6 +138,7 @@ BUILTIN_ROLES: Final[list[dict]] = [
             "business:team:read",
             "business:algo:write",
             "business:dnn:write",
+            "business:notification:read", "business:notification:write",
         ],
     },
     {
@@ -153,6 +157,7 @@ BUILTIN_ROLES: Final[list[dict]] = [
             "business:team:read",
             "business:algo:write",
             "business:dnn:write",
+            "business:notification:read", "business:notification:write",
         ],
     },
 ]

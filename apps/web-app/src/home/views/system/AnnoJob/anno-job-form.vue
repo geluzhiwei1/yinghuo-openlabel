@@ -104,19 +104,53 @@
           </el-row>
         </el-form-item>
 
+        <!-- B3: 体数据任务可选预标注模型, 创建后后台逐帧推理(审核态可采纳/驳回) -->
+        <el-form-item label="预标注" v-if="form.label_spec.mission.key === Mission.VolumeSegment3d">
+          <el-row style="width: 100%">
+            <el-col :span="24">
+              <el-checkbox-group v-if="preAnnoModels && preAnnoModels.length" v-model="form.label_spec.data.pre_annotate">
+                <el-checkbox v-for="m in preAnnoModels" :key="m.id" :value="m.id"
+                  :disabled="m.requires.includes('pet') && !hasPetStream">
+                  {{ m.label }}
+                  <span v-if="m.requires.includes('pet')" class="pre-anno__req">（需 PET 流）</span>
+                </el-checkbox>
+              </el-checkbox-group>
+              <el-text v-else type="info" size="small">推理服务不可用，创建后可手动 AI 分割</el-text>
+            </el-col>
+          </el-row>
+        </el-form-item>
+
         <el-form-item label="任务数据" v-if="form.label_spec.data.dataSource === 'localImage'" prop="imageURLs">
           <el-row style="width: 100%">
-            <el-col :span="24"><el-button @click="openDir()">点击选择数据文件夹</el-button> </el-col>
+            <el-col :span="24"><el-button @click="openDir()" :loading="dicomScan.scanning">点击选择数据文件夹</el-button> </el-col>
+          </el-row>
+          <el-row v-if="dicomScan.scanning" style="width: 100%; margin-top: 8px">
+            <el-col :span="24">
+              <el-progress :percentage="Math.round(dicomScan.read * 100 / Math.max(1, dicomScan.total))"
+                :stroke-width="14" text-inside />
+              <el-text size="small">正在解析 DICOM 头 {{ dicomScan.read }}/{{ dicomScan.total }} …</el-text>
+            </el-col>
+          </el-row>
+          <el-row v-if="dicomSummary" style="width: 100%; margin-top: 8px">
+            <el-col :span="24">
+              <el-alert type="success" :closable="false">
+                <div>DICOM 目录：{{ dicomSummary.patients }} 患者 / {{ dicomSummary.studies }} 检查 /
+                  {{ dicomSummary.framesCount }} 帧（配对 {{ dicomSummary.pairs }}，未配对 {{ dicomSummary.singles }}），
+                  数据流 {{ dicomSummary.streams.join(',') }}</div>
+                <div v-for="r in dicomSummary.rejected" :key="r.name" class="dicom-rej">
+                  剔除 {{ r.name }}：{{ r.reason }}</div>
+              </el-alert>
+            </el-col>
           </el-row>
           <el-row style="width: 100%">
             <el-col :span="12"><el-input v-model="form.label_spec.data.seq" maxlength="100" style="width: 100%"
                 placeholder="数据段ID,如data-seq1" /></el-col>
-            <el-col :span="12"><el-input v-model="tempForm.streams" maxlength="100" style="width: 100%"
+            <el-col v-if="!dicomSummary" :span="12"><el-input v-model="tempForm.streams" maxlength="100" style="width: 100%"
                 placeholder="数据名字,如camera1" /></el-col>
           </el-row>
-          <el-row style="width: 100%">
+          <el-row v-if="!dicomSummary" style="width: 100%">
             <el-col :span="24"><el-input v-model="tempForm.imageURLs" maxlength="102400" style="width: 100%"
-                show-word-limit type="textarea" :rows="5" /></el-col>
+              show-word-limit type="textarea" :rows="5" /></el-col>
           </el-row>
         </el-form-item>
 
@@ -156,7 +190,7 @@
 <script setup lang="ts">
 import { onMounted, ref, watch, computed, h } from 'vue'
 import { ElMessage, ElTag, ElTooltip } from 'element-plus'
-import { annoJobPerformApi, dataSeqApi, openlabelApi } from '@/api'
+import { annoJobPerformApi, dataSeqApi, openlabelApi, volumeInferApi } from '@/api'
 import TaxonomySelectTable from '@/components/AnnoSpecSelector.vue'
 import PrioritySelect from '@/components/PrioritySelect.vue'
 import { i18n } from '@/locales'
@@ -165,6 +199,12 @@ import { isEmpty, isObject, clone } from 'radash'
 import { messages } from '@/states'
 import { fileTypes, openFilesFromDir } from '@/states/LocalFiles'
 import { cloneDeep } from 'lodash'
+import { isDicomFile, readDicomInfo } from '@/nrrd/data/dicomIO'
+import type { DicomInfo } from '@/nrrd/data/dicomIO'
+import {
+  STREAM_BY_MODALITY, buildVolumes, frameDisplayName, orderFrames, pairSeries,
+} from '@/nrrd/data/dicomGroup'
+import type { Study } from '@/nrrd/data/dicomGroup'
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
@@ -182,6 +222,14 @@ const tempForm = ref({
   imageURLs: '',
   streams: ''
 })
+
+// 本地 DICOM 目录扫描状态(表单侧;魔数嗅探 → 读头 → 分组/配对 → dicomFrames 暂存)
+const dicomScan = ref({ scanning: false, total: 0, read: 0 })
+interface DicomSummary {
+  patients: number; studies: number; pairs: number; singles: number
+  framesCount: number; streams: string[]; rejected: { name: string; reason: string }[]
+}
+const dicomSummary = ref<DicomSummary | null>(null)
 
 const dataFormats = [
   {label: 'directory', value: 'simple-directory', desc: '简单的目录结构：每个非空子文件夹视为一个数据流（stream），无需 meta.json。'},
@@ -336,20 +384,26 @@ const rules = ref({
     {
       validator: (rule, value, callback) => {
         let error = false
+        const isDicom = !!form.value.label_spec.data.dicomLocal
         if (isEmpty(form.value.label_spec.data.seq)) {
           callback(new Error('数据ID不可以为空。'))
           error = true
         }
-        if (isEmpty(tempForm.value.streams)) {
+        if (isEmpty(tempForm.value.streams) && isEmpty(form.value.label_spec.data.streams)) {
           callback(new Error('图像名不可以为空。'))
           error = true
-        } else {
+        } else if (form.value.label_spec.mission.key === Mission.VolumeSegment3d
+          && form.value.label_spec.data.dataSource === 'localImage' && !isDicom) {
+          // 体数据本地任务支持逗号分隔多流(ct,pet → PET/CT 融合);DICOM 模式流来自分组结果
+          form.value.label_spec.data.streams = tempForm.value.streams
+            .split(/[,，\s]+/).map(s => s.trim()).filter(s => !isEmpty(s))
+        } else if (!isDicom && !isEmpty(tempForm.value.streams)) {
           form.value.label_spec.data.streams = [tempForm.value.streams]
         }
-        if (isEmpty(tempForm.value.imageURLs)) {
+        if (!isDicom && isEmpty(tempForm.value.imageURLs)) {
           callback(new Error('列表不可以为空。'))
           error = true
-        } else {
+        } else if (!isDicom) {
           const imgURLs = tempForm.value.imageURLs
             .split('\n')
             .map((item) => {
@@ -399,27 +453,174 @@ const formDefault = {
       seq: '',
       streams: [] as string[],
       clip_key: '',
-      imageURLs: [] as string[]
+      imageURLs: [] as string[],
+      pre_annotate: [] as string[],
+      dicomLocal: false,
+      dicomFrames: undefined as any[] | undefined
     }
   }
 }
 const form = ref({ ...cloneDeep(formDefault) })
 
+// B3 预标注: null=探测中/不可用; 选中写入 label_spec.data.pre_annotate(后端 DTO 透传)
+// 注意必须放在 form 声明之后: watch 的 getter 在 setup 阶段立即求值, 提前会 TDZ 崩掉整个页面
+const preAnnoModels = ref<Array<{ id: string; label: string; requires: string[] }> | null>(null)
+const hasPetStream = computed(() => {
+  if ((form.value.label_spec.data.streams || []).includes('pet')) return true
+  return (tempForm.value.streams || '').split(/[,，\s]+/).includes('pet')
+})
+watch(() => form.value.label_spec.mission.key, async key => {
+  if (key !== Mission.VolumeSegment3d) {
+    form.value.label_spec.data.pre_annotate = []
+    return
+  }
+  if (preAnnoModels.value === null) {
+    preAnnoModels.value = await volumeInferApi.models()
+  }
+}, { immediate: true })
+// pet 流取消后, 需要 pet 的模型自动退选
+watch(hasPetStream, ok => {
+  if (ok || !preAnnoModels.value) return
+  form.value.label_spec.data.pre_annotate = form.value.label_spec.data.pre_annotate
+    .filter(id => !preAnnoModels.value!.find(m => m.id === id)?.requires.includes('pet'))
+})
+
+/** 魔数嗅探 + 渐进读头(并发 8)。无 DICOM → null(走 .nrrd 流)。 */
+async function scanDicomDir(blobs: any[]): Promise<DicomInfo[] | null> {
+  const flags = await Promise.all(blobs.map((b: any) => isDicomFile(b)))
+  const idx = flags.map((f, i) => (f ? i : -1)).filter(i => i >= 0)
+  if (!idx.length) return null
+  dicomScan.value = { scanning: true, total: idx.length, read: 0 }
+  const infos: DicomInfo[] = []
+  let failed = 0
+  let next = 0
+  const worker = async () => {
+    while (true) {
+      const i = next++
+      if (i >= idx.length) return
+      try {
+        infos.push(await readDicomInfo(blobs[idx[i]], blobs[idx[i]].webkitRelativePath || ''))
+      } catch {
+        failed++
+      }
+      dicomScan.value.read++
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(8, idx.length) }, worker))
+  dicomScan.value.scanning = false
+  if (failed) ElMessage.warning(`${failed} 个 DICOM 文件头解析失败,已跳过`)
+  return infos
+}
+
+/** dicomFrames 构建(契约二): 与服务端 import_dicom / 工作台 DicomLocal 同规范。 */
+function buildDicomJobData(infos: DicomInfo[]) {
+  const { patients, kept, rejected } = buildVolumes(infos)
+  const studies = new Map<string, Study>()
+  for (const p of patients.values())
+    for (const s of p.studies.values()) studies.set(s.meta.studyUid, s)
+  const [pairs, unpairedCt, unpairedPet] = pairSeries(studies, kept)
+  const frames = orderFrames(pairs, unpairedCt)
+  if (!frames.length) {
+    ElMessage.error('DICOM 目录中没有可用的体数据序列')
+    return null
+  }
+  const entries = frames.map(f => {
+    if (f.kind === 'pair') {
+      const st = f.study.meta
+      return {
+        name: frameDisplayName(st.patientId, st.studyDate, 'CT', f.ct.meta.seriesDesc, f.ct.meta.seriesNumber),
+        patient: st.patientId, patientName: f.ct.instances[0].patientName,
+        studyDate: st.studyDate, studyUid: st.studyUid, studyDesc: st.studyDesc,
+        seriesUid: f.ct.meta.uid, seriesDesc: f.ct.meta.seriesDesc,
+        modality: 'CT', pairedModality: 'PT',
+        streams: { ct: f.ct.meta.uid, pet: f.pet.meta.uid },
+        instanceCounts: { ct: f.ct.instances.length, pet: f.pet.instances.length },
+      }
+    }
+    const s = f.series
+    const st = f.study.meta
+    const stream = STREAM_BY_MODALITY[s.meta.modality] || 'ct'
+    return {
+      name: frameDisplayName(st.patientId, st.studyDate, s.meta.modality, s.meta.seriesDesc, s.meta.seriesNumber),
+      patient: st.patientId, patientName: s.instances[0].patientName,
+      studyDate: st.studyDate, studyUid: st.studyUid, studyDesc: st.studyDesc,
+      seriesUid: s.meta.uid, seriesDesc: s.meta.seriesDesc,
+      modality: s.meta.modality,
+      streams: { [stream]: s.meta.uid },
+      instanceCounts: { [stream]: s.instances.length },
+    }
+  })
+  const streams = [...new Set(entries.flatMap(e => Object.keys(e.streams)))]
+  const rejList = rejected.map(r => ({
+    name: `${r.series.meta.modality} ${r.series.meta.seriesDesc || 's' + r.series.meta.seriesNumber}`,
+    reason: r.reason,
+  }))
+  const summary: DicomSummary = {
+    patients: patients.size,
+    studies: studies.size,
+    pairs: pairs.length,
+    singles: frames.length - pairs.length,
+    framesCount: frames.length,
+    streams,
+    rejected: rejList,
+  }
+  if (unpairedPet.length)
+    summary.rejected.push(...unpairedPet.map(p => ({
+      name: `PT ${p.meta.seriesDesc || 's' + p.meta.seriesNumber}`,
+      reason: '无同 FrameOfReference 的 CT,未配对',
+    })))
+  return { entries, streams, summary, keptCount: kept.length }
+}
+
 const openDir = () => {
-  let fileExts = []
-  if ([Mission.ObjectBBox3d, Mission.PcSemantic3d, Mission.PcPolyline3d].includes(form.value.label_spec.mission.key)) {
+  const mission = form.value.label_spec.mission.key
+  let fileExts: string[] = []
+  if ([Mission.ObjectBBox3d, Mission.PcSemantic3d, Mission.PcPolyline3d].includes(mission)) {
     // 点云
     fileExts = fileTypes.pointcloud
-  } else if (form.value.label_spec.mission.key === Mission.VideoEvents) {
+  } else if (mission === Mission.VideoEvents) {
     fileExts = fileTypes.videos
-  }
-  else {
+  } else if (mission === Mission.VolumeSegment3d) {
+    // 医学体数据: DICOM 靠魔数嗅探(无扩展名约定),先全收
+    fileExts = []
+  } else {
     fileExts = fileTypes.images
   }
 
   openFilesFromDir({ fileExts })
-    .then((data) => {
+    .then(async (data) => {
       const { filePaths, blobs } = data
+      if (mission === Mission.VolumeSegment3d) {
+        const infos = await scanDicomDir(blobs)
+        if (infos && infos.length) {
+          const built = buildDicomJobData(infos)
+          if (built) {
+            form.value.label_spec.data.dicomLocal = true
+            form.value.label_spec.data.dicomFrames = built.entries
+            form.value.label_spec.data.imageURLs = []
+            form.value.label_spec.data.streams = built.streams
+            form.value.label_spec.data.file_exts = ['.dcm']
+            tempForm.value.streams = built.streams.join(',')
+            tempForm.value.imageURLs = ''
+            dicomSummary.value = built.summary
+          }
+          return
+        }
+        // 非 DICOM: 清掉旧 DICOM 状态,走 .nrrd 流
+        form.value.label_spec.data.dicomLocal = false
+        form.value.label_spec.data.dicomFrames = undefined
+        dicomSummary.value = null
+        const volPaths = filePaths.filter(p => /\.(nrrd|nii|nii\.gz|gz)$/i.test(p))
+        if (!volPaths.length) {
+          ElMessage.warning('找不到 DICOM 或 ' + fileTypes.volumes.join(', ') + ' 文件, 请重新选择')
+          return
+        }
+        tempForm.value.imageURLs = volPaths.join('\n')
+        // 体数据: 按父目录分流(x/ct/a.nrrd + x/pet/b.nii.gz → ct,pet), 平铺/单目录取目录名
+        const parents = [...new Set(volPaths.map(p => p.replace(/\\/g, '/').split('/').slice(-2, -1)[0]).filter(Boolean))]
+        tempForm.value.streams = parents.length ? parents.join(',') : (volPaths[0].split('/')[0] || 'ct')
+        return
+      }
       if (filePaths.length === 0) {
         ElMessage.warning('找不到文件: ' + fileExts.join(', ') + ', 请重新选择')
         return
@@ -449,8 +650,22 @@ const open = async (type: string, params) => {
       })
       if (res.data && res.data[0]) {
         form.value = res.data[0]
-        tempForm.value.imageURLs = form.value.label_spec.data.imageURLs.join('\n')
-        tempForm.value.streams = form.value.label_spec.data.streams[0]
+        tempForm.value.imageURLs = (form.value.label_spec.data.imageURLs || []).join('\n')
+        tempForm.value.streams = (form.value.label_spec.data.streams || []).join(',')
+        const dicomFrames = form.value.label_spec.data.dicomFrames
+        if (form.value.label_spec.data.dicomLocal && dicomFrames?.length) {
+          dicomSummary.value = {
+            patients: new Set(dicomFrames.map((f: any) => f.patient)).size,
+            studies: new Set(dicomFrames.map((f: any) => f.studyUid)).size,
+            pairs: dicomFrames.filter((f: any) => f.pairedModality).length,
+            singles: dicomFrames.filter((f: any) => !f.pairedModality).length,
+            framesCount: dicomFrames.length,
+            streams: form.value.label_spec.data.streams || [],
+            rejected: [],
+          }
+        } else {
+          dicomSummary.value = null
+        }
         const seq = form.value.label_spec.data.seq
         seqCacheData.value = seq ? [{ value: seq, label: seq.split('/').pop() }] : []
       } else {
@@ -484,11 +699,17 @@ const submitForm = async (formEl) => {
         case Mission.VideoEvents:
           fileExts = fileTypes.videos
           break
+        case Mission.VolumeSegment3d:
+          fileExts = fileTypes.volumes
+          break
         default:
           fileExts = fileTypes.images
           break
       }
       form.value.label_spec.data.file_exts = fileExts
+      if (form.value.label_spec.data.dicomLocal) {
+        form.value.label_spec.data.file_exts = ['.dcm']
+      }
       // 设置name
       formLoading.value = true
       const formData = {
@@ -508,8 +729,14 @@ const submitForm = async (formEl) => {
           messages.lastSuccess = '操作成功'
         }
         dialogVisible.value = false
-        // 发送操作成功的事件
-        emit('success')
+        // 发送操作成功的事件(payload 供调用方定位新 job 实现跳转)
+        emit('success', {
+          formType: formType.value,
+          name: formData.name,
+          seq: typeof formData.label_spec?.data?.seq === 'string' ? formData.label_spec.data.seq : undefined,
+        })
+      } catch {
+        // 错误提示已由请求层 notify 弹出,吞掉异常以保持弹窗打开
       } finally {
         formLoading.value = false
       }
@@ -539,6 +766,8 @@ const resetForm = (formEl: FormInstance | undefined) => {
     imageURLs: '',
     streams: ''
   }
+  dicomSummary.value = null
+  dicomScan.value = { scanning: false, total: 0, read: 0 }
   // formRef.resetFields()
   if (form.value.label_spec.data.dataSource === 'serverLocalDir') {
     form.value.label_spec.data.seq = ''
@@ -627,6 +856,15 @@ defineExpose({ open })
 }
 .seq-tag {
   margin-left: auto;
+}
+.pre-anno__req {
+  font-size: 11px;
+  color: var(--el-text-color-secondary);
+}
+.dicom-rej {
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+  line-height: 1.7;
 }
 /* 这两个类挂在 tree dropdown 内部(被 Teleport 到 body),
    scoped style 在 :deep() 里不会命中 — 用不带 scope 的全局规则 */

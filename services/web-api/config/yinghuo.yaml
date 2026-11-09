@@ -85,3 +85,10 @@ global:
     # EE 备份目标目录(pg_dump / mongodump 产物落地处)。
     # systemd timer / cron 应挂载此路径,清理由外部 rotate 策略管。
     target_dir: '/var/backups/yinghuo'
+
+# 医学体数据模型推理(med-seg)服务。dev 用 mock(yinghuo-flow/funcs-dev/apps/med-seg-serv);
+# 未配置或不可达时 /label/volume_infer/models 返回 503, 前端隐藏 AI 分割入口。
+infer:
+  med_seg:
+    url: 'http://127.0.0.1:8940'
+

@@ -13,7 +13,10 @@ export enum Mission {
     // 3d
     ObjectBBox3d = 'objectBBox3d',
     PcSemantic3d = 'pcSemantic3d',
-    PcPolyline3d = 'pcPolyline3d'
+    PcPolyline3d = 'pcPolyline3d',
+
+    // 医学体数据
+    VolumeSegment3d = 'volumeSegment3d'
 }
 
 export enum LabelOpType {
@@ -54,6 +57,13 @@ export const AnnoMissons = [
             { value: 'objectBBox3d', label: '3D框-Bounding Box' },
             { value: 'pcPolyline3d', label: '3D曲线标注' },
             { value: 'pcSemantic3d', label: '语义分割' },
+        ]
+    },
+    {
+        value: 'Medical',
+        label: '医学体数据',
+        children: [
+            { value: 'volumeSegment3d', label: '体数据分割(CT/PET/MR)' },
         ]
     }
 ]

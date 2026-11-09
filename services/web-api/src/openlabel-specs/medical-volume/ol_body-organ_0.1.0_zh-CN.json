@@ -1,0 +1,57 @@
+{
+    "openlabel": {
+        "meta": {
+            "name": "人体器官分割",
+            "description": "CT/PET 体数据基础分割标注",
+            "version": "1.0.0",
+            "license": "CCBY-SA 4.0",
+            "copyright": "Copyright © 2024 openlabel.gerwee.com",
+            "authors": [
+                {"name": "Zhang Lizhi", "email": "gerwee@qq.com"}
+            ],
+            "contributors": [
+            ]
+        },
+        "ontologies": {
+            "0": "http://openlabel.gerwee.com/taxonomy/"
+        },
+        "classes": [
+            {
+                "name": "根节点",
+                "definition": {
+                },
+                "properties": {
+                    "tags": {
+                        "type": "string",
+                        "title": "标签",
+                        "default": "",
+                        "maxLength": 1024
+                    },
+                    "annotation": {
+                        "type": "string",
+                        "default": "",
+                        "title": "描述",
+                        "maxLength": 1024
+                    }
+                },
+                "children": [
+                    {
+                        "name": "肝脏"
+                    },
+                    {
+                        "name": "肿瘤"
+                    },
+                    {
+                        "name": "肺结节"
+                    },
+                    {
+                        "name": "心脏"
+                    },
+                    {
+                        "name": "其他"
+                    }
+                ]
+            }
+        ]
+    }
+}

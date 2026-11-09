@@ -12,7 +12,8 @@ export const fileTypes = {
     videos: ['.mp4', '.avi', '.wmv'],
     audios: ['mp3', 'wav'],
     documents: ['pdf', 'docx', 'txt'],
-    pointcloud: ['.pcd', '.ply', '.las', '.laz']
+    pointcloud: ['.pcd', '.ply', '.las', '.laz'],
+    volumes: ['.nrrd', '.nii', '.gz']
 }
 
 const listDirectory = (blobs) => {

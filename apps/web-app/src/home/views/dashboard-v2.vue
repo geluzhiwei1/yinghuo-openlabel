@@ -256,8 +256,11 @@ const statusTagType = (status?: string): 'success' | 'warning' | 'info' | 'prima
 
 const missionAnnoUri = (stream: string, item: any): string => {
   const miss = item.label_spec?.mission?.key
-  if (miss === 'ObjectBBox3d' || miss === 'PcPolyline3d' || miss === 'PcSemantic3d') {
+  if (miss === 'objectBBox3d' || miss === 'pcPolyline3d' || miss === 'pcSemantic3d') {
     return `pc.html?uuid=${item._id}&stream=${encodeURIComponent(stream)}`
+  }
+  if (miss === 'volumeSegment3d') {
+    return `nrrd.html?uuid=${item._id}&stream=${encodeURIComponent(stream)}`
   }
   return `anno.html?uuid=${item._id}&stream=${encodeURIComponent(stream)}`
 }

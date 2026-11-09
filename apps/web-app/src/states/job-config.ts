@@ -27,6 +27,8 @@ const initFromQuery = () => {
     jobConfig.data_format = j.label_spec.data.format || ''
     jobConfig.data_source = j.label_spec.data.dataSource || ''
     jobConfig.taxonomy = j.label_spec.taxonomy || {}
+    jobConfig.streams = j.label_spec.data.streams || []
+    jobConfig.dicom_local = !!j.label_spec.data.dicomLocal
 
     jobConfig.inited = true
   })
@@ -39,6 +41,10 @@ const jobConfig = reactive({
   data_source: '',
   seq: '',
   stream: '',
+  /** 任务声明的全部数据流(PET/CT 融合 = ['ct','pet']) */
+  streams: [] as string[],
+  /** 本地 DICOM 任务(浏览器直读装配,uri=dicom://<seriesUid>) */
+  dicom_local: false,
   /**
    * frame序号
    */

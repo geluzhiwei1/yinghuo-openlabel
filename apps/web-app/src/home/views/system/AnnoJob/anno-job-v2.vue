@@ -53,6 +53,10 @@
 
     <template #toolbar>
       <div class="anno-job-v2__toolbar">
+        <el-button type="primary" @click="openFormCreate()">
+          <Icon icon="lucide:plus" :width="16" />
+          新建任务
+        </el-button>
         <div class="view-toggle" role="tablist" aria-label="视图切换">
           <button
             class="view-toggle__btn"
@@ -106,22 +110,32 @@
         </template>
 
         <template #cell-current_status="{ row }">
-          <el-popover width="500px" trigger="hover" placement="left-end">
-            <template #reference>
-              <span
-                class="aj-status-chip"
-                :class="`aj-status-chip--${statusTagType(row.current_status?.status)}`"
-              >
-                {{ row.current_status?.status || '未知' }}
-              </span>
-            </template>
-            <el-table :data="row.status_history" size="small">
-              <el-table-column property="status" label="状态" />
-              <el-table-column property="update_time" label="更新时间" min-width="180" />
-              <el-table-column property="user_id" label="更新者" />
-              <el-table-column property="desc" label="备注" />
-            </el-table>
-          </el-popover>
+          <div class="anno-job-v2__status-cell">
+            <el-popover width="500px" trigger="hover" placement="left-end">
+              <template #reference>
+                <span
+                  class="aj-status-chip"
+                  :class="`aj-status-chip--${statusTagType(row.current_status?.status)}`"
+                >
+                  {{ row.current_status?.status || '未知' }}
+                </span>
+              </template>
+              <el-table :data="row.status_history" size="small">
+                <el-table-column property="status" label="状态" />
+                <el-table-column property="update_time" label="更新时间" min-width="180" />
+                <el-table-column property="user_id" label="更新者" />
+                <el-table-column property="desc" label="备注" />
+              </el-table>
+            </el-popover>
+            <span
+              v-if="preAnnoText(row.pre_annotate)"
+              class="aj-preanno-chip"
+              :class="`aj-preanno-chip--${row.pre_annotate.status}`"
+              :title="`模型: ${(row.pre_annotate.models || []).join(', ')}`"
+            >
+              {{ preAnnoText(row.pre_annotate) }}
+            </span>
+          </div>
         </template>
 
         <template #cell-anno="{ row }">
@@ -213,6 +227,13 @@
           >
             {{ row.current_status?.status || '未知' }}
           </span>
+          <span
+            v-if="preAnnoText(row.pre_annotate)"
+            class="aj-preanno-chip"
+            :class="`aj-preanno-chip--${row.pre_annotate.status}`"
+          >
+            {{ preAnnoText(row.pre_annotate) }}
+          </span>
           <el-dropdown trigger="click" placement="bottom-end" @command="(cmd: string) => handleCardCommand(cmd, row)">
             <button class="icon-action" aria-label="更多操作">
               <Icon icon="lucide:ellipsis" :width="16" />
@@ -297,6 +318,7 @@
     </el-dialog>
 
     <AnnotStatisticDrawer ref="annotDrawerRef" />
+    <AnnoJobForm ref="formRef" @success="onFormSuccess" />
   </PageContainer>
 </template>
 
@@ -312,6 +334,7 @@ import TablePro, { type TableColumn } from '@/components/TablePro.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import { userAuth } from '@/states/UserState'
 import AnnotStatisticDrawer from '@/views/statistics/AnnoStatistics.vue'
+import AnnoJobForm from './anno-job-form.vue'
 import { Mission, JobStatus } from '@/constants'
 import { ElMessage } from 'element-plus'
 import { i18n } from '@/locales'
@@ -374,18 +397,59 @@ const statusTagType = (status?: string): 'success' | 'warning' | 'info' | 'prima
   return 'info'
 }
 
+/** B3 预标注状态角标文案(running/done/partial/failed) */
+const preAnnoText = (p: any): string => {
+  if (!p?.status) return ''
+  if (p.status === 'running') return `预标注中 ${p.done ?? 0}/${p.total ?? '?'}`
+  if (p.status === 'done') return '已预标注'
+  if (p.status === 'partial') return `部分预标注 ${p.done ?? 0}/${p.total ?? '?'}`
+  if (p.status === 'failed') return '预标注失败'
+  return ''
+}
+
 const missionAnnoUri = (stream: string, item: any): string => {
   switch (item.label_spec.mission.key) {
     case Mission.ObjectBBox3d:
     case Mission.PcPolyline3d:
     case Mission.PcSemantic3d:
       return `pc.html?uuid=${item._id}&stream=${encodeURIComponent(stream)}`
+    case Mission.VolumeSegment3d:
+      return `nrrd.html?uuid=${item._id}&stream=${encodeURIComponent(stream)}`
     default:
       return `anno.html?uuid=${item._id}&stream=${encodeURIComponent(stream)}`
   }
 }
 
 const tableData = ref<JobPerform[]>([])
+
+// ── 新建任务: 表单 drawer + 创建成功后直接跳转标注页 ────────
+const formRef = ref()
+const openFormCreate = () => {
+  formRef.value.open('create', { id: 0 })
+}
+
+const jumpFallback = () => ElMessage.warning(t('annoJob.create.jumpFallback'))
+
+const onFormSuccess = async (payload?: { formType: string; name?: string; seq?: string }) => {
+  loadData()
+  if (payload?.formType !== 'create' || !payload.name) return
+  try {
+    // create 端点不回传 uuid → 按 seq(可空)过滤 + name 精确匹配找回新 job
+    const res = await annoJobPerformApi.searchJob({
+      pager: { page: 1, page_size: 50 },
+      query: { data_seq: payload.seq, mission: undefined, job_status: undefined },
+    })
+    const job = (res.data || []).find((j: any) => j.name === payload.name)
+    const stream: string | undefined = job?.label_spec?.data?.streams?.[0]
+    if (job && stream) {
+      window.location.href = missionAnnoUri(stream, job)
+    } else {
+      jumpFallback()
+    }
+  } catch {
+    jumpFallback()
+  }
+}
 
 const loadData = () => {
   tableLoading.value = true
@@ -419,6 +483,7 @@ const loadData = () => {
             })),
             current_status: item.current_status,
             status_history: item.status_history,
+            pre_annotate: item.pre_annotate,
             disableDeleteBtn: !item.authority.owners.includes(userAuth.value.user.id),
           }) as JobPerform,
       )
@@ -666,6 +731,46 @@ onMounted(() => {
 .aj-status-chip--info {
   background: var(--lab-cream);
   color: var(--lab-slate);
+}
+
+/* B3 预标注角标 */
+.anno-job-v2__status-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.aj-preanno-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--lab-radius-pill, 999px);
+  font-size: 10px;
+  font-family: var(--y-font-family-mono, "JetBrains Mono", monospace);
+  letter-spacing: 0.04em;
+  background: rgba(126, 87, 194, 0.14);
+  color: var(--el-color-primary);
+  white-space: nowrap;
+}
+
+.aj-preanno-chip--running {
+  background: rgba(126, 87, 194, 0.14);
+  color: var(--el-color-primary);
+}
+
+.aj-preanno-chip--done {
+  background: var(--lab-mint, #b8f0d0);
+  color: var(--lab-graphite);
+}
+
+.aj-preanno-chip--partial {
+  background: var(--lab-butter, #ffe58a);
+  color: var(--lab-graphite);
+}
+
+.aj-preanno-chip--failed {
+  background: rgba(255, 106, 61, 0.16);
+  color: var(--lab-coral);
 }
 
 /* Row action mini buttons */

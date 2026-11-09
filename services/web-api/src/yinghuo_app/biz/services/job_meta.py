@@ -34,7 +34,10 @@ def find_stream_meta(uuid: str, stream: str, data_source:str, seq=None):
         data["openlabel"]['metadata']['uuid'] = str(rows[0]['_id'])
         for k, v in data["openlabel"]["frames"].items():
             uri = _.get(v, "frame_properties.uri")
-            _.set(v, "frame_properties.name", uri)
+            # path=重写前的相对路径,供 file2/get 解析;name 保留 manifest 显示名(legacy 无 name 时回退 uri)
+            _.set(v, "frame_properties.path", uri)
+            if not _.get(v, "frame_properties.name"):
+                _.set(v, "frame_properties.name", uri)
 
             if data_source == 'serverLocalDir' and seq is not None:
                 uri = uri.replace("file://.", "")
