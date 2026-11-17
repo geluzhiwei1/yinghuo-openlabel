@@ -67,10 +67,11 @@ export const loadPlugin2 = (src:string) => {
 // In dev, fetch plugin assets through the Vite proxy at /webapps/ (see
 // vite.config.ts). Loading them as same-origin avoids the CORS-cross-origin
 // base-URL collapse that breaks relative dynamic imports inside the loaded
-// scripts. In prod, use the configured absolute base URI.
+// scripts. In prod, use the configured absolute base URI; fall back to
+// same-origin so a missing env var can never yield "undefined/webapps/...".
 const PLUGIN_BASE = import.meta.env.DEV
   ? ''
-  : import.meta.env.VITE_APP_PLUGIN_BASE_URI
+  : import.meta.env.VITE_APP_PLUGIN_BASE_URI ?? ''
 
 // Load rust_wasm without relying on the remote bootstrap.js, which depends
 // on Wasm ES Module Integration (`import * as wasm from "./x.wasm"` — not

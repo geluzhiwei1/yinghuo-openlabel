@@ -33,4 +33,5 @@ playwright-report/
 
 *.tsbuildinfo
 .env*
+!.env.production
 onnx-web-infer/

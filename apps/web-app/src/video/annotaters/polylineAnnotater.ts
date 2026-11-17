@@ -1069,6 +1069,12 @@ class PolylineAnnotater extends Annotater {
       for (let i = 0; i < obj.val.length; i += 2) {
         points.push(new fabric.Point(obj.val[i], obj.val[i + 1]))
       }
+      // 类别可能未注册样式(单类别 taxonomy 不触发 objTypes>1 的配色 watcher,
+      // 或数据里的 object_type 来自旧规范),逐级回落,避免 .get(...).options 读 undefined
+      const style =
+        this.objStyles.get(object_type) ??
+        this.objStyles.get(poly2dAnnotaterStates.defaultObjType) ??
+        this.objStyles.get('default') ?? { options: { fill: 'rgba(55,0,0,0.1)' } }
       // 封闭多边形
       if (obj.attributes && obj.attributes.closed) {
         newFabricObj = new fabric.Polygon(points, {
@@ -1085,9 +1091,7 @@ class PolylineAnnotater extends Annotater {
             }
           },
           // fill 等属性
-          ...this.objStyles.get(
-            this.objStyles.has(object_type) ? object_type : poly2dAnnotaterStates.defaultObjType
-          ).options
+          ...style.options
         })  as UserObject
       } else {
         newFabricObj = new fabric.Polyline(points, {
@@ -1104,8 +1108,8 @@ class PolylineAnnotater extends Annotater {
             }
           },
           // fill 等属性
-          ...this.objStyles.get(object_type).options,
-          fill: new Color(this.objStyles.get(object_type).options.fill).toString()
+          ...style.options,
+          fill: new Color(style.options.fill).toString()
         }) as UserObject
       }
 
