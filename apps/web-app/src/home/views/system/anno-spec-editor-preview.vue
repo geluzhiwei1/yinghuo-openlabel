@@ -90,15 +90,17 @@ watch(copyFromSpec, (newVal, oldVal) => {
   const { key, type, name, domain } = newVal
   let jsonObj = undefined
   if (type === 'system') {
+    // 后端 /openlabel/query 只读嵌套 taxonomy.key/taxonomy.domain;扁平传参会被当成空 domain 走"返回全部"分支
     openlabelApi.query({
-      taxonomy: key,
-      domain: domain
+      taxonomy: { key, domain }
     }).then((res) => {
-      if (res && res.data) {
-        jsonObj = res.data[0]
-        specJson.value = jsonObj
+      const spec = res?.data?.length === 1 ? res.data[0] : undefined
+      if (spec?.openlabel) {
+        specJson.value = spec
         updateTreeData(specJson.value)
         ElMessage.success('操作成功')
+      } else {
+        ElMessage.warning('未找到该规范！')
       }
     })
   } else if (type === 'user') {
