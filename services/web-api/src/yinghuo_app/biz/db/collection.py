@@ -37,7 +37,7 @@ class CollectionBase(BaseModel):
 
 class Pager(BaseModel):
     page: int = Field(default=1, gt=0)
-    page_size: int = Field(default=10, gt=0, lt=100)
+    page_size: int = Field(default=10, gt=0, le=100)
     total: int | None = 0
 
 
